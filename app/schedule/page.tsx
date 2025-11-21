@@ -1,0 +1,178 @@
+'use client'
+
+import { useState } from 'react'
+import { format, startOfWeek } from 'date-fns'
+import { MainLayout } from '@/components/layout/MainLayout'
+import { NextUpCard } from '@/components/schedule/NextUpCard'
+// import { FilterBar } from '@/components/schedule/FilterBar'
+// import { ModuleProgressWidget } from '@/components/schedule/ModuleProgressWidget'
+import { TodayList } from '@/components/schedule/TodayList'
+import { TasksWidget } from '@/components/schedule/TasksWidget'
+import { WeeklyGrid } from '@/components/schedule/WeeklyGrid'
+import { SessionPanel } from '@/components/schedule/SessionPanel'
+import {
+  mockSessions,
+  mockTasks,
+  mockModuleProgress,
+  getWeekDays,
+  getSessionsForDay,
+  organizeSessionsByTimeSlots,
+  type Program,
+  type Session
+} from '@/data/mockData'
+
+export default function SchedulePage() {
+  const [selectedProgram, setSelectedProgram] = useState<Program>('DTI')
+  const [viewMode, setViewMode] = useState<'week' | 'list'>('week')
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
+  const [isPanelOpen, setIsPanelOpen] = useState(false)
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    // Start with Monday of current week
+    const today = new Date()
+    const monday = startOfWeek(today, { weekStartsOn: 1 })
+    return monday
+  })
+
+  const weekDays = getWeekDays(currentWeekStart)
+  const today = new Date()
+
+  // Filter sessions by selected program
+  const filteredSessions = mockSessions.filter((s) => s.program === selectedProgram)
+
+  // Get next up session (live or upcoming)
+  const nextUpSession = filteredSessions.find((s) => s.isLive) || filteredSessions[0]
+
+  // Get today's sessions - normalize today's date to compare only date part
+  const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const todaySessions = getSessionsForDay(filteredSessions, todayNormalized)
+    .sort((a, b) => {
+      // Sort by time
+      const [aHours, aMinutes] = a.time.split(':').map(Number)
+      const [bHours, bMinutes] = b.time.split(':').map(Number)
+      return aHours * 60 + aMinutes - (bHours * 60 + bMinutes)
+    })
+    .map((session) => {
+      // Create a proper date-time for comparison
+      const sessionDateTime = new Date(session.date)
+      const [hours, minutes] = session.time.split(':').map(Number)
+      sessionDateTime.setHours(hours, minutes, 0, 0)
+      const now = new Date()
+      
+      return {
+        id: session.id,
+        time: session.time,
+        title: session.title, // Use full title
+        type: session.type === 'lecture' ? 'Vorlesung' : session.type === 'workshop' ? 'Workshop' : 'Coaching',
+        location: session.locationType === 'online' ? 'Online' : session.location,
+        isLive: session.isLive || (sessionDateTime <= now && new Date(sessionDateTime.getTime() + 2 * 60 * 60 * 1000) >= now), // Live if within 2 hours
+        isPast: sessionDateTime < now
+      }
+    })
+
+  // Organize sessions for weekly grid
+  const timeSlots = organizeSessionsByTimeSlots(filteredSessions, weekDays)
+
+  const handleSessionClick = (sessionId: string) => {
+    const session = mockSessions.find((s) => s.id === sessionId)
+    if (session) {
+      setSelectedSession(session)
+      setIsPanelOpen(true)
+    }
+  }
+
+  const handleTaskToggle = (taskId: string) => {
+    // Mock task toggle - in real app, update state
+    console.log('Toggle task:', taskId)
+  }
+
+  const handlePreviousWeek = () => {
+    setCurrentWeekStart((prev) => {
+      const newDate = new Date(prev)
+      newDate.setDate(prev.getDate() - 7)
+      return newDate
+    })
+  }
+
+  const handleNextWeek = () => {
+    setCurrentWeekStart((prev) => {
+      const newDate = new Date(prev)
+      newDate.setDate(prev.getDate() + 7)
+      return newDate
+    })
+  }
+
+  const handleToday = () => {
+    const today = new Date()
+    const monday = startOfWeek(today, { weekStartsOn: 1 })
+    setCurrentWeekStart(monday)
+  }
+
+  const weekRange = `${format(weekDays[0], 'MMM d')} – ${format(weekDays[6], 'MMM d, yyyy')}`
+
+  return (
+    <MainLayout>
+      {/* Header */}
+      {/* <header className="mb-8">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Mein Terminplan</h1>
+      </header> */}
+
+      {/* Hero Section */}
+      {nextUpSession && (
+        <NextUpCard
+          session={{
+            title: nextUpSession.title,
+            subtitle: nextUpSession.type === 'lecture' ? 'Vorlesungsreihe' : nextUpSession.type === 'workshop' ? 'Praktikum' : 'Coaching',
+            program: nextUpSession.program,
+            date: format(nextUpSession.date, 'EEEE, MMM d'),
+            time: nextUpSession.time,
+            endTime: nextUpSession.endTime,
+            location: nextUpSession.location,
+            locationType: nextUpSession.locationType,
+            isLive: nextUpSession.isLive || false
+          }}
+          onOpenPanel={() => handleSessionClick(nextUpSession.id)}
+        />
+      )}
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* LEFT COLUMN */}
+        <aside className="lg:col-span-3 space-y-6">
+          {/* <FilterBar selectedProgram={selectedProgram} onProgramChange={setSelectedProgram} /> */}
+
+          {/* <ModuleProgressWidget progress={mockModuleProgress} /> */}
+
+          <TodayList
+            date={today}
+            sessions={todaySessions}
+            onSessionClick={handleSessionClick}
+          />
+
+          <TasksWidget tasks={mockTasks} onTaskToggle={handleTaskToggle} />
+        </aside>
+
+        {/* RIGHT COLUMN (Weekly Grid) */}
+        <WeeklyGrid
+          weekDays={weekDays}
+          timeSlots={timeSlots}
+          sessions={filteredSessions}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onSessionClick={handleSessionClick}
+          weekRange={weekRange}
+          onPreviousWeek={handlePreviousWeek}
+          onNextWeek={handleNextWeek}
+          onToday={handleToday}
+        />
+      </div>
+
+      {/* Slide-over Panel */}
+      <SessionPanel
+        session={selectedSession}
+        isOpen={isPanelOpen}
+        onClose={() => setIsPanelOpen(false)}
+      />
+    </MainLayout>
+  )
+}
+
