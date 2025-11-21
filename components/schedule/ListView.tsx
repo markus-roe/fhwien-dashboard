@@ -1,77 +1,88 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { format, isToday, isPast, isFuture, startOfDay, endOfDay } from 'date-fns'
-import { de } from 'date-fns/locale'
-import { Video, MapPin, Calendar, ChevronDown, ChevronUp } from 'lucide-react'
-import { SessionCard } from './SessionCard'
-import type { Session } from '@/data/mockData'
+import { useState } from "react";
+import {
+  format,
+  isToday,
+  isPast,
+  isFuture,
+  startOfDay,
+  endOfDay,
+} from "date-fns";
+import { de } from "date-fns/locale";
+import { Video, MapPin, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { SessionCard } from "./SessionCard";
+import type { Session } from "@/data/mockData";
 
 interface ListViewProps {
-  sessions: Session[]
-  weekDays: Date[]
-  onSessionClick?: (sessionId: string) => void
+  sessions: Session[];
+  weekDays: Date[];
+  onSessionClick?: (sessionId: string) => void;
 }
 
-export const ListView = ({ sessions, weekDays, onSessionClick }: ListViewProps) => {
-  const [showPastSessions, setShowPastSessions] = useState(false)
-  const today = startOfDay(new Date())
+export const ListView = ({
+  sessions,
+  weekDays,
+  onSessionClick,
+}: ListViewProps) => {
+  const [showPastSessions, setShowPastSessions] = useState(false);
+  const today = startOfDay(new Date());
 
   // Separate past and future sessions
   const pastSessions = sessions.filter((session) => {
-    const sessionDate = startOfDay(session.date)
-    return sessionDate < today
-  })
+    const sessionDate = startOfDay(session.date);
+    return sessionDate < today;
+  });
 
   const futureSessions = sessions.filter((session) => {
-    const sessionDate = startOfDay(session.date)
-    return sessionDate >= today
-  })
+    const sessionDate = startOfDay(session.date);
+    return sessionDate >= today;
+  });
 
   // Combine sessions: show past only if toggle is on
-  const sessionsToShow = showPastSessions 
+  const sessionsToShow = showPastSessions
     ? [...pastSessions, ...futureSessions]
-    : futureSessions
+    : futureSessions;
 
   // Sort sessions by date and time
   const sortedSessions = [...sessionsToShow].sort((a, b) => {
-    const dateA = new Date(a.date)
-    const dateB = new Date(b.date)
-    const [aHours, aMinutes] = a.time.split(':').map(Number)
-    const [bHours, bMinutes] = b.time.split(':').map(Number)
-    
-    dateA.setHours(aHours, aMinutes, 0, 0)
-    dateB.setHours(bHours, bMinutes, 0, 0)
-    
-    return dateA.getTime() - dateB.getTime()
-  })
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    const [aHours, aMinutes] = a.time.split(":").map(Number);
+    const [bHours, bMinutes] = b.time.split(":").map(Number);
+
+    dateA.setHours(aHours, aMinutes, 0, 0);
+    dateB.setHours(bHours, bMinutes, 0, 0);
+
+    return dateA.getTime() - dateB.getTime();
+  });
 
   // Group sessions by date
-  const sessionsByDate = new Map<string, Session[]>()
-  
+  const sessionsByDate = new Map<string, Session[]>();
+
   sortedSessions.forEach((session) => {
-    const dateKey = format(session.date, 'yyyy-MM-dd')
+    const dateKey = format(session.date, "yyyy-MM-dd");
     if (!sessionsByDate.has(dateKey)) {
-      sessionsByDate.set(dateKey, [])
+      sessionsByDate.set(dateKey, []);
     }
-    sessionsByDate.get(dateKey)!.push(session)
-  })
+    sessionsByDate.get(dateKey)!.push(session);
+  });
 
   const getDateLabel = (date: Date) => {
     if (isToday(date)) {
-      return 'Heute'
+      return "Heute";
     }
     if (isPast(date) && !isToday(date)) {
-      return format(date, 'EEEE, d. MMM', { locale: de })
+      return format(date, "EEEE, d. MMM", { locale: de });
     }
     if (isFuture(date)) {
-      return format(date, 'EEEE, d. MMM', { locale: de })
+      return format(date, "EEEE, d. MMM", { locale: de });
     }
-    return format(date, 'EEEE, d. MMM', { locale: de })
-  }
+    return format(date, "EEEE, d. MMM", { locale: de });
+  };
 
   // Check if there are past sessions to show toggle
-  const hasPastSessions = pastSessions.length > 0
+  const hasPastSessions = pastSessions.length > 0;
 
   return (
     <div className="flex-1 overflow-y-auto min-h-[500px] flex flex-col">
@@ -85,7 +96,9 @@ export const ListView = ({ sessions, weekDays, onSessionClick }: ListViewProps) 
             {showPastSessions ? (
               <>
                 <ChevronUp className="w-4 h-4" />
-                <span>Vergangene Events ausblenden ({pastSessions.length})</span>
+                <span>
+                  Vergangene Events ausblenden ({pastSessions.length})
+                </span>
               </>
             ) : (
               <>
@@ -99,38 +112,66 @@ export const ListView = ({ sessions, weekDays, onSessionClick }: ListViewProps) 
 
       <div className="space-y-6 p-4 flex-1">
         {Array.from(sessionsByDate.entries()).map(([dateKey, daySessions]) => {
-          const date = new Date(dateKey)
-          const isPastDate = isPast(date) && !isToday(date)
-          
+          const date = new Date(dateKey);
+          const isPastDate = isPast(date) && !isToday(date);
+
           return (
             <div key={dateKey} className="space-y-3">
               {/* Date Header */}
-              <div className={`flex items-center gap-3 sticky ${hasPastSessions ? 'top-[57px]' : 'top-0'} bg-white py-2 z-10 border-b border-zinc-200`}>
+              <div
+                className={`flex items-center gap-3 sticky ${
+                  hasPastSessions ? "top-[57px]" : "top-0"
+                } bg-white py-2 z-10 border-b border-zinc-200`}
+              >
                 <Calendar className="w-4 h-4 text-zinc-400" />
-                <h3 className={`text-sm font-semibold ${isPastDate ? 'text-zinc-400' : 'text-zinc-900'}`}>
+                <h3
+                  className={`text-sm font-semibold ${
+                    isPastDate ? "text-zinc-400" : "text-zinc-900"
+                  }`}
+                >
                   {getDateLabel(date)}
                 </h3>
                 <span className="text-xs text-zinc-400 font-medium">
-                  {daySessions.length} {daySessions.length === 1 ? 'Sitzung' : 'Sitzungen'}
+                  {daySessions.length}{" "}
+                  {daySessions.length === 1 ? "Sitzung" : "Sitzungen"}
                 </span>
               </div>
 
               {/* Sessions for this date */}
               <div className="space-y-2 pl-7">
                 {daySessions.map((session) => {
-                  const sessionDateTime = new Date(session.date)
-                  const [hours, minutes] = session.time.split(':').map(Number)
-                  sessionDateTime.setHours(hours, minutes, 0, 0)
-                  const now = new Date()
-                  const isLive = session.isLive || (sessionDateTime <= now && new Date(sessionDateTime.getTime() + 2 * 60 * 60 * 1000) >= now)
-                  const isPastSession = sessionDateTime < now
+                  const sessionDateTime = new Date(session.date);
+                  const [hours, minutes] = session.time.split(":").map(Number);
+                  sessionDateTime.setHours(hours, minutes, 0, 0);
+
+                  // Calculate end time
+                  const sessionEndDateTime = new Date(session.date);
+                  if (session.endTime) {
+                    const [endHours, endMinutes] = session.endTime
+                      .split(":")
+                      .map(Number);
+                    sessionEndDateTime.setHours(endHours, endMinutes, 0, 0);
+                  } else {
+                    // Fallback to start time if no end time
+                    sessionEndDateTime.setHours(hours, minutes, 0, 0);
+                  }
+
+                  const now = new Date();
+                  const isLive =
+                    session.isLive ||
+                    (sessionDateTime <= now &&
+                      new Date(
+                        sessionDateTime.getTime() + 2 * 60 * 60 * 1000
+                      ) >= now);
+                  // Check if session has ended (after end time)
+                  const isPastSession = sessionEndDateTime < now;
 
                   return (
                     <div
                       key={session.id}
                       className={`bg-white border border-zinc-200 rounded-lg p-4 hover:shadow-md transition-all ${
-                        isPastSession ? 'opacity-60' : ''
-                      } ${isLive ? 'ring-2 ring-red-500 ring-opacity-50' : ''}`}
+                        isPastSession && "opacity-60"
+                      }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                         {/* Time Column */}
@@ -149,8 +190,13 @@ export const ListView = ({ sessions, weekDays, onSessionClick }: ListViewProps) 
                             )}
                           </div>
                           {isLive && (
-                            <span className="inline-block mt-1 text-[10px] font-bold text-red-600 uppercase tracking-wide">
-                              Live
+                            <span className="text-[10px] inline-block mt-1 font-medium text-red-600">
+                              seit{" "}
+                              {Math.floor(
+                                (now.getTime() - sessionDateTime.getTime()) /
+                                  (1000 * 60)
+                              )}{" "}
+                              minuten
                             </span>
                           )}
                         </div>
@@ -160,19 +206,27 @@ export const ListView = ({ sessions, weekDays, onSessionClick }: ListViewProps) 
                           <div className="flex flex-col sm:flex-row sm:items-start gap-3 mb-2">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className={`text-[10px] font-bold uppercase tracking-wide ${
-                                  session.type === 'lecture'
-                                    ? session.locationType === 'online'
-                                      ? 'text-purple-600'
-                                      : 'text-blue-600'
-                                    : session.type === 'workshop'
-                                    ? 'text-blue-600'
-                                    : 'text-amber-600'
-                                }`}>
-                                  {session.type === 'lecture' ? 'Vorlesung' : session.type === 'workshop' ? 'Workshop' : 'Coaching'}
+                                <span
+                                  className={`text-[10px] font-bold uppercase tracking-wide ${
+                                    session.type === "lecture"
+                                      ? session.locationType === "online"
+                                        ? "text-purple-600"
+                                        : "text-blue-600"
+                                      : session.type === "workshop"
+                                      ? "text-blue-600"
+                                      : "text-amber-600"
+                                  }`}
+                                >
+                                  {session.type === "lecture"
+                                    ? "Vorlesung"
+                                    : session.type === "workshop"
+                                    ? "Workshop"
+                                    : "Coaching"}
                                 </span>
-                                {session.attendance === 'mandatory' && (
-                                  <span className="text-[10px] text-zinc-500">• Pflicht</span>
+                                {session.attendance === "mandatory" && (
+                                  <span className="text-[10px] text-zinc-500">
+                                    • Pflicht
+                                  </span>
                                 )}
                               </div>
                               <h4 className="text-sm font-semibold text-zinc-900 leading-tight mb-1">
@@ -182,7 +236,7 @@ export const ListView = ({ sessions, weekDays, onSessionClick }: ListViewProps) 
                                 <span>{session.module}</span>
                                 <span>•</span>
                                 <div className="flex items-center gap-1">
-                                  {session.locationType === 'online' ? (
+                                  {session.locationType === "online" ? (
                                     <>
                                       <Video className="w-3 h-3" />
                                       <span>{session.location}</span>
@@ -212,14 +266,13 @@ export const ListView = ({ sessions, weekDays, onSessionClick }: ListViewProps) 
                         </div>
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
-}
-
+  );
+};

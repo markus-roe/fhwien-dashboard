@@ -1,71 +1,129 @@
-'use client'
+"use client";
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { WeeklyGridHeader } from './WeeklyGridHeader'
-import { WeeklyGridRow } from './WeeklyGridRow'
-import { ListView } from './ListView'
-import { Tabs, Tab } from '../ui/Tabs'
-import type { Session } from '@/data/mockData'
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { WeeklyGridHeader } from "./WeeklyGridHeader";
+import { WeeklyGridRow } from "./WeeklyGridRow";
+import { ListView } from "./ListView";
+import { Tabs, Tab } from "../ui/Tabs";
+import type { Session } from "@/data/mockData";
 
 interface TimeSlot {
-  time: string
+  time: string;
   sessions: Array<{
-    dayIndex: number
+    dayIndex: number;
     session: {
-      id: string
-      type: 'lecture' | 'workshop' | 'coaching'
-      title: string
-      program: string
-      location: string
-      locationType: 'online' | 'on-campus'
-      participants?: number
-    }
-  }>
+      id: string;
+      type: "lecture" | "workshop" | "coaching";
+      title: string;
+      program: string;
+      location: string;
+      locationType: "online" | "on-campus";
+      participants?: number;
+    };
+  }>;
 }
 
 interface WeeklyGridProps {
-  weekDays: Date[]
-  timeSlots: TimeSlot[]
-  sessions: Session[]
-  viewMode?: 'week' | 'list'
-  onViewModeChange?: (mode: 'week' | 'list') => void
-  onSessionClick?: (sessionId: string) => void
-  weekRange?: string
-  onPreviousWeek?: () => void
-  onNextWeek?: () => void
-  onToday?: () => void
+  weekDays: Date[];
+  timeSlots: TimeSlot[];
+  sessions: Session[];
+  viewMode?: "week" | "list";
+  onViewModeChange?: (mode: "week" | "list") => void;
+  onSessionClick?: (sessionId: string) => void;
+  weekRange?: string;
+  onPreviousWeek?: () => void;
+  onNextWeek?: () => void;
+  onToday?: () => void;
 }
 
 export const WeeklyGrid = ({
   weekDays,
   timeSlots,
   sessions,
-  viewMode = 'week',
+  viewMode = "week",
   onViewModeChange,
   onSessionClick,
   weekRange,
   onPreviousWeek,
   onNextWeek,
-  onToday
+  onToday,
 }: WeeklyGridProps) => {
   // Find current day index in the week
-  const today = new Date()
-  const todayDay = today.getDate()
-  const todayMonth = today.getMonth()
-  const todayYear = today.getFullYear()
-  
+  const today = new Date();
+  const todayDay = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
+
   const currentDayIndex = weekDays.findIndex((day) => {
     return (
       day.getDate() === todayDay &&
       day.getMonth() === todayMonth &&
       day.getFullYear() === todayYear
-    )
-  })
+    );
+  });
 
-  // Calculate current time position (mock for now - can be enhanced to show actual time)
-  const currentTime = today.toTimeString().slice(0, 5) // HH:MM format
-  const rowHeight = 140 // min-h-[140px]
-  const currentTimePosition = 165 // Approximate position, can be calculated more precisely
+  // Calculate current time position accurately
+  const currentTime = today.toTimeString().slice(0, 5); // HH:MM format
+  const [currentHours, currentMinutes] = currentTime.split(":").map(Number);
+  const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+
+  const rowHeight = 140; // min-h-[140px]
+
+  // Calculate current time position based on time slots
+  let currentTimePosition: number | null = null;
+
+  if (timeSlots.length > 0) {
+    // Convert time slots to minutes for comparison
+    const timeSlotMinutes = timeSlots.map((slot) => {
+      const [hours, minutes] = slot.time.split(":").map(Number);
+      return hours * 60 + minutes;
+    });
+
+    // Find the position of current time
+    if (currentTimeInMinutes < timeSlotMinutes[0]) {
+      // Current time is before the first slot - position at the top
+      currentTimePosition = 0;
+    } else if (
+      currentTimeInMinutes >= timeSlotMinutes[timeSlotMinutes.length - 1]
+    ) {
+      // Current time is after the last slot - position after the last row
+      currentTimePosition = timeSlotMinutes.length * rowHeight;
+    } else {
+      // Find the slot index where current time falls
+      let slotIndex = -1;
+      for (let i = 0; i < timeSlotMinutes.length - 1; i++) {
+        if (
+          currentTimeInMinutes >= timeSlotMinutes[i] &&
+          currentTimeInMinutes < timeSlotMinutes[i + 1]
+        ) {
+          slotIndex = i;
+          break;
+        }
+      }
+
+      if (slotIndex >= 0) {
+        // Interpolate position between two slots
+        const slotStart = timeSlotMinutes[slotIndex];
+        const slotEnd = timeSlotMinutes[slotIndex + 1];
+        const timeDiff = currentTimeInMinutes - slotStart;
+        const slotDuration = slotEnd - slotStart;
+        const progress = slotDuration > 0 ? timeDiff / slotDuration : 0;
+
+        currentTimePosition = slotIndex * rowHeight + progress * rowHeight;
+      } else {
+        // Current time exactly matches a slot
+        const exactMatchIndex = timeSlotMinutes.findIndex(
+          (min) => min === currentTimeInMinutes
+        );
+        if (exactMatchIndex >= 0) {
+          currentTimePosition = exactMatchIndex * rowHeight;
+        } else {
+          // Fallback: use first slot position
+          currentTimePosition = 0;
+        }
+      }
+    }
+  }
 
   return (
     <section className="lg:col-span-9 h-full flex flex-col">
@@ -99,10 +157,16 @@ export const WeeklyGrid = ({
         </div>
         {/* Tabs - centered */}
         <Tabs>
-          <Tab active={viewMode === 'week'} onClick={() => onViewModeChange?.('week')}>
+          <Tab
+            active={viewMode === "week"}
+            onClick={() => onViewModeChange?.("week")}
+          >
             Wochenansicht
           </Tab>
-          <Tab active={viewMode === 'list'} onClick={() => onViewModeChange?.('list')}>
+          <Tab
+            active={viewMode === "list"}
+            onClick={() => onViewModeChange?.("list")}
+          >
             Listenansicht
           </Tab>
         </Tabs>
@@ -110,26 +174,40 @@ export const WeeklyGrid = ({
 
       {/* Grid Container */}
       <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col relative">
-        {viewMode === 'week' ? (
+        {viewMode === "week" ? (
           <>
             <WeeklyGridHeader weekDays={weekDays} />
 
             {/* Scrollable Grid Area */}
             <div className="overflow-y-auto overflow-x-auto relative flex-1 min-h-[500px]">
               {/* Current Time Indicator */}
-              {currentDayIndex >= 0 && (
-                <div className="absolute top-[165px] left-0 right-0 z-20 pointer-events-none flex items-center group">
+              {currentDayIndex >= 0 && currentTimePosition !== null && (
+                <div
+                  className="absolute left-0 right-0 z-20 pointer-events-none flex items-center group"
+                  style={{ top: `${currentTimePosition}px` }}
+                >
                   {/* Days before current day */}
-                  <div style={{ width: `${(currentDayIndex / 7) * 100}%` }} className="border-t border-red-500/30"></div>
+                  <div
+                    style={{ width: `${(currentDayIndex / 7) * 100}%` }}
+                    className="border-t border-red-500/30"
+                  ></div>
                   {/* Current day column */}
-                  <div style={{ width: `${(1 / 7) * 100}%` }} className="border-t border-red-500 relative">
+                  <div
+                    style={{ width: `${(1 / 7) * 100}%` }}
+                    className="border-t border-red-500 relative"
+                  >
                     <div className="absolute -left-1.5 -top-1.5 w-3 h-3 bg-red-500 rounded-full shadow-sm"></div>
                     <div className="absolute -left-12 -top-2.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
                       {currentTime}
                     </div>
                   </div>
                   {/* Days after current day */}
-                  <div style={{ width: `${((7 - currentDayIndex - 1) / 7) * 100}%` }} className="border-t border-red-500/30"></div>
+                  <div
+                    style={{
+                      width: `${((7 - currentDayIndex - 1) / 7) * 100}%`,
+                    }}
+                    className="border-t border-red-500/30"
+                  ></div>
                 </div>
               )}
 
@@ -139,6 +217,8 @@ export const WeeklyGrid = ({
                   <WeeklyGridRow
                     key={timeSlot.time}
                     timeSlot={timeSlot}
+                    weekDays={weekDays}
+                    sessions={sessions}
                     onSessionClick={onSessionClick}
                   />
                 ))}
@@ -146,10 +226,13 @@ export const WeeklyGrid = ({
             </div>
           </>
         ) : (
-          <ListView sessions={sessions} weekDays={weekDays} onSessionClick={onSessionClick} />
+          <ListView
+            sessions={sessions}
+            weekDays={weekDays}
+            onSessionClick={onSessionClick}
+          />
         )}
       </div>
     </section>
-  )
-}
-
+  );
+};
