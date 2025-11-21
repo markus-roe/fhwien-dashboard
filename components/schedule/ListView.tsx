@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { format, isToday, isPast, isFuture, startOfDay, endOfDay } from 'date-fns'
+import { de } from 'date-fns/locale'
 import { Video, MapPin, Calendar, ChevronDown, ChevronUp } from 'lucide-react'
 import { SessionCard } from './SessionCard'
 import type { Session } from '@/data/mockData'
@@ -61,12 +62,12 @@ export const ListView = ({ sessions, weekDays, onSessionClick }: ListViewProps) 
       return 'Heute'
     }
     if (isPast(date) && !isToday(date)) {
-      return format(date, 'EEEE, MMM d')
+      return format(date, 'EEEE, d. MMM', { locale: de })
     }
     if (isFuture(date)) {
-      return format(date, 'EEEE, MMM d')
+      return format(date, 'EEEE, d. MMM', { locale: de })
     }
-    return format(date, 'EEEE, MMM d')
+    return format(date, 'EEEE, d. MMM', { locale: de })
   }
 
   // Check if there are past sessions to show toggle

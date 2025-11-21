@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { de } from 'date-fns/locale'
 
 interface WeeklyGridHeaderProps {
   weekDays: Date[]
@@ -24,7 +25,7 @@ export const WeeklyGridHeader = ({ weekDays }: WeeklyGridHeaderProps) => {
                 isToday ? 'text-blue-600' : 'text-zinc-500'
               }`}
             >
-              {format(day, 'EEE')}
+              {format(day, 'EEE', { locale: de })}
             </span>
             <span className="block text-sm font-semibold text-zinc-900 mt-0.5">
               {format(day, 'd')}

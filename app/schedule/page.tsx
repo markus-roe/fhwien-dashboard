@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { format, startOfWeek } from 'date-fns'
+import { de } from 'date-fns/locale'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { NextUpCard } from '@/components/schedule/NextUpCard'
 // import { FilterBar } from '@/components/schedule/FilterBar'
@@ -107,7 +108,7 @@ export default function SchedulePage() {
     setCurrentWeekStart(monday)
   }
 
-  const weekRange = `${format(weekDays[0], 'MMM d')} – ${format(weekDays[6], 'MMM d, yyyy')}`
+  const weekRange = `${format(weekDays[0], 'd. MMM', { locale: de })} – ${format(weekDays[6], 'd. MMM yyyy', { locale: de })}`
 
   return (
     <MainLayout>
@@ -121,9 +122,9 @@ export default function SchedulePage() {
         <NextUpCard
           session={{
             title: nextUpSession.title,
-            subtitle: nextUpSession.type === 'lecture' ? 'Vorlesungsreihe' : nextUpSession.type === 'workshop' ? 'Praktikum' : 'Coaching',
+            subtitle: nextUpSession.type === 'lecture' ? 'Vorlesung' : nextUpSession.type === 'workshop' ? 'Workshop' : 'Coaching',
             program: nextUpSession.program,
-            date: format(nextUpSession.date, 'EEEE, MMM d'),
+            date: format(nextUpSession.date, 'EEEE, d. MMM', { locale: de }),
             time: nextUpSession.time,
             endTime: nextUpSession.endTime,
             location: nextUpSession.location,
