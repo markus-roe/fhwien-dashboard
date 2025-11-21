@@ -73,7 +73,7 @@ export const WeeklyGrid = ({
   let currentTimePosition: number | null = null;
 
   if (timeSlots.length > 0) {
-    // Convert time slots to minutes for comparison
+    // Convert time slots to minutes for comparon
     const timeSlotMinutes = timeSlots.map((slot) => {
       const [hours, minutes] = slot.time.split(":").map(Number);
       return hours * 60 + minutes;
