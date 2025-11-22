@@ -16,15 +16,10 @@ import type { Session } from "@/data/mockData";
 
 interface ListViewProps {
   sessions: Session[];
-  weekDays: Date[];
   onSessionClick?: (sessionId: string) => void;
 }
 
-export const ListView = ({
-  sessions,
-  weekDays,
-  onSessionClick,
-}: ListViewProps) => {
+export const ListView = ({ sessions, onSessionClick }: ListViewProps) => {
   const [showPastSessions, setShowPastSessions] = useState(false);
   const today = startOfDay(new Date());
 

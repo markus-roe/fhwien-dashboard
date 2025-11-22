@@ -1,13 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  html {
+    overflow-y: scroll;
+  }
+
   body {
-    font-family: 'Inter', sans-serif;
-    background-color: #FAFAFA;
+    font-family: "Inter", sans-serif;
+    background-color: #fafafa;
     color: #171717;
   }
 }
@@ -23,12 +27,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E5E5E5;
+  background: #e5e5e5;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #D4D4D4;
+  background: #d4d4d4;
 }
 
 /* Custom Checkbox */
@@ -73,4 +77,3 @@
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
 }
-

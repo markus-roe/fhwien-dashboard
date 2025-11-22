@@ -1,6 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
+import { de } from "date-fns/locale";
 
 interface TodayListProps {
   date: Date;
@@ -26,7 +27,7 @@ export const TodayList = ({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-medium text-zinc-900">Heute</h3>
         <span className="text-[10px] text-zinc-400">
-          {format(date, "MMM d")}
+          {format(date, "dd MMM", { locale: de })}
         </span>
       </div>
 
@@ -38,8 +39,8 @@ export const TodayList = ({
           <div
             key={session.id}
             onClick={() => onSessionClick?.(session.id)}
-            className={`group hover:bg-zinc-50 p-2 rounded-md transition-colors duration-200 ease-in-out flex gap-3 items-start relative z-10 ${
-              session.isPast ? "opacity-60" : "cursor-pointer"
+            className={`group hover:bg-zinc-50 p-2 rounded-md transition-colors duration-200 ease-in-out flex gap-3 items-start relative z-10 cursor-pointer ${
+              session.isPast ? "opacity-60" : ""
             }`}
           >
             <div className="w-8 text-[10px] font-medium text-zinc-400 pt-1 text-right tabular-nums">

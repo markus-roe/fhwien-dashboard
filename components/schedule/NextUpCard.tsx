@@ -84,12 +84,7 @@ export const NextUpCard = ({ session, onOpenPanel }: NextUpCardProps) => {
             </div>
           ) : (
             <div className="w-full md:w-auto mt-2 md:mt-0">
-              <Button
-                className="w-full md:w-auto px-4 py-2 text-sm"
-                icon={ArrowRight}
-              >
-                Details ansehen
-              </Button>
+              <Button icon={ArrowRight}>Details ansehen</Button>
             </div>
           )}
         </div>

@@ -5,7 +5,6 @@ export type LocationType = "online" | "on-campus";
 export interface Course {
   id: string;
   title: string;
-  subtitle: string;
   program: Program;
   module: string;
 }
@@ -32,6 +31,7 @@ export interface Session {
   materials: Material[];
   participants?: number;
   isLive?: boolean;
+  groupId?: string; // Link to group if this is a group appointment
 }
 
 export interface Material {
@@ -57,49 +57,68 @@ export interface ModuleProgress {
   creditsTotal: number;
 }
 
+export interface GroupMember {
+  id: string;
+  name: string;
+  initials: string;
+  email: string;
+  joinedAt: Date;
+}
+
+export interface Group {
+  id: string;
+  courseId: string;
+  name: string;
+  description?: string;
+  maxMembers?: number;
+  members: GroupMember[];
+  createdBy: string;
+  createdAt: Date;
+}
+
 // Mock Courses
 export const mockCourses: Course[] = [
   {
     id: "c1",
     title: "Data Science",
-    subtitle: "Integrated Lecture",
     program: "DTI",
     module: "DTI Module 3",
   },
   {
     id: "c2",
     title: "Human-Technology Interaction",
-    subtitle: "Integrated Lecture",
     program: "DTI",
     module: "DTI Module 4",
   },
   {
     id: "c3",
     title: "Innovation Design",
-    subtitle: "Integrated Lecture",
     program: "DTI",
     module: "DTI Module 4",
   },
   {
     id: "c4",
     title: "Innovation Teams and Networks",
-    subtitle: "Integrated Lecture",
     program: "DTI",
     module: "DTI Module 4",
   },
   {
     id: "c5",
     title: "Agile Software Engineering",
-    subtitle: "Integrated Lecture",
     program: "DTI",
     module: "DTI Module 3",
   },
   {
     id: "c6",
-    title: "Werkstatt",
-    subtitle: "UE Workshop",
+    title: "Data Governance",
     program: "DTI",
     module: "DTI Module 1",
+  },
+  {
+    id: "c7",
+    title: "Cloud-based IT-Infrastructure",
+    program: "DI",
+    module: "DI Module 1",
   },
 ];
 
@@ -565,23 +584,6 @@ export const mockSessions: Session[] = [
     materials: [],
   },
   {
-    id: "s31",
-    courseId: "c1",
-    type: "lecture",
-    title: "Data Science IL",
-    program: "DTI",
-    module: "DTI Module 3",
-    date: new Date("2025-11-22T08:30:00+01:00"),
-    time: "08:30",
-    endTime: "12:00",
-    duration: "3h 30m",
-    location: "B309",
-    locationType: "on-campus",
-    attendance: "mandatory",
-    objectives: [],
-    materials: [],
-  },
-  {
     id: "s32",
     courseId: "c4",
     type: "coaching",
@@ -666,6 +668,23 @@ export const mockSessions: Session[] = [
     objectives: [],
     materials: [],
   },
+  {
+    id: "s37",
+    courseId: "c1",
+    type: "coaching",
+    title: "Data Science Coaching",
+    program: "DTI",
+    module: "DTI Module 3",
+    date: new Date("2025-12-02T21:00:00+01:00"),
+    time: "21:00",
+    endTime: "21:45",
+    duration: "45m",
+    location: "Online",
+    locationType: "online",
+    attendance: "optional",
+    objectives: [],
+    materials: [],
+  },
 ];
 
 // Mock Tasks
@@ -678,7 +697,6 @@ export const mockTasks: Task[] = [
     course: {
       id: "c1",
       title: "4 Interaction",
-      subtitle: "Designprinzipien und HTI-Beobachtungen",
       program: "DTI",
       module: "DTI Module 4",
     },
@@ -691,7 +709,6 @@ export const mockTasks: Task[] = [
     course: {
       id: "c2",
       title: "4 Interaction",
-      subtitle: "Designed for Whom?",
       program: "DTI",
       module: "DTI Module 4",
     },
@@ -704,7 +721,6 @@ export const mockTasks: Task[] = [
     course: {
       id: "c3",
       title: "4 Interaction",
-      subtitle: 'Projekt "Interaktionsdesign',
       program: "DTI",
       module: "DTI Module 4",
     },
@@ -807,4 +823,317 @@ export const organizeSessionsByTimeSlots = (
   });
 
   return organized;
+};
+
+// Mock Groups
+export const mockGroups: Group[] = [
+  {
+    id: "g1",
+    courseId: "c4",
+    name: "Gruppe 1 - Innovation Teams",
+    description: "Arbeitsgruppe für Projektarbeit",
+    maxMembers: 5,
+    members: [
+      {
+        id: "m1",
+        name: "Markus R.",
+        initials: "MR",
+        email: "markus.roe@example.com",
+        joinedAt: new Date("2025-09-20"),
+      },
+      {
+        id: "m2",
+        name: "Anna S.",
+        initials: "AS",
+        email: "anna.s@example.com",
+        joinedAt: new Date("2025-09-21"),
+      },
+      {
+        id: "m3",
+        name: "Tom K.",
+        initials: "TK",
+        email: "tom.k@example.com",
+        joinedAt: new Date("2025-09-22"),
+      },
+    ],
+    createdBy: "m1",
+    createdAt: new Date("2025-09-20"),
+  },
+  {
+    id: "g2",
+    courseId: "c4",
+    name: "Gruppe 2 - Innovation Teams",
+    description: "Alternative Gruppe",
+    maxMembers: 6,
+    members: [
+      {
+        id: "m4",
+        name: "Lisa M.",
+        initials: "LM",
+        email: "lisa.m@example.com",
+        joinedAt: new Date("2025-09-19"),
+      },
+      {
+        id: "m5",
+        name: "Max H.",
+        initials: "MH",
+        email: "max.h@example.com",
+        joinedAt: new Date("2025-09-20"),
+      },
+    ],
+    createdBy: "m4",
+    createdAt: new Date("2025-09-19"),
+  },
+  {
+    id: "g3",
+    courseId: "c3",
+    name: "Gruppe 3 - Innovation Design",
+    description: "Für Innovation Design",
+    maxMembers: 4,
+    members: [
+      {
+        id: "m1",
+        name: "Markus R.",
+        initials: "MR",
+        email: "markus.roe@example.com",
+        joinedAt: new Date("2025-10-01"),
+      },
+    ],
+    createdBy: "m1",
+    createdAt: new Date("2025-10-01"),
+  },
+  {
+    id: "g4",
+    courseId: "c1",
+    name: "Gruppe 1 - Data Science",
+    description: "Für Data Science Projekte",
+    maxMembers: 7,
+    members: [
+      {
+        id: "m7",
+        name: "Emanuel",
+        initials: "E",
+        email: "emanuel@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m8",
+        name: "Bence",
+        initials: "B",
+        email: "bence@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m9",
+        name: "Simon",
+        initials: "S",
+        email: "simon@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m10",
+        name: "Alex",
+        initials: "A",
+        email: "alex@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m11",
+        name: "Ozan",
+        initials: "O",
+        email: "ozan@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m12",
+        name: "Natalia",
+        initials: "N",
+        email: "natalia@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m13",
+        name: "Christoph",
+        initials: "C",
+        email: "christoph@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+    ],
+    createdBy: "m7",
+    createdAt: new Date("2025-10-15"),
+  },
+  {
+    id: "g5",
+    courseId: "c1",
+    name: "Gruppe 2 - Data Science",
+    description: "Für Data Science Projekte",
+    maxMembers: 6,
+    members: [
+      {
+        id: "m14",
+        name: "Patrick",
+        initials: "P",
+        email: "patrick@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m15",
+        name: "Paul",
+        initials: "P",
+        email: "paul@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m16",
+        name: "Petar",
+        initials: "P",
+        email: "petar@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m17",
+        name: "Chris",
+        initials: "C",
+        email: "chris@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m18",
+        name: "Hanna",
+        initials: "H",
+        email: "hanna@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m19",
+        name: "Verena",
+        initials: "V",
+        email: "verena@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+    ],
+    createdBy: "m14",
+    createdAt: new Date("2025-10-15"),
+  },
+  {
+    id: "g6",
+    courseId: "c1",
+    name: "Gruppe 3 - Data Science",
+    description: "Für Data Science Projekte",
+    maxMembers: 6,
+    members: [
+      {
+        id: "m20",
+        name: "Tamas",
+        initials: "T",
+        email: "tamas@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m21",
+        name: "Volha",
+        initials: "V",
+        email: "volha@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m22",
+        name: "Lisa",
+        initials: "L",
+        email: "lisa.ds@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m23",
+        name: "Katja",
+        initials: "K",
+        email: "katja@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m24",
+        name: "Sophie",
+        initials: "S",
+        email: "sophie@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m25",
+        name: "Tanja",
+        initials: "T",
+        email: "tanja@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+    ],
+    createdBy: "m20",
+    createdAt: new Date("2025-10-15"),
+  },
+  {
+    id: "g7",
+    courseId: "c1",
+    name: "Gruppe 4 - Data Science",
+    description: "Für Data Science Projekte",
+    maxMembers: 7,
+    members: [
+      {
+        id: "m26",
+        name: "Öznur",
+        initials: "Ö",
+        email: "oznur@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m1",
+        name: "Markus",
+        initials: "M",
+        email: "markus.roe@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m27",
+        name: "Melanie",
+        initials: "M",
+        email: "melanie@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m28",
+        name: "Andreas",
+        initials: "A",
+        email: "andreas@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m29",
+        name: "Johannes",
+        initials: "J",
+        email: "johannes@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m30",
+        name: "Thomas",
+        initials: "T",
+        email: "thomas@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+      {
+        id: "m31",
+        name: "Gökhan",
+        initials: "G",
+        email: "gokhan@example.com",
+        joinedAt: new Date("2025-10-15"),
+      },
+    ],
+    createdBy: "m26",
+    createdAt: new Date("2025-10-15"),
+  },
+];
+
+// Current user (mock)
+export const currentUser = {
+  id: "m1",
+  name: "Markus R.",
+  initials: "MR",
+  email: "markus.roe@example.com",
 };

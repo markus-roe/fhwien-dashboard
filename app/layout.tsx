@@ -1,15 +1,14 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Studenten-Terminplan - DTI/DI',
-  description: 'DTI/DI Studenten-Terminplan Anwendung',
-}
+  title: "FH Wien - DTI/DI",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="de">
@@ -17,6 +16,5 @@ export default function RootLayout({
         {children}
       </body>
     </html>
-  )
+  );
 }
-
