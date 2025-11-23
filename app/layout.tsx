@@ -11,8 +11,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="de">
-      <body className="bg-zinc-50 text-zinc-900 min-h-screen flex flex-col overflow-x-hidden selection:bg-zinc-200">
+    <html lang="de" className="h-full">
+      <body className="bg-zinc-50 text-zinc-900 h-full flex flex-col overflow-hidden selection:bg-zinc-200">
         {children}
       </body>
     </html>

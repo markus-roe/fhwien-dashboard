@@ -11,6 +11,7 @@ interface TodayListProps {
     title: string;
     type: string;
     location: string;
+    date: Date;
     isLive?: boolean;
     isPast: boolean;
   }>;
@@ -23,15 +24,12 @@ export const TodayList = ({
   onSessionClick,
 }: TodayListProps) => {
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-zinc-900">Heute</h3>
-        <span className="text-[10px] text-zinc-400">
-          {format(date, "dd MMM", { locale: de })}
-        </span>
+    <div className="bg-white rounded-xl border border-zinc-200 p-3 sm:p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h3 className="text-xs sm:text-sm font-medium text-zinc-900">Nächste Einheiten</h3>
       </div>
 
-      <div className="space-y-3 relative">
+      <div className="space-y-2 sm:space-y-3 relative">
         {/* Timeline line */}
         <div className="absolute left-[2.8rem] top-2 bottom-2 w-px bg-zinc-100"></div>
 
@@ -44,7 +42,9 @@ export const TodayList = ({
             }`}
           >
             <div className="w-8 text-[10px] font-medium text-zinc-400 pt-1 text-right tabular-nums">
-              {session.time}
+              {format(session.date, "dd.MM", { locale: de })}
+              <br />
+              <span className="text-[9px]">{session.time}</span>
             </div>
             <div
               className={`w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm mt-1 shrink-0 ${

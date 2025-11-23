@@ -80,10 +80,10 @@ export const ListView = ({ sessions, onSessionClick }: ListViewProps) => {
   const hasPastSessions = pastSessions.length > 0;
 
   return (
-    <div className="flex-1 overflow-y-auto min-h-[500px] flex flex-col">
+    <div className="h-full flex flex-col min-h-0 overflow-hidden">
       {/* Toggle for past sessions */}
       {hasPastSessions && (
-        <div className="sticky top-0 z-20 bg-white border-b border-zinc-200 px-4 py-3">
+        <div className="sticky top-0 z-20 bg-white border-b border-zinc-200 px-4 py-3 flex-shrink-0">
           <button
             onClick={() => setShowPastSessions(!showPastSessions)}
             className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
@@ -105,35 +105,36 @@ export const ListView = ({ sessions, onSessionClick }: ListViewProps) => {
         </div>
       )}
 
-      <div className="space-y-6 p-4 flex-1">
-        {Array.from(sessionsByDate.entries()).map(([dateKey, daySessions]) => {
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="space-y-4 p-3">
+          {Array.from(sessionsByDate.entries()).map(([dateKey, daySessions]) => {
           const date = new Date(dateKey);
           const isPastDate = isPast(date) && !isToday(date);
 
           return (
-            <div key={dateKey} className="space-y-3">
+            <div key={dateKey} className="space-y-2">
               {/* Date Header */}
               <div
-                className={`flex items-center gap-3 sticky ${
+                className={`flex items-center gap-2 sticky ${
                   hasPastSessions ? "top-[57px]" : "top-0"
-                } bg-white py-2 z-10 border-b border-zinc-200`}
+                } bg-white py-1.5 z-10 border-b border-zinc-200`}
               >
-                <Calendar className="w-4 h-4 text-zinc-400" />
+                <Calendar className="w-3.5 h-3.5 text-zinc-400" />
                 <h3
-                  className={`text-sm font-semibold ${
+                  className={`text-xs font-semibold ${
                     isPastDate ? "text-zinc-400" : "text-zinc-900"
                   }`}
                 >
                   {getDateLabel(date)}
                 </h3>
-                <span className="text-xs text-zinc-400 font-medium">
+                <span className="text-[10px] text-zinc-400 font-medium">
                   {daySessions.length}{" "}
                   {daySessions.length === 1 ? "Sitzung" : "Sitzungen"}
                 </span>
               </div>
 
               {/* Sessions for this date */}
-              <div className="space-y-2 pl-7">
+              <div className="space-y-1.5 pl-5">
                 {daySessions.map((session) => {
                   const sessionDateTime = new Date(session.date);
                   const [hours, minutes] = session.time.split(":").map(Number);
@@ -164,45 +165,38 @@ export const ListView = ({ sessions, onSessionClick }: ListViewProps) => {
                   return (
                     <div
                       key={session.id}
-                      className={`bg-white border border-zinc-200 rounded-lg p-4 hover:shadow-md transition-all ${
+                      className={`bg-white border border-zinc-200 rounded-md p-2.5 hover:shadow-sm transition-all cursor-pointer ${
                         isPastSession && "opacity-60"
                       }`}
+                      onClick={() => onSessionClick?.(session.id)}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                      <div className="flex items-start gap-3">
                         {/* Time Column */}
-                        <div className="flex-shrink-0 w-full sm:w-24">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-zinc-900 tabular-nums">
+                        <div className="flex-shrink-0 w-16">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-zinc-900 tabular-nums leading-tight">
                               {session.time}
                             </span>
                             {session.endTime && (
-                              <>
-                                <span className="text-zinc-300">–</span>
-                                <span className="text-xs text-zinc-500 tabular-nums">
-                                  {session.endTime}
-                                </span>
-                              </>
+                              <span className="text-[10px] text-zinc-500 tabular-nums leading-tight">
+                                {session.endTime}
+                              </span>
                             )}
                           </div>
                           {isLive && (
-                            <span className="text-[10px] inline-block mt-1 font-medium text-red-600">
-                              seit{" "}
-                              {Math.floor(
-                                (now.getTime() - sessionDateTime.getTime()) /
-                                  (1000 * 60)
-                              )}{" "}
-                              minuten
+                            <span className="text-[9px] inline-block mt-0.5 font-medium text-red-600 leading-tight">
+                              LIVE
                             </span>
                           )}
                         </div>
 
                         {/* Session Info */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-start gap-3 mb-2">
+                          <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
+                              <div className="flex items-center gap-1.5 mb-0.5">
                                 <span
-                                  className={`text-[10px] font-bold uppercase tracking-wide ${
+                                  className={`text-[9px] font-bold uppercase tracking-wide ${
                                     session.type === "lecture"
                                       ? session.locationType === "online"
                                         ? "text-purple-600"
@@ -219,27 +213,25 @@ export const ListView = ({ sessions, onSessionClick }: ListViewProps) => {
                                     : "Coaching"}
                                 </span>
                                 {session.attendance === "mandatory" && (
-                                  <span className="text-[10px] text-zinc-500">
+                                  <span className="text-[9px] text-zinc-500">
                                     • Pflicht
                                   </span>
                                 )}
                               </div>
-                              <h4 className="text-sm font-semibold text-zinc-900 leading-tight mb-1">
+                              <h4 className="text-xs font-semibold text-zinc-900 leading-tight mb-0.5 line-clamp-2">
                                 {session.title}
                               </h4>
-                              <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500">
-                                <span>{session.module}</span>
-                                <span>•</span>
-                                <div className="flex items-center gap-1">
+                              <div className="flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
+                                <div className="flex items-center gap-0.5">
                                   {session.locationType === "online" ? (
                                     <>
-                                      <Video className="w-3 h-3" />
-                                      <span>{session.location}</span>
+                                      <Video className="w-2.5 h-2.5" />
+                                      <span className="truncate">{session.location}</span>
                                     </>
                                   ) : (
                                     <>
-                                      <MapPin className="w-3 h-3" />
-                                      <span>{session.location}</span>
+                                      <MapPin className="w-2.5 h-2.5" />
+                                      <span className="truncate">{session.location}</span>
                                     </>
                                   )}
                                 </div>
@@ -251,12 +243,6 @@ export const ListView = ({ sessions, onSessionClick }: ListViewProps) => {
                                 )}
                               </div>
                             </div>
-                            <button
-                              onClick={() => onSessionClick?.(session.id)}
-                              className="flex-shrink-0 text-xs font-medium text-blue-600 hover:text-blue-700 px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors sm:mt-0 mt-2 sm:w-auto w-full"
-                            >
-                              Details anzeigen
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -267,6 +253,7 @@ export const ListView = ({ sessions, onSessionClick }: ListViewProps) => {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

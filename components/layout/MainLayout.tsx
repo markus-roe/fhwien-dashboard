@@ -7,12 +7,12 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <>
+    <div className="h-full flex flex-col">
       <TopNav />
-      <main className="flex-1 max-w-7xl mx-auto px-6 w-full pt-8 pb-20">
+      <main className="flex-1 w-full px-2 sm:px-2 pt-4 pb-4 overflow-hidden flex flex-col min-h-0">
         {children}
       </main>
-    </>
+    </div>
   )
 }
 
