@@ -20,7 +20,7 @@ export const Button = ({
     "w-full md:w-auto px-4 py-2 text-sm flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all active:scale-95 shadow-sm";
 
   const variantClasses = {
-    primary: "bg-zinc-900 hover:bg-zinc-800 text-white",
+    primary: "bg-[#012f64] hover:bg-[#012f64]/80 text-white",
     secondary:
       "bg-white border border-zinc-200 hover:border-zinc-300 text-zinc-700",
     ghost: "bg-transparent hover:bg-zinc-50 text-zinc-700",

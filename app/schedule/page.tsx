@@ -108,15 +108,49 @@ export default function SchedulePage() {
   const today = new Date();
 
 
-  // Get upcoming sessions (future sessions, sorted by date/time)
+  // Get upcoming sessions for the next 7 days
   const upcomingSessions = useMemo(() => {
     const now = new Date();
+    const sevenDaysFromNow = new Date(now);
+    sevenDaysFromNow.setDate(now.getDate() + 7);
+    sevenDaysFromNow.setHours(23, 59, 59, 999); // End of day 7
+
     return allSessions
       .filter((session) => {
-        const sessionStartTime = new Date(session.date);
-        const [startHours, startMinutes] = session.time.split(":").map(Number);
-        sessionStartTime.setHours(startHours, startMinutes, 0, 0);
-        return sessionStartTime > now;
+        const sessionDate = new Date(session.date);
+        // Normalize to compare only dates (ignore time)
+        const sessionDateOnly = new Date(
+          sessionDate.getFullYear(),
+          sessionDate.getMonth(),
+          sessionDate.getDate()
+        );
+        const nowDateOnly = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+        const sevenDaysDateOnly = new Date(
+          sevenDaysFromNow.getFullYear(),
+          sevenDaysFromNow.getMonth(),
+          sevenDaysFromNow.getDate()
+        );
+
+        // Check if session is within the 7-day window
+        if (sessionDateOnly < nowDateOnly || sessionDateOnly > sevenDaysDateOnly) {
+          return false;
+        }
+
+        // For today's sessions, check if they haven't ended yet
+        if (sessionDateOnly.getTime() === nowDateOnly.getTime()) {
+          const sessionEndTime = new Date(session.date);
+          const [endHours, endMinutes] = session.endTime.split(":").map(Number);
+          sessionEndTime.setHours(endHours, endMinutes, 0, 0);
+          // Only include if session hasn't ended yet
+          return sessionEndTime > now;
+        }
+
+        // For future days, include all sessions
+        return true;
       })
       .sort((a, b) => {
         const dateA = new Date(a.date);
@@ -127,7 +161,6 @@ export default function SchedulePage() {
         dateB.setHours(bHours, bMinutes, 0, 0);
         return dateA.getTime() - dateB.getTime();
       })
-      .slice(0, 5) // Show next 5 upcoming sessions
       .map((session) => {
         const sessionStartTime = new Date(session.date);
         const sessionEndTime = new Date(session.date);

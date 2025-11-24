@@ -50,7 +50,7 @@ export const ModuleProgressWidget = ({ progress }: ModuleProgressWidgetProps) =>
           </p>
           <a
             href="#"
-            className="text-[10px] text-zinc-500 hover:text-zinc-900 underline decoration-zinc-300 underline-offset-2 mt-2 inline-block"
+            className="text-[10px] text-zinc-500 hover:text-[var(--primary)] underline decoration-zinc-300 underline-offset-2 mt-2 inline-block"
           >
             Details anzeigen
           </a>

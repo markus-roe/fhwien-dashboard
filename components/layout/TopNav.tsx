@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { currentUser } from "@/data/mockData";
 
 export const TopNav = () => {
   const pathname = usePathname();
@@ -86,10 +87,10 @@ export const TopNav = () => {
 
             <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
               <div className="text-right hidden sm:block">
-                <p className="text-xs font-medium text-zinc-900">Markus R.</p>
-                <p className="text-[10px] text-zinc-500">DTI Student</p>
+                <p className="text-xs font-medium text-zinc-900">{currentUser.name}</p>
+                <p className="text-[10px] text-zinc-500">{currentUser.program} Student</p>
               </div>
-              <Avatar initials="MR" />
+              <Avatar initials={currentUser.initials} />
             </div>
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -194,10 +195,10 @@ export const TopNav = () => {
             {/* User Profile Footer */}
             <div className="p-4 border-t border-zinc-200 bg-zinc-50/50">
               <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white transition-colors">
-                <Avatar initials="MR" />
+                <Avatar initials={currentUser.initials} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-900 truncate">Markus R.</p>
-                  <p className="text-xs text-zinc-500">DTI Student</p>
+                  <p className="text-sm font-medium text-zinc-900 truncate">{currentUser.name}</p>
+                  <p className="text-xs text-zinc-500">{currentUser.program} Student</p>
                 </div>
               </div>
             </div>

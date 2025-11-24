@@ -20,7 +20,7 @@ export const SessionPanelHeader = ({ session, onClose }: SessionPanelHeaderProps
 
   const getBadgeVariant = () => {
     if (session.type === 'lecture' && session.locationType === 'online') {
-      return 'purple'
+      return 'blue'
     }
     if (session.type === 'lecture' || session.type === 'workshop') {
       return 'blue'

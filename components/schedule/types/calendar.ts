@@ -1,0 +1,19 @@
+import type { Session } from "@/data/mockData";
+
+export type ViewType = "month" | "week" | "day" | "list";
+
+// Internal event format for calendar rendering
+export interface CalendarEvent {
+  id: string;
+  summary: string;
+  startTime: Date;
+  endTime: Date;
+  session: Session;
+}
+
+export interface CalendarViewProps {
+  sessions: Session[];
+  onSessionClick: (session: Session) => void;
+  onDateClick?: (date: Date) => void;
+}
+

@@ -22,7 +22,7 @@ export const SessionPanelDetails = ({ session }: SessionPanelDetailsProps) => {
       {/* Quick Actions */}
       {session.locationType === 'online' && (
         <div className="flex gap-3">
-          <button className="flex-1 flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white py-2.5 rounded-lg text-sm font-medium transition-all active:scale-[0.98] shadow-sm">
+          <button className="flex-1 flex items-center justify-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary)]/80 text-white py-2.5 rounded-lg text-sm font-medium transition-all active:scale-[0.98] shadow-sm">
             <Video className="w-4 h-4" />
             Teams beitreten
           </button>

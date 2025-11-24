@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary: #012f64;
+  --secondary: #012f64/80;
+}
+
 @layer base {
   html {
     overflow-y: scroll;

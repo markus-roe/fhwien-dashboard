@@ -27,7 +27,7 @@ export const NextUpCard = ({ session, onOpenPanel }: NextUpCardProps) => {
       onClick={onOpenPanel}
       className="hidden md:block group cursor-pointer relative w-full bg-white rounded-xl border border-zinc-200 p-3 sm:p-4 shadow-sm overflow-hidden transition-all hover:shadow-md hover:border-blue-300 hover:bg-blue-50/30"
     >
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+      <div className="absolute top-0 left-0 w-full h-1 bg-[var(--primary)]"></div>
 
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <h3 className="text-xs sm:text-sm font-medium text-zinc-900">Nächste Einheit</h3>
@@ -61,7 +61,7 @@ export const NextUpCard = ({ session, onOpenPanel }: NextUpCardProps) => {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-zinc-900 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
+          <h3 className="text-sm font-semibold text-zinc-900 leading-tight group-hover:text-[var(--primary)] transition-colors line-clamp-2">
             {session.title}
           </h3>
         </div>
@@ -69,9 +69,9 @@ export const NextUpCard = ({ session, onOpenPanel }: NextUpCardProps) => {
         <div className="flex items-center justify-between gap-2 pt-1">
           <div className="flex items-center gap-1.5 text-zinc-600">
             {session.locationType === "online" ? (
-              <Video className="w-3 h-3 text-blue-500" />
+              <Video className="w-3 h-3 text-[var(--primary)]" />
             ) : (
-              <MapPin className="w-3 h-3 text-blue-500" />
+              <MapPin className="w-3 h-3 text-[var(--primary)]" />
             )}
             <span className="text-[10px] font-medium truncate">{session.location}</span>
           </div>

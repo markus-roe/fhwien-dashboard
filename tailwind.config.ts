@@ -11,6 +11,10 @@ const config: Config = {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
       },
+      colors: {
+        primary: '#012f64',
+        secondary: '#012f64/80'
+      },
     },
   },
   plugins: [],
