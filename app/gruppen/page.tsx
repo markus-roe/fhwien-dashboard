@@ -24,12 +24,8 @@ export default function GruppenPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [groups, setGroups] = useState<Group[]>(mockGroups);
   const [searchQuery, setSearchQuery] = useState("");
-  const {
-    selectedSession,
-    isPanelOpen,
-    openSessionPanel,
-    closeSessionPanel,
-  } = useSessionPanel();
+  const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
+    useSessionPanel();
 
   const myGroups = useMemo(() => {
     return groups.filter((g) => g.members.some((m) => m.id === currentUser.id));
@@ -74,7 +70,6 @@ export default function GruppenPage() {
     });
     return counts;
   }, [groups]);
-
 
   const handleCreateGroup = (data: CreateGroupFormData) => {
     const courseId = data.courseId || selectedCourseId;
@@ -172,71 +167,71 @@ export default function GruppenPage() {
 
   return (
     <div className="flex flex-col h-full min-h-0">
-        <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
-          <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 lg:overflow-y-auto">
-            <GroupsSidebar
-              myGroups={myGroups}
-              courses={mockCourses}
-              expandedGroups={expandedGroups}
-              onToggleGroup={toggleGroup}
-              onLeaveGroup={handleLeaveGroup}
-              onCreateGroup={handleCreateGroup}
-              onSessionClick={openSessionPanel}
-            />
-          </aside>
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+        <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 lg:overflow-y-auto">
+          <GroupsSidebar
+            myGroups={myGroups}
+            courses={mockCourses}
+            expandedGroups={expandedGroups}
+            onToggleGroup={toggleGroup}
+            onLeaveGroup={handleLeaveGroup}
+            onCreateGroup={handleCreateGroup}
+            onSessionClick={openSessionPanel}
+          />
+        </aside>
 
-          <div className="flex-1 min-w-0 space-y-6">
-            <Card>
-              <CardContent className="p-4">
+        <div className="flex-1 min-w-0 space-y-6">
+          <Card>
+            <CardContent className="p-4">
               {myGroups.length > 0 && (
                 <>
-                <MyGroupsSection
-                myGroups={myGroups}
-                courses={mockCourses}
-                isUserInGroup={isUserInGroup}
-                isGroupFull={isGroupFull}
-                onJoinGroup={handleJoinGroup}
-                onLeaveGroup={handleLeaveGroup}
-              />
-            </>
-            )}
+                  <MyGroupsSection
+                    myGroups={myGroups}
+                    courses={mockCourses}
+                    isUserInGroup={isUserInGroup}
+                    isGroupFull={isGroupFull}
+                    onJoinGroup={handleJoinGroup}
+                    onLeaveGroup={handleLeaveGroup}
+                  />
+                </>
+              )}
 
-            <div className="mt-6">
-              <GroupSearchSection
-                courseGroups={courseGroups}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onCreateGroupClick={() => setIsCreateModalOpen(true)}
-                courses={mockCourses}
-                isUserInGroup={isUserInGroup}
-                isGroupFull={isGroupFull}
-                onJoinGroup={handleJoinGroup}
-                onLeaveGroup={handleLeaveGroup}
-                selectedCourseId={selectedCourseId}
-                onSelectCourse={setSelectedCourseId}
-                totalGroupCount={totalGroupCount}
-                courseGroupCounts={courseGroupCounts}
-              />
-            </div>
+              <div className="mt-6">
+                <GroupSearchSection
+                  courseGroups={courseGroups}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  onCreateGroupClick={() => setIsCreateModalOpen(true)}
+                  courses={mockCourses}
+                  isUserInGroup={isUserInGroup}
+                  isGroupFull={isGroupFull}
+                  onJoinGroup={handleJoinGroup}
+                  onLeaveGroup={handleLeaveGroup}
+                  selectedCourseId={selectedCourseId}
+                  onSelectCourse={setSelectedCourseId}
+                  totalGroupCount={totalGroupCount}
+                  courseGroupCounts={courseGroupCounts}
+                />
+              </div>
             </CardContent>
-            </Card>
-          </div>
+          </Card>
         </div>
-
-        <CreateGroupDialog
-          isOpen={isCreateModalOpen}
-          onOpenChange={setIsCreateModalOpen}
-          courses={mockCourses}
-          defaultCourseId={selectedCourseId}
-          onCoursePrefill={handleCoursePrefill}
-          onSubmit={handleCreateGroup}
-        />
-
-        <SessionPanel
-          session={selectedSession}
-          isOpen={isPanelOpen}
-          onClose={closeSessionPanel}
-        />
       </div>
+
+      <CreateGroupDialog
+        isOpen={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        courses={mockCourses}
+        defaultCourseId={selectedCourseId}
+        onCoursePrefill={handleCoursePrefill}
+        onSubmit={handleCreateGroup}
+      />
+
+      <SessionPanel
+        session={selectedSession}
+        isOpen={isPanelOpen}
+        onClose={closeSessionPanel}
+      />
+    </div>
   );
 }

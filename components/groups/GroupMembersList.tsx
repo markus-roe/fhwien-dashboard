@@ -20,10 +20,7 @@ export function GroupMembersList({ members }: GroupMembersListProps) {
             key={member.id}
             className="flex items-center gap-1 hover:bg-zinc-50 p-1 rounded-md transition-colors"
           >
-            <Avatar
-              initials={member.initials}
-              className="w-4 h-4 text-[9px]"
-            />
+            <Avatar initials={member.initials} className="w-4 h-4 text-[9px]" />
             <div className="flex flex-col">
               <span className="text-[9px] sm:text-[10px] text-zinc-700">
                 {member.name}
@@ -42,4 +39,3 @@ export function GroupMembersList({ members }: GroupMembersListProps) {
     </div>
   );
 }
-

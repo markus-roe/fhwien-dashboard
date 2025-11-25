@@ -1,10 +1,10 @@
 "use client";
 
-import { ReactNode } from 'react'
-import { TopNav } from './TopNav'
+import { ReactNode } from "react";
+import { TopNav } from "./TopNav";
 
 interface ClientLayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export const ClientLayout = ({ children }: ClientLayoutProps) => {
@@ -15,6 +15,5 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
         {children}
       </main>
     </div>
-  )
-}
-
+  );
+};

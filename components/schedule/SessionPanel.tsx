@@ -3,7 +3,6 @@
 import type { Session } from '@/data/mockData'
 import { SessionPanelHeader } from './SessionPanelHeader'
 import { SessionPanelDetails } from './SessionPanelDetails'
-import { SessionPanelMaterials } from './SessionPanelMaterials'
 
 interface SessionPanelProps {
   session: Session | null
@@ -35,7 +34,6 @@ export const SessionPanel = ({ session, isOpen, onClose }: SessionPanelProps) =>
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-8 py-6 space-y-8">
           <SessionPanelDetails session={session} />
-          {/* <SessionPanelMaterials materials={session.materials} /> */}
         </div>
 
         {/* Panel Footer */}

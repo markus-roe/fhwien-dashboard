@@ -20,30 +20,36 @@ import { getSessionColor } from "@/components/schedule/utils/calendarHelpers";
 
 type SmallCalendarProps = {
   allSessions: Session[];
-  onDayClick?: (event: MouseEvent<HTMLDivElement>, dayAppointments: Session[]) => void;
+  onDayClick?: (
+    event: MouseEvent<HTMLDivElement>,
+    dayAppointments: Session[]
+  ) => void;
   date?: Date;
   onDateChange?: (date: Date) => void;
 };
 
-export function SmallCalendar({ 
-  allSessions, 
+export function SmallCalendar({
+  allSessions,
   onDayClick,
   date: controlledDate,
   onDateChange,
 }: SmallCalendarProps) {
   const [internalDate, setInternalDate] = useState(new Date());
   const calendarDate = controlledDate ?? internalDate;
-  
+
   useEffect(() => {
     if (controlledDate) {
       setInternalDate(controlledDate);
     }
   }, [controlledDate]);
 
-  const setCalendarDate = useCallback((newDate: Date) => {
-    setInternalDate(newDate);
-    onDateChange?.(newDate);
-  }, [onDateChange]);
+  const setCalendarDate = useCallback(
+    (newDate: Date) => {
+      setInternalDate(newDate);
+      onDateChange?.(newDate);
+    },
+    [onDateChange]
+  );
 
   const handleCalendarDayClick = useCallback(
     (event: MouseEvent<HTMLDivElement>, dayAppointments: Session[]) => {
@@ -71,16 +77,13 @@ export function SmallCalendar({
       weeks.push(days.slice(i, i + 7));
     }
 
-    const appointmentsByDate = allSessions.reduce(
-      (map, appointment) => {
-        const key = format(appointment.date, "yyyy-MM-dd");
-        const existing = map.get(key) || [];
-        existing.push(appointment);
-        map.set(key, existing);
-        return map;
-      },
-      new Map<string, Session[]>()
-    );
+    const appointmentsByDate = allSessions.reduce((map, appointment) => {
+      const key = format(appointment.date, "yyyy-MM-dd");
+      const existing = map.get(key) || [];
+      existing.push(appointment);
+      map.set(key, existing);
+      return map;
+    }, new Map<string, Session[]>());
 
     return (
       <Card className="relative overflow-hidden">
@@ -102,7 +105,7 @@ export function SmallCalendar({
               <h3 className="text-sm font-semibold text-zinc-900 flex-1 text-center">
                 {format(calendarDate, "MMMM yyyy", { locale: de })}
               </h3>
-              </button>
+            </button>
             <button
               onClick={() => setCalendarDate(addMonths(calendarDate, 1))}
               className="p-1.5 hover:bg-zinc-100 rounded transition-colors flex items-center justify-center"
@@ -189,4 +192,3 @@ export function SmallCalendar({
 
   return calendarContent;
 }
-
