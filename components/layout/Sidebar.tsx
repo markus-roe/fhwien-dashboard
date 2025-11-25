@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback, type MouseEvent } from "react";
-import type { Session, Course, CoachingSlot } from "@/data/mockData";
+import type { Session } from "@/data/mockData";
 import { SmallCalendar } from "@/components/groups/SmallCalendar";
 import { NextUpList } from "@/components/schedule/NextUpList";
 import { NextUpCard } from "@/components/schedule/NextUpCard";
@@ -41,7 +41,7 @@ export function Sidebar({
   // Convert coaching slots to sessions for calendar
   const slotSessions: Session[] = useMemo(() => {
     return mockCoachingSlots
-      .filter((slot) => slot.participants.some((p) => p.id === currentUser.id))
+      .filter((slot) => slot.participants.some((p) => p === currentUser.name))
       .map((slot) => {
         const course = mockCourses.find((c) => c.id === slot.courseId);
         return {
