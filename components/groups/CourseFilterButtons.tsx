@@ -17,7 +17,7 @@ export function CourseFilterButtons({
   courseGroupCounts,
 }: CourseFilterButtonsProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+    <div className="flex flex-col gap-2">
       <CourseFilterButton
         label="Alle Fächer"
         count={totalGroupCount}

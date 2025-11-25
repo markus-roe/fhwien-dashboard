@@ -22,7 +22,6 @@ export function GroupCard({
   onJoinGroup,
   onLeaveGroup,
 }: GroupCardProps) {
-
   return (
     <Card className="hover:border-zinc-300 hover:shadow-sm transition-all group">
       <CardContent className="p-3">
@@ -33,15 +32,14 @@ export function GroupCard({
                 {group.name}
               </h3>
               {course && (
-                <span className="text-xs text-zinc-400">
-                  {course.title}
-                </span>
+                <span className="text-xs text-zinc-400">{course.title}</span>
               )}
             </div>
             <div className="flex items-center gap-3 text-xs text-zinc-500 mb-2">
               <span className="flex items-center gap-1">
                 <Users className="w-3 h-3" />
-                {group.members.length}{group.maxMembers ? `/${group.maxMembers}` : ""}
+                {group.members.length}
+                {group.maxMembers ? `/${group.maxMembers}` : ""}
               </span>
             </div>
             {group.members.length > 0 && (
@@ -49,12 +47,12 @@ export function GroupCard({
                 {group.members.map((member) => (
                   <Badge
                     rounded="md"
-                    key={member.id}
+                    key={member}
                     variant="default"
                     size="sm"
                     className="normal-case font-normal"
                   >
-                    {member.name}
+                    {member}
                   </Badge>
                 ))}
               </div>
@@ -77,7 +75,7 @@ export function GroupCard({
                 className="text-xs h-7 px-2.5"
               >
                 Verlassen
-              </Button>  
+              </Button>
             )}
           </div>
         </div>
@@ -85,4 +83,3 @@ export function GroupCard({
     </Card>
   );
 }
-

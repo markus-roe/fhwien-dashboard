@@ -72,8 +72,12 @@ export const TopNav = () => {
                 Gruppen
               </Link>
               <Link
-                href="#"
-                className="text-sm font-medium text-zinc-400 hover:cursor-not-allowed  px-3 py-1.5 rounded-md transition-all"
+                href="/coaching"
+                className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${
+                  isActive("/coaching")
+                    ? "text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-900"
+                }`}
               >
                 Coaching
               </Link>
@@ -81,14 +85,16 @@ export const TopNav = () => {
           </div>
 
           <div className="flex items-center gap-4">
-      
-
             <div className="h-4 w-px bg-zinc-200 hidden sm:block"></div>
 
             <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
               <div className="text-right hidden sm:block">
-                <p className="text-xs font-medium text-zinc-900">{currentUser.name}</p>
-                <p className="text-[10px] text-zinc-500">{currentUser.program} Student</p>
+                <p className="text-xs font-medium text-zinc-900">
+                  {currentUser.name}
+                </p>
+                <p className="text-[10px] text-zinc-500">
+                  {currentUser.program} Student
+                </p>
               </div>
               <Avatar initials={currentUser.initials} />
             </div>
@@ -106,7 +112,9 @@ export const TopNav = () => {
       {/* Mobile Menu Overlay */}
       <div
         className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${
-          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          mobileMenuOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
       >
         {/* Backdrop */}
@@ -116,7 +124,7 @@ export const TopNav = () => {
           }`}
           onClick={() => setMobileMenuOpen(false)}
         />
-        
+
         {/* Menu Panel */}
         <div
           className={`fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] bg-white shadow-2xl transition-transform duration-300 ease-out ${
@@ -159,9 +167,11 @@ export const TopNav = () => {
                       : "text-zinc-600 hover:text-zinc-900"
                   }`}
                 >
-                  <Calendar className={`w-5 h-5 flex-shrink-0 ${
-                    isActive("/schedule") ? "text-zinc-900" : "text-zinc-400"
-                  }`} />
+                  <Calendar
+                    className={`w-5 h-5 flex-shrink-0 ${
+                      isActive("/schedule") ? "text-zinc-900" : "text-zinc-400"
+                    }`}
+                  />
                   <span className="text-base">Terminplan</span>
                 </Link>
                 <Link
@@ -173,20 +183,27 @@ export const TopNav = () => {
                       : "text-zinc-600 hover:text-zinc-900"
                   }`}
                 >
-                  <Users className={`w-5 h-5 flex-shrink-0 ${
-                    isActive("/gruppen") ? "text-zinc-900" : "text-zinc-400"
-                  }`} />
+                  <Users
+                    className={`w-5 h-5 flex-shrink-0 ${
+                      isActive("/gruppen") ? "text-zinc-900" : "text-zinc-400"
+                    }`}
+                  />
                   <span className="text-base">Gruppen</span>
                 </Link>
                 <Link
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] text-zinc-400 cursor-not-allowed"
+                  href="/coaching"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${
+                    isActive("/coaching")
+                      ? "text-zinc-900 font-medium"
+                      : "text-zinc-600 hover:text-zinc-900"
+                  }`}
                 >
-                  <MessageSquare className="w-5 h-5 flex-shrink-0 text-zinc-300" />
+                  <MessageSquare
+                    className={`w-5 h-5 flex-shrink-0 ${
+                      isActive("/coaching") ? "text-zinc-900" : "text-zinc-400"
+                    }`}
+                  />
                   <span className="text-base">Coaching</span>
                 </Link>
               </div>
@@ -197,8 +214,12 @@ export const TopNav = () => {
               <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white transition-colors">
                 <Avatar initials={currentUser.initials} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-900 truncate">{currentUser.name}</p>
-                  <p className="text-xs text-zinc-500">{currentUser.program} Student</p>
+                  <p className="text-sm font-medium text-zinc-900 truncate">
+                    {currentUser.name}
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    {currentUser.program} Student
+                  </p>
                 </div>
               </div>
             </div>

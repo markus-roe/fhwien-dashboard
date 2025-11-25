@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { GroupSearchSection } from "@/components/groups/GroupSearchSection";
 import { MyGroupsSection } from "@/components/groups/MyGroupsSection";
-import { GroupsSidebar } from "@/components/groups/GroupsSidebar";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { SessionPanel } from "@/components/schedule/SessionPanel";
 import { useSessionPanel } from "@/components/schedule/hooks/useSessionPanel";
 import {
@@ -20,7 +20,6 @@ import { Card, CardContent } from "@/components/ui/Card";
 
 export default function GruppenPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [groups, setGroups] = useState<Group[]>(mockGroups);
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,7 +27,7 @@ export default function GruppenPage() {
     useSessionPanel();
 
   const myGroups = useMemo(() => {
-    return groups.filter((g) => g.members.some((m) => m.id === currentUser.id));
+    return groups.filter((g) => g.members.some((m) => m === currentUser.name));
   }, [groups]);
 
   const courseGroups = useMemo(() => {
@@ -46,12 +45,7 @@ export default function GruppenPage() {
             .find((c) => c.id === g.courseId)
             ?.title.toLowerCase()
             .includes(query) ||
-          g.members.some(
-            (m) =>
-              m.name.toLowerCase().includes(query) ||
-              m.initials.toLowerCase().includes(query) ||
-              m.email.toLowerCase().includes(query)
-          )
+          g.members.some((m) => m.toLowerCase().includes(query))
       );
     }
 
@@ -81,15 +75,7 @@ export default function GruppenPage() {
       name: data.name,
       description: data.description || undefined,
       maxMembers: data.maxMembers || undefined,
-      members: [
-        {
-          id: currentUser.id,
-          name: currentUser.name,
-          initials: currentUser.initials,
-          email: currentUser.email,
-          program: currentUser.program,
-        },
-      ],
+      members: [currentUser.name],
       createdAt: new Date(),
     };
 
@@ -102,7 +88,7 @@ export default function GruppenPage() {
         if (group.id !== groupId) return group;
 
         const isAlreadyMember = group.members.some(
-          (m) => m.id === currentUser.id
+          (m) => m === currentUser.name
         );
         if (isAlreadyMember) return group;
 
@@ -112,16 +98,7 @@ export default function GruppenPage() {
 
         return {
           ...group,
-          members: [
-            ...group.members,
-            {
-              id: currentUser.id,
-              name: currentUser.name,
-              initials: currentUser.initials,
-              email: currentUser.email,
-              program: currentUser.program,
-            },
-          ],
+          members: [...group.members, currentUser.name],
         };
       })
     );
@@ -133,14 +110,14 @@ export default function GruppenPage() {
         if (group.id !== groupId) return group;
         return {
           ...group,
-          members: group.members.filter((m) => m.id !== currentUser.id),
+          members: group.members.filter((m) => m !== currentUser.name),
         };
       })
     );
   };
 
   const isUserInGroup = (group: Group) => {
-    return group.members.some((m) => m.id === currentUser.id);
+    return group.members.some((m) => m === currentUser.name);
   };
 
   const isGroupFull = (group: Group) => {
@@ -153,36 +130,23 @@ export default function GruppenPage() {
     }
   };
 
-  const toggleGroup = (groupId: string) => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(groupId)) {
-        next.delete(groupId);
-      } else {
-        next.add(groupId);
-      }
-      return next;
-    });
-  };
-
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
         <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 lg:overflow-y-auto">
-          <GroupsSidebar
-            myGroups={myGroups}
-            courses={mockCourses}
-            expandedGroups={expandedGroups}
-            onToggleGroup={toggleGroup}
-            onLeaveGroup={handleLeaveGroup}
-            onCreateGroup={handleCreateGroup}
+          <Sidebar
+            showCalendar={true}
+            showNextUpCard={false}
             onSessionClick={openSessionPanel}
           />
         </aside>
 
         <div className="flex-1 min-w-0 space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900">Gruppen</h1>
+          </div>
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-4 sm:p-6">
               {myGroups.length > 0 && (
                 <>
                   <MyGroupsSection
@@ -193,10 +157,11 @@ export default function GruppenPage() {
                     onJoinGroup={handleJoinGroup}
                     onLeaveGroup={handleLeaveGroup}
                   />
+                  <div className="border-t border-zinc-200 my-6"></div>
                 </>
               )}
 
-              <div className="mt-6">
+              <div>
                 <GroupSearchSection
                   courseGroups={courseGroups}
                   searchQuery={searchQuery}
