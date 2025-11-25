@@ -181,6 +181,7 @@ export default function GruppenPage() {
               onToggleGroup={toggleGroup}
               onLeaveGroup={handleLeaveGroup}
               onCreateGroup={handleCreateGroup}
+              onSessionClick={openSessionPanel}
             />
           </aside>
 

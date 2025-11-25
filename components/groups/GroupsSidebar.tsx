@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import type { Course, Group } from "@/data/mockData";
+import type { MouseEvent } from "react";
+import type { Session } from "@/data/mockData";
 import { MyGroupCard } from "./MyGroupCard";
 import { EmptyGroupsState } from "./EmptyGroupsState";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
@@ -9,6 +11,9 @@ import { CreateGroupDialog, type CreateGroupFormData } from "./CreateGroupDialog
 import { SmallCalendar } from "./SmallCalendar";
 import { mockSessions as allSessions } from "@/data/mockData";
 import { NextUpList } from "../schedule/NextUpList";
+import { EventPopover } from "../schedule/EventPopover";
+import { sessionToEvent } from "@/components/schedule/utils/calendarHelpers";
+import type { CalendarEvent } from "@/components/schedule/types/calendar";
 
 type GroupsSidebarProps = {
   myGroups: Group[];
@@ -17,6 +22,7 @@ type GroupsSidebarProps = {
   onToggleGroup: (groupId: string) => void;
   onLeaveGroup: (groupId: string) => void;
   onCreateGroup?: (data: CreateGroupFormData) => void;
+  onSessionClick?: (session: Session) => void;
 };
 
 export function GroupsSidebar({
@@ -26,8 +32,16 @@ export function GroupsSidebar({
   onToggleGroup,
   onLeaveGroup,
   onCreateGroup,
+  onSessionClick,
 }: GroupsSidebarProps) {
   const [isCreateGroupDialogOpen, setIsCreateGroupDialogOpen] = useState(false);
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [selectedDayEvents, setSelectedDayEvents] = useState<CalendarEvent[] | null>(null);
+  const [popoverPosition, setPopoverPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+  const [showEventPopover, setShowEventPopover] = useState(false);
   
 
   // Group groups by course
@@ -136,6 +150,71 @@ export function GroupsSidebar({
         });
     }, [allSessions]);
 
+  const handleClosePopover = useCallback(() => {
+    setShowEventPopover(false);
+    setSelectedDayEvents(null);
+    setPopoverPosition(null);
+  }, []);
+
+  const handleCalendarDayClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>, dayAppointments: Session[]) => {
+      if (dayAppointments.length === 0) return;
+      const target = event.currentTarget;
+      const rect = target.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollLeft =
+        window.pageXOffset || document.documentElement.scrollLeft;
+      const isMobile = window.innerWidth < 640;
+      const popoverWidth = isMobile ? 260 : 280;
+      const popoverHeight = 320;
+      let top = rect.bottom + scrollTop + 4;
+      let left = rect.left + scrollLeft;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 8;
+
+      if (isMobile) {
+        left = Math.max(
+          padding,
+          Math.min(left, viewportWidth - popoverWidth - padding)
+        );
+      } else {
+        if (left + popoverWidth > viewportWidth - padding) {
+          left = viewportWidth - popoverWidth - padding;
+        }
+        if (left < padding) {
+          left = padding;
+        }
+      }
+
+      if (top + popoverHeight > scrollTop + viewportHeight - padding) {
+        top = rect.top + scrollTop - popoverHeight - 4;
+        if (top < scrollTop + padding) {
+          top = scrollTop + padding;
+        }
+      }
+
+      setSelectedDayEvents(dayAppointments.map(sessionToEvent));
+      setPopoverPosition({ top, left });
+      setShowEventPopover(true);
+    },
+    []
+  );
+
+  const handleDateChange = useCallback((date: Date) => {
+    setCalendarDate(date);
+  }, []);
+
+  const handleSessionClick = useCallback(
+    (sessionId: string) => {
+      const session = allSessions.find((s) => s.id === sessionId);
+      if (session) {
+        onSessionClick?.(session);
+      }
+    },
+    [allSessions, onSessionClick]
+  );
+
   return (
     <>
       <div className="flex-shrink-0 space-y-4">
@@ -143,16 +222,16 @@ export function GroupsSidebar({
           <div className="w-full">
             <SmallCalendar
               allSessions={allSessions}
-              onDayClick={() => {}}
-              date={new Date()}
-              onDateChange={() => {}}
+              onDayClick={handleCalendarDayClick}
+              date={calendarDate}
+              onDateChange={handleDateChange}
             />
           </div>
           <div className="flex-1 min-w-0">
             <NextUpList
               sessions={upcomingSessions}
               emptyMessage="Noch keine Gruppentermine geplant."
-              onSessionClick={() => {}}
+              onSessionClick={handleSessionClick}
             />
           </div>
         </div>
@@ -167,6 +246,18 @@ export function GroupsSidebar({
           onSubmit={(data) => {
             onCreateGroup(data);
             setIsCreateGroupDialogOpen(false);
+          }}
+        />
+      )}
+
+      {showEventPopover && popoverPosition && selectedDayEvents && (
+        <EventPopover
+          events={selectedDayEvents}
+          position={popoverPosition}
+          onClose={handleClosePopover}
+          onSessionClick={(session) => {
+            onSessionClick?.(session);
+            handleClosePopover();
           }}
         />
       )}

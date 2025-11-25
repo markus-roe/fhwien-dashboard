@@ -185,7 +185,7 @@ export function SmallCalendar({
         </CardContent>
       </Card>
     );
-  }, [allSessions, calendarDate, handleCalendarDayClick]);
+  }, [allSessions, calendarDate, handleCalendarDayClick, setCalendarDate]);
 
   return calendarContent;
 }
