@@ -1,19 +1,9 @@
-import { Monitor, Check, Video, Calendar, Share2, MapPin } from 'lucide-react'
+import type { Session } from '@/data/mockData'
+import { Monitor, Video, MapPin } from 'lucide-react'
 import { Avatar } from '../ui/Avatar'
 
 interface SessionPanelDetailsProps {
-  session: {
-    time: string
-    endTime: string
-    duration: string
-    lecturer?: {
-      name: string
-      initials: string
-    }
-    location: string
-    locationType: 'online' | 'on-campus'
-    attendance: 'mandatory' | 'optional'
-  }
+  session: Session
 }
 
 export const SessionPanelDetails = ({ session }: SessionPanelDetailsProps) => {

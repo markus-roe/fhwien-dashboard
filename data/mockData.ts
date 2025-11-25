@@ -770,7 +770,7 @@ export const mockGroups: Group[] = [
   {
     id: "g4",
     courseId: "c1",
-    name: "Gruppe 1 - Data Science",
+    name: "Gruppe 1",
     description: "",
     maxMembers: 7,
     members: [
@@ -829,7 +829,7 @@ export const mockGroups: Group[] = [
   {
     id: "g5",
     courseId: "c1",
-    name: "Gruppe 2 - Data Science",
+    name: "Gruppe 2",
     description: "",
     maxMembers: 6,
     members: [
@@ -881,7 +881,7 @@ export const mockGroups: Group[] = [
   {
     id: "g6",
     courseId: "c1",
-    name: "Gruppe 3 - Data Science",
+    name: "Gruppe 3",
     description: "",
     maxMembers: 6,
     members: [
@@ -933,7 +933,7 @@ export const mockGroups: Group[] = [
   {
     id: "g7",
     courseId: "c1",
-    name: "Gruppe 4 - Data Science",
+    name: "Gruppe 4",
     description: "",
     maxMembers: 7,
     members: [
@@ -992,9 +992,9 @@ export const mockGroups: Group[] = [
   {
     id: "g8",
     courseId: "c6",
-    name: "Gruppe 1 - Data Governance",
+    name: "Gruppe 1",
     description: "",
-    maxMembers: 3,
+    maxMembers: 0,
     members: [
       {
         id: "m32",
@@ -1023,9 +1023,9 @@ export const mockGroups: Group[] = [
   {
     id: "g9",
     courseId: "c6",
-    name: "Gruppe 2 - Data Governance",
+    name: "Gruppe 2",
     description: "",
-    maxMembers: 3,
+    maxMembers: 0,
     members: [
       {
         id: "m35",
@@ -1054,9 +1054,9 @@ export const mockGroups: Group[] = [
   {
     id: "g10",
     courseId: "c6",
-    name: "Gruppe 3 - Data Governance",
+    name: "Gruppe 3",
     description: "",
-    maxMembers: 3,
+    maxMembers: 0,
     members: [
       {
         id: "m38",
@@ -1085,9 +1085,9 @@ export const mockGroups: Group[] = [
   {
     id: "g11",
     courseId: "c6",
-    name: "Gruppe 4 - Data Governance",
+    name: "Gruppe 4",
     description: "",
-    maxMembers: 3,
+    maxMembers: 0,
     members: [
       {
         id: "m41",
@@ -1113,7 +1113,24 @@ export const mockGroups: Group[] = [
     ],
     createdAt: new Date("2025-11-23"),
   },
-];
+  {
+    id: "g12",
+    courseId: "c7",
+    name: "Gruppe 5",
+    description: "",
+    maxMembers: 0,
+    members: [
+      {
+        id: "m1",
+        name: "Markus R.",
+        initials: "MR",
+        email: "markus.roe@gmx.net",
+        program: "DTI",
+      }
+    ],
+    createdAt: new Date("2025-11-23"),
+  }
+]
 
 // Current user (mock)
 export const currentUser = {

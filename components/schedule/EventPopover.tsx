@@ -20,6 +20,14 @@ export function EventPopover({
   onClose,
   onSessionClick,
 }: EventPopoverProps) {
+
+
+  const sortedEvents = events.sort((a: CalendarEvent, b: CalendarEvent) => {
+    const startDiff = a.startTime.getTime() - b.startTime.getTime();
+    if (startDiff !== 0) return startDiff;
+    return a.endTime.getTime() - b.endTime.getTime();
+  });
+
   return (
     <>
       {/* Backdrop to close popover */}
@@ -42,7 +50,7 @@ export function EventPopover({
               {format(events[0]?.startTime || new Date(), "EEEE", { locale: de })}
             </span>
             <span className="text-xs text-gray-500">
-              {format(events[0]?.startTime || new Date(), "d. MM. yyyy", { locale: de })}
+              {format(events[0]?.startTime || new Date(), "dd.MM.yyyy", { locale: de })}
             </span>
           </div>
           <button
@@ -54,7 +62,7 @@ export function EventPopover({
         </div>
         <div className="px-2.5 py-1.5">
           <div className="space-y-1">
-            {events.map((ev) => (
+            {sortedEvents.map((ev) => (
               <div
                 key={ev.id}
                 className="px-2 py-1.5 rounded cursor-pointer hover:bg-gray-50 transition-colors"

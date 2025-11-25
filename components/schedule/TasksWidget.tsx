@@ -35,7 +35,6 @@ export const TasksWidget = ({ tasks, onTaskToggle }: TasksWidgetProps) => {
             <label className="flex items-start gap-3 cursor-pointer group py-3">
               <input
                 type="checkbox"
-                className="custom-checkbox mt-0.5 shrink-0"
                 checked={task.completed}
                 onChange={() => onTaskToggle?.(task.id)}
               />

@@ -1,13 +1,9 @@
 import { X } from 'lucide-react'
+import type { Session } from '@/data/mockData'
 import { Badge } from '../ui/Badge'
 
 interface SessionPanelHeaderProps {
-  session: {
-    type: 'lecture' | 'workshop' | 'coaching'
-    locationType?: 'online' | 'on-campus'
-    module: string
-    title: string
-  }
+  session: Session
   onClose: () => void
 }
 
@@ -28,12 +24,15 @@ export const SessionPanelHeader = ({ session, onClose }: SessionPanelHeaderProps
     return 'amber'
   }
 
+  const courseLabel = session.courseId?.toUpperCase?.() ? session.courseId.toUpperCase() : session.courseId
+  const metaLabel = session.program ? `${session.program} • ${courseLabel}` : courseLabel
+
   return (
     <div className="px-8 py-6 border-b border-zinc-100 flex items-start justify-between bg-white sticky top-0 z-10">
       <div>
         <div className="flex items-center gap-2 mb-2.5">
           <Badge variant={getBadgeVariant()}>{typeLabels[session.type]}</Badge>
-          <span className="text-zinc-400 text-xs font-medium">{session.module}</span>
+          <span className="text-zinc-400 text-xs font-medium">{metaLabel}</span>
         </div>
         <h2 className="text-xl font-semibold text-zinc-900 leading-tight">{session.title}</h2>
       </div>

@@ -11,16 +11,30 @@ interface BadgeProps {
     | "rose"
     | "red";
   className?: string;
+  rounded?: "full" | "lg" | "md" | "sm";
+  size?: "xs" | "sm" | "md" | "lg";
 }
 
 export const Badge = ({
   children,
   variant = "default",
+  size = "xs",
   className = "",
+  rounded = "full",
 }: BadgeProps) => {
-  const baseClasses =
-    "px-2.5 py-1 rounded-full text-xs font-medium tracking-wide uppercase border";
-
+  const baseClasses = "px-2.5 py-1 font-medium tracking-wide uppercase border";
+  const sizeClasses = {
+    xs: "text-[10px]",
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base",
+  };
+  const roundedClasses = {
+    full: "rounded-full",
+    lg: "rounded-lg",
+    md: "rounded-md",
+    sm: "rounded-sm",
+  };
   const variantClasses = {
     default: "bg-zinc-100 text-zinc-600 border-zinc-200",
     blue: "bg-blue-50 text-blue-700 border-blue-100",
@@ -32,7 +46,7 @@ export const Badge = ({
   };
 
   return (
-    <span className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
+    <span className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${roundedClasses[rounded]} ${className}`}>
       {children}
     </span>
   );

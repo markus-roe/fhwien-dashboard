@@ -1,35 +1,9 @@
 'use client'
 
+import type { Session } from '@/data/mockData'
 import { SessionPanelHeader } from './SessionPanelHeader'
 import { SessionPanelDetails } from './SessionPanelDetails'
 import { SessionPanelMaterials } from './SessionPanelMaterials'
-
-interface Material {
-  id: string
-  name: string
-  size: string
-  addedDate: string
-  type: 'pdf' | 'presentation' | 'other'
-}
-
-interface Session {
-  id: string
-  type: 'lecture' | 'workshop' | 'coaching'
-  module: string
-  title: string
-  time: string
-  endTime: string
-  duration: string
-  lecturer?: {
-    name: string
-    initials: string
-  }
-  location: string
-  locationType: 'online' | 'on-campus'
-  attendance: 'mandatory' | 'optional'
-  objectives: string[]
-  materials: Material[]
-}
 
 interface SessionPanelProps {
   session: Session | null
@@ -45,7 +19,7 @@ export const SessionPanel = ({ session, isOpen, onClose }: SessionPanelProps) =>
       {/* Overlay */}
       <div
         onClick={onClose}
-        className={`fixed inset-0 bg-zinc-900/20 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-zinc-900/50 z-50 transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       ></div>

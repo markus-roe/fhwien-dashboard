@@ -30,7 +30,7 @@ export function WeekView({
   const dayColumnHeight = 24 * hourHeight; // 1008px (desktop)
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden">
       <div className="overflow-x-auto flex-shrink-0">
         <div className="min-w-[320px] sm:min-w-[800px]">
           {/* Header */}
@@ -57,7 +57,7 @@ export function WeekView({
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-auto min-h-0">
+      <div className="flex-1 min-h-0 overflow-auto">
         <div className="overflow-x-auto h-full">
           <div className="min-w-[320px] sm:min-w-[800px] h-full min-h-0">
             <div className="grid grid-cols-[2rem_repeat(7,1fr)] sm:grid-cols-[3rem_repeat(7,1fr)] h-full min-h-0">

@@ -26,7 +26,7 @@ export function DayView({
   const dayColumnHeight = 24 * hourHeight; // 1008px (desktop)
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden">
       {/* Header row for day view */}
       <div className="grid grid-cols-[2rem_1fr] sm:grid-cols-[3rem_1fr] border-t border-gray-150 sticky top-0 bg-white z-10 flex-shrink-0">
         <div className="w-8 sm:w-12 border-r border-gray-150"></div>

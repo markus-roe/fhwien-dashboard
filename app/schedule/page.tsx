@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { MainLayout } from "@/components/layout/MainLayout";
 import { NextUpCard } from "@/components/schedule/NextUpCard";
-import { TodayList } from "@/components/schedule/TodayList";
+import { NextUpList } from "@/components/schedule/NextUpList";
 import { SessionPanel } from "@/components/schedule/SessionPanel";
+import { useSessionPanel } from "@/components/schedule/hooks/useSessionPanel";
 import {
   mockSessions,
   mockGroups,
@@ -12,10 +12,16 @@ import {
   type Session,
 } from "@/data/mockData";
 import { CalendarView } from "@/components/schedule/CalendarView";
+import { Button } from "@/components/ui/Button";
+import { Plus } from "lucide-react";
 
 export default function SchedulePage() {
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const {
+    selectedSession,
+    isPanelOpen,
+    openSessionPanel,
+    closeSessionPanel,
+  } = useSessionPanel();
 
   // Load group sessions from localStorage
   const [groupSessions, setGroupSessions] = useState<Session[]>(() => {
@@ -196,18 +202,16 @@ export default function SchedulePage() {
   const handleSessionClick = (sessionId: string) => {
     const session = allSessions.find((s) => s.id === sessionId);
     if (session) {
-      setSelectedSession(session);
-      setIsPanelOpen(true);
+      openSessionPanel(session);
     }
   };
 
 
   return (
-    <MainLayout>
-      <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden">
         {/* Mobile: Only show NextUpCard as compact banner */}
         {nextUpSession && (
-          <div className="lg:hidden mb-3">
+          <div className="lg:hidden mb-3 shrink-0">
             <NextUpCard
               session={nextUpSession}
               onOpenPanel={() => handleSessionClick(nextUpSession.id)}
@@ -215,35 +219,35 @@ export default function SchedulePage() {
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-4 w-full flex-1 min-h-0">
-          {/* Desktop: Full sidebar with NextUpCard and TodayList */}
-          <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 space-y-3 lg:overflow-y-auto lg:max-h-full">
+        <div className="flex flex-col lg:flex-row gap-4 w-full flex-1 min-h-0 overflow-hidden">
+          {/* Desktop: Full sidebar with NextUpCard and NextUpList */}
+          <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 space-y-3 lg:overflow-y-auto">
             {nextUpSession && (
               <NextUpCard
                 session={nextUpSession}
                 onOpenPanel={() => handleSessionClick(nextUpSession.id)}
               />
             )}
-            <TodayList
-              date={today}
+            <NextUpList
               sessions={upcomingSessions}
               onSessionClick={handleSessionClick}
             />
-            {/* <TasksWidget tasks={mockTasks} onTaskToggle={handleTaskToggle} /> */}
           </aside>
 
           {/* Calendar - full width on mobile, flex-1 on desktop */}
-          <div className="flex-1 min-w-0 w-full min-h-0 flex flex-col">
-            <CalendarView sessions={allSessions} onSessionClick={(session) => handleSessionClick(session.id)} />
+          <div className="flex-1 min-w-0 w-full min-h-0 flex flex-col overflow-hidden">
+            <CalendarView
+              sessions={allSessions}
+              onSessionClick={openSessionPanel}
+            />
           </div>
         </div>
-      </div>
 
-      <SessionPanel
-        session={selectedSession}
-        isOpen={isPanelOpen}
-        onClose={() => setIsPanelOpen(false)}
-      />
-    </MainLayout>
+        <SessionPanel
+          session={selectedSession}
+          isOpen={isPanelOpen}
+          onClose={closeSessionPanel}
+        />
+      </div>
   );
 }

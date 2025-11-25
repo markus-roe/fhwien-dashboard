@@ -1,12 +1,5 @@
+import type { Material } from '@/data/mockData'
 import { FileText, Presentation, ArrowDownToLine } from 'lucide-react'
-
-interface Material {
-  id: string
-  name: string
-  size: string
-  addedDate: string
-  type: 'pdf' | 'presentation' | 'other'
-}
 
 interface SessionPanelMaterialsProps {
   materials: Material[]

@@ -55,8 +55,8 @@ export const TopNav = () => {
                 href="/schedule"
                 className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${
                   isActive("/schedule")
-                    ? "text-zinc-900 bg-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
+                    ? "text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-900"
                 }`}
               >
                 Terminplan
@@ -65,8 +65,8 @@ export const TopNav = () => {
                 href="/gruppen"
                 className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${
                   isActive("/gruppen")
-                    ? "text-zinc-900 bg-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
+                    ? "text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-900"
                 }`}
               >
                 Gruppen
@@ -94,7 +94,7 @@ export const TopNav = () => {
             </div>
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 -mr-2 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-all"
+              className="md:hidden p-2 -mr-2 text-zinc-600 hover:text-zinc-900 rounded-md transition-all"
               aria-label="Menü öffnen"
             >
               <Menu className="w-5 h-5" />
@@ -140,7 +140,7 @@ export const TopNav = () => {
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 -mr-2 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 active:bg-zinc-200 rounded-md transition-all"
+                className="p-2 -mr-2 text-zinc-600 hover:text-zinc-900 rounded-md transition-all"
                 aria-label="Menü schließen"
               >
                 <X className="w-5 h-5" />
@@ -155,8 +155,8 @@ export const TopNav = () => {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${
                     isActive("/schedule")
-                      ? "text-zinc-900 bg-zinc-100 font-medium shadow-sm"
-                      : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
+                      ? "text-zinc-900 font-medium"
+                      : "text-zinc-600 hover:text-zinc-900"
                   }`}
                 >
                   <Calendar className={`w-5 h-5 flex-shrink-0 ${
@@ -169,8 +169,8 @@ export const TopNav = () => {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${
                     isActive("/gruppen")
-                      ? "text-zinc-900 bg-zinc-100 font-medium shadow-sm"
-                      : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
+                      ? "text-zinc-900 font-medium"
+                      : "text-zinc-600 hover:text-zinc-900"
                   }`}
                 >
                   <Users className={`w-5 h-5 flex-shrink-0 ${

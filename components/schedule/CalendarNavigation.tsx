@@ -90,45 +90,37 @@ export function CalendarNavigation({
         </div>
       </div>
       {/* Desktop: 3-Spalten-Grid */}
-      <div
-        className={`hidden sm:grid sm:items-center sm:gap-2 w-full ${
-          viewType === "list"
-            ? "sm:grid-cols-[1fr_auto]"
-            : "sm:grid-cols-[1fr_auto_1fr]"
-        }`}
-      >
+      <div className="hidden sm:grid sm:items-center sm:gap-2 w-full sm:grid-cols-[1fr_auto_1fr]">
         {/* Links: Navigation + Heute */}
-        {viewType !== "list" && (
-          <div className="flex items-center gap-2 justify-start">
-            <Button
-              variant="ghost"
-              onClick={() => onNavigateDate("prev")}
-              className="bg-transparent p-2 sm:p-2"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => onNavigateDate("next")}
-              className="bg-transparent p-2 sm:p-2"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={onGoToToday}
-              className="bg-transparent text-xs sm:text-sm"
-            >
-              Heute
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 justify-start">
+          {viewType !== "list" && (
+            <>
+              <Button
+                variant="ghost"
+                onClick={() => onNavigateDate("prev")}
+                className="bg-transparent p-2 sm:p-2"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => onNavigateDate("next")}
+                className="bg-transparent p-2 sm:p-2"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={onGoToToday}
+                className="bg-transparent text-xs sm:text-sm"
+              >
+                Heute
+              </Button>
+            </>
+          )}
+        </div>
         {/* Mitte: Titel zentriert */}
-        <div
-          className={`flex justify-center ${
-            viewType === "list" ? "col-start-1" : ""
-          }`}
-        >
+        <div className="flex justify-center">
           <h3 className="text-base sm:text-xl font-semibold text-center">
             {dateTitle}
           </h3>
