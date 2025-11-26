@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Plus, Calendar } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   mockCoachingSlots,
   mockCourses,
@@ -12,7 +12,6 @@ import {
   type Session,
   type LocationType,
 } from "@/data/mockData";
-import { CreateCoachingSlotDialog } from "@/components/coaching/CreateCoachingSlotDialog";
 import { CoachingSlotCard } from "@/components/coaching/CoachingSlotCard";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Select, type SelectOption } from "@/components/ui/Select";
@@ -25,7 +24,6 @@ export default function CoachingPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
   const [slots, setSlots] = useState<CoachingSlot[]>(mockCoachingSlots);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<"all" | "upcoming" | "past">(
     "upcoming"
@@ -33,8 +31,6 @@ export default function CoachingPage() {
   const [activeStudentTab, setActiveStudentTab] = useState<
     "myBookings" | "available"
   >("available");
-
-  const isProfessor = currentUser.role === "professor";
 
   const courseOptions: SelectOption[] = [
     { value: "", label: "Alle Kurse" },
@@ -97,7 +93,7 @@ export default function CoachingPage() {
     return filteredSlots.filter(
       (slot) => slot.participants.length < slot.maxParticipants
     );
-  }, [filteredSlots, isProfessor]);
+  }, [filteredSlots]);
 
   const mySlotsByWeek = useMemo(() => {
     return groupSlotsByWeek(mySlots);
@@ -106,38 +102,6 @@ export default function CoachingPage() {
   const availableSlotsByWeek = useMemo(() => {
     return groupSlotsByWeek(availableSlots);
   }, [availableSlots]);
-
-  const handleCreateSlot = (slotData: {
-    courseId: string;
-    date: Date;
-    time: string;
-    endTime: string;
-    location: string;
-    locationType: "online" | "on-campus";
-    maxParticipants: number;
-    description?: string;
-  }) => {
-    const professor = {
-      name: currentUser.name,
-      initials: currentUser.initials,
-    };
-
-    const newSlot: CoachingSlot = {
-      id: `cs${Date.now()}`,
-      courseId: slotData.courseId,
-      date: slotData.date,
-      time: slotData.time,
-      endTime: slotData.endTime,
-      duration: calculateDuration(slotData.time, slotData.endTime),
-      maxParticipants: slotData.maxParticipants,
-      participants: [],
-      description: slotData.description,
-      createdAt: new Date(),
-    };
-
-    setSlots((prev) => [...prev, newSlot]);
-    setIsCreateDialogOpen(false);
-  };
 
   const handleBookSlot = (slotId: string) => {
     setSlots((prev) =>
@@ -208,11 +172,7 @@ export default function CoachingPage() {
             showCalendar={true}
             showNextUpCard={false}
             onSessionClick={handleSessionClick}
-            emptyMessage={
-              isProfessor
-                ? "Noch keine Coaching-Slots erstellt."
-                : "Noch keine Coaching-Slots gebucht."
-            }
+            emptyMessage={"Noch keine Coaching-Slots gebucht."}
           />
         </aside>
 
@@ -223,16 +183,6 @@ export default function CoachingPage() {
                 Coaching
               </h1>
             </div>
-            {isProfessor && (
-              <Button
-                onClick={() => setIsCreateDialogOpen(true)}
-                icon={Plus}
-                iconPosition="left"
-                className="w-full sm:w-auto text-sm"
-              >
-                Neuer Slot
-              </Button>
-            )}
           </div>
 
           <Card>
@@ -274,216 +224,147 @@ export default function CoachingPage() {
               </div>
 
               {/* Student: switch zwischen "Verfügbare Slots" und "Meine Buchungen" */}
-              {!isProfessor && (
-                <div className="mb-4 inline-flex w-full rounded-lg bg-zinc-50 p-1 border border-zinc-200 text-xs sm:text-sm">
-                  <button
-                    type="button"
-                    onClick={() => setActiveStudentTab("available")}
-                    className={`flex-1 px-2 py-1.5 rounded-md font-medium transition-colors ${
-                      activeStudentTab === "available"
-                        ? "bg-primary text-white shadow-sm"
-                        : "text-zinc-500 hover:text-zinc-800"
-                    }`}
-                  >
-                    Verfügbare Slots
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveStudentTab("myBookings")}
-                    className={`flex-1 px-2 py-1.5 rounded-md font-medium transition-colors ${
-                      activeStudentTab === "myBookings"
-                        ? "bg-primary text-white shadow-sm"
-                        : "text-zinc-500 hover:text-zinc-800"
-                    }`}
-                  >
-                    Meine Buchungen
-                  </button>
-                </div>
-              )}
-
-              {isProfessor && mySlots.length > 0 && (
-                <div className="space-y-6">
-                  <h2 className="text-base font-semibold text-zinc-900">
-                    Meine Slots
-                  </h2>
-                  {mySlotsByWeek.map((weekGroup) => (
-                    <div key={weekGroup.weekKey} className="space-y-4">
-                      {weekGroup.days.map((dayGroup) => (
-                        <div key={dayGroup.dayKey} className="space-y-3">
-                          <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
-                            {dayGroup.dayLabel}
-                          </h4>
-                          {dayGroup.timeGroups.map((timeGroup) => (
-                            <div key={timeGroup.timeKey} className="space-y-2">
-                              <h5 className="text-xs font-medium text-zinc-500">
-                                {timeGroup.timeLabel}
-                              </h5>
-                              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                                {timeGroup.slots.map((slot) => (
-                                  <div key={slot.id} id={`slot-${slot.id}`}>
-                                    <CoachingSlotCard
-                                      slot={slot}
-                                      course={mockCourses.find(
-                                        (c) => c.id === slot.courseId
-                                      )}
-                                      isProfessor={true}
-                                      onBook={handleBookSlot}
-                                      onCancelBooking={handleCancelBooking}
-                                      onDelete={handleDeleteSlot}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="mb-4 inline-flex w-full rounded-lg bg-zinc-50 p-1 border border-zinc-200 text-xs sm:text-sm">
+                <button
+                  type="button"
+                  onClick={() => setActiveStudentTab("available")}
+                  className={`flex-1 px-2 py-1.5 rounded-md font-medium transition-colors ${
+                    activeStudentTab === "available"
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-800"
+                  }`}
+                >
+                  Verfügbare Slots
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveStudentTab("myBookings")}
+                  className={`flex-1 px-2 py-1.5 rounded-md font-medium transition-colors ${
+                    activeStudentTab === "myBookings"
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-800"
+                  }`}
+                >
+                  Meine Buchungen
+                </button>
+              </div>
 
               {/* Student-Ansicht: tab-basierte Darstellung */}
-              {!isProfessor && (
-                <>
-                  {activeStudentTab === "myBookings" && (
-                    <div className="space-y-6">
-                      <h2 className="text-base font-semibold text-zinc-900">
-                        Meine Buchungen
-                      </h2>
-                      {mySlots.length === 0 ? (
-                        <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
-                          <p className="text-sm text-zinc-600 mb-1">
-                            Du hast aktuell keine gebuchten Coaching-Slots.
-                          </p>
-                          <p className="text-xs text-zinc-500">
-                            Wechsle zur Ansicht{" "}
-                            <span className="font-medium">
-                              &quot;Verfügbare Slots&quot;
-                            </span>{" "}
-                            um einen Termin zu buchen.
-                          </p>
-                        </div>
-                      ) : (
-                        mySlotsByWeek.map((weekGroup) => (
-                          <div key={weekGroup.weekKey} className="space-y-4">
-                            {weekGroup.days.map((dayGroup) => (
-                              <div key={dayGroup.dayKey} className="space-y-3">
-                                <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
-                                  {dayGroup.dayLabel}
-                                </h4>
-                                {dayGroup.timeGroups.map((timeGroup) => (
-                                  <div
-                                    key={timeGroup.timeKey}
-                                    className="space-y-2"
-                                  >
-                                    <h5 className="text-xs font-medium text-zinc-500">
-                                      {timeGroup.timeLabel}
-                                    </h5>
-                                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                                      {timeGroup.slots.map((slot) => (
-                                        <div
-                                          key={slot.id}
-                                          id={`slot-${slot.id}`}
-                                        >
-                                          <CoachingSlotCard
-                                            slot={slot}
-                                            course={mockCourses.find(
-                                              (c) => c.id === slot.courseId
-                                            )}
-                                            isProfessor={false}
-                                            onBook={handleBookSlot}
-                                            onCancelBooking={
-                                              handleCancelBooking
-                                            }
-                                            onDelete={handleDeleteSlot}
-                                          />
-                                        </div>
-                                      ))}
+              {activeStudentTab === "myBookings" && (
+                <div className="space-y-6">
+                  <h2 className="text-base font-semibold text-zinc-900">
+                    Meine Buchungen
+                  </h2>
+                  {mySlots.length === 0 ? (
+                    <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
+                      <p className="text-sm text-zinc-600 mb-1">
+                        Du hast aktuell keine gebuchten Coaching-Slots.
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        Wechsle zur Ansicht{" "}
+                        <span className="font-medium">
+                          &quot;Verfügbare Slots&quot;
+                        </span>{" "}
+                        um einen Termin zu buchen.
+                      </p>
+                    </div>
+                  ) : (
+                    mySlotsByWeek.map((weekGroup) => (
+                      <div key={weekGroup.weekKey} className="space-y-4">
+                        {weekGroup.days.map((dayGroup) => (
+                          <div key={dayGroup.dayKey} className="space-y-3">
+                            <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
+                              {dayGroup.dayLabel}
+                            </h4>
+                            {dayGroup.timeGroups.map((timeGroup) => (
+                              <div
+                                key={timeGroup.timeKey}
+                                className="space-y-2"
+                              >
+                                <h5 className="text-xs font-medium text-zinc-500">
+                                  {timeGroup.timeLabel}
+                                </h5>
+                                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                                  {timeGroup.slots.map((slot) => (
+                                    <div key={slot.id} id={`slot-${slot.id}`}>
+                                      <CoachingSlotCard
+                                        slot={slot}
+                                        course={mockCourses.find(
+                                          (c) => c.id === slot.courseId
+                                        )}
+                                        isProfessor={false}
+                                        onBook={handleBookSlot}
+                                        onCancelBooking={handleCancelBooking}
+                                        onDelete={handleDeleteSlot}
+                                      />
                                     </div>
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
                               </div>
                             ))}
                           </div>
-                        ))
-                      )}
-                    </div>
+                        ))}
+                      </div>
+                    ))
                   )}
-
-                  {activeStudentTab === "available" && (
-                    <div className="space-y-6">
-                      <h2 className="text-base font-semibold text-zinc-900">
-                        Verfügbare Slots
-                      </h2>
-                      {availableSlots.length === 0 ? (
-                        <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
-                          <p className="text-sm text-zinc-600 mb-1">
-                            Für die aktuelle Auswahl wurden keine freien
-                            Coaching-Slots gefunden.
-                          </p>
-                          <p className="text-xs text-zinc-500">
-                            Probiere einen anderen Kurs oder ändere den
-                            Zeitfilter oben.
-                          </p>
-                        </div>
-                      ) : (
-                        availableSlotsByWeek.map((weekGroup) => (
-                          <div key={weekGroup.weekKey} className="space-y-4">
-                            {weekGroup.days.map((dayGroup) => (
-                              <div key={dayGroup.dayKey} className="space-y-3">
-                                <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
-                                  {dayGroup.dayLabel}
-                                </h4>
-                                {dayGroup.timeGroups.map((timeGroup) => (
-                                  <div
-                                    key={timeGroup.timeKey}
-                                    className="space-y-2"
-                                  >
-                                    <h5 className="text-xs font-medium text-zinc-500">
-                                      {timeGroup.timeLabel}
-                                    </h5>
-                                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                                      {timeGroup.slots.map((slot) => (
-                                        <div
-                                          key={slot.id}
-                                          id={`slot-${slot.id}`}
-                                        >
-                                          <CoachingSlotCard
-                                            slot={slot}
-                                            course={mockCourses.find(
-                                              (c) => c.id === slot.courseId
-                                            )}
-                                            isProfessor={false}
-                                            onBook={handleBookSlot}
-                                            onCancelBooking={
-                                              handleCancelBooking
-                                            }
-                                            onDelete={handleDeleteSlot}
-                                          />
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </>
+                </div>
               )}
 
-              {/* Professor-Ansicht: generischer Empty-State */}
-              {isProfessor && filteredSlots.length === 0 && (
-                <div className="p-8 text-center">
-                  <Calendar className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
-                  <p className="text-sm text-zinc-500">
-                    Keine Coaching-Slots gefunden. Erstellen Sie einen neuen
-                    Slot.
-                  </p>
+              {activeStudentTab === "available" && (
+                <div className="space-y-6">
+                  <h2 className="text-base font-semibold text-zinc-900">
+                    Verfügbare Slots
+                  </h2>
+                  {availableSlots.length === 0 ? (
+                    <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
+                      <p className="text-sm text-zinc-600 mb-1">
+                        Für die aktuelle Auswahl wurden keine freien
+                        Coaching-Slots gefunden.
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        Probiere einen anderen Kurs oder ändere den Zeitfilter
+                        oben.
+                      </p>
+                    </div>
+                  ) : (
+                    availableSlotsByWeek.map((weekGroup) => (
+                      <div key={weekGroup.weekKey} className="space-y-4">
+                        {weekGroup.days.map((dayGroup) => (
+                          <div key={dayGroup.dayKey} className="space-y-3">
+                            <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
+                              {dayGroup.dayLabel}
+                            </h4>
+                            {dayGroup.timeGroups.map((timeGroup) => (
+                              <div
+                                key={timeGroup.timeKey}
+                                className="space-y-2"
+                              >
+                                <h5 className="text-xs font-medium text-zinc-500">
+                                  {timeGroup.timeLabel}
+                                </h5>
+                                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                                  {timeGroup.slots.map((slot) => (
+                                    <div key={slot.id} id={`slot-${slot.id}`}>
+                                      <CoachingSlotCard
+                                        slot={slot}
+                                        course={mockCourses.find(
+                                          (c) => c.id === slot.courseId
+                                        )}
+                                        isProfessor={false}
+                                        onBook={handleBookSlot}
+                                        onCancelBooking={handleCancelBooking}
+                                        onDelete={handleDeleteSlot}
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
             </CardContent>
@@ -491,12 +372,6 @@ export default function CoachingPage() {
         </div>
       </div>
 
-      <CreateCoachingSlotDialog
-        isOpen={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        courses={mockCourses}
-        onSubmit={handleCreateSlot}
-      />
       <SessionPanel
         session={selectedSession}
         isOpen={isPanelOpen}

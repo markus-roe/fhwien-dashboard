@@ -6,6 +6,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "destructive";
   icon?: LucideIcon;
   iconPosition?: "left" | "right";
+  size?: "sm" | "md" | "lg";
+  disabled?: boolean;
 }
 
 export const Button = ({
@@ -14,6 +16,8 @@ export const Button = ({
   icon: Icon,
   iconPosition = "right",
   className = "",
+  size = "md",
+  disabled = false,
   ...props
 }: ButtonProps) => {
   const baseClasses =
@@ -27,11 +31,20 @@ export const Button = ({
     destructive: "bg-red-500 hover:bg-red-600 text-white",
   };
 
+  const sizeClasses = {
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base",
+  };
+
   const iconElement = Icon && <Icon className="w-4 h-4" />;
 
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${
+        sizeClasses[size]
+      } ${className} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+      disabled={disabled}
       {...props}
     >
       {iconPosition === "left" && iconElement}
