@@ -16,14 +16,8 @@ import {
 } from "date-fns";
 import { de } from "date-fns/locale";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import {
-  currentUser,
-  mockCoachingSlots,
-  mockCourses,
-  mockSessions,
-  type Session,
-} from "@/data/mockData";
-import type { CalendarEvent, ViewType } from "./types/calendar";
+import type { Session } from "@/data/mockData";
+import type { CalendarEvent, ViewType, CalendarViewProps } from "./types/calendar";
 import { sessionToEvent } from "./utils/calendarHelpers";
 import { CalendarNavigation } from "./CalendarNavigation";
 import { MonthView } from "./MonthView";
@@ -32,12 +26,8 @@ import { DayView } from "./DayView";
 import { CalendarListView } from "./CalendarListView";
 import { EventPopover } from "./EventPopover";
 
-interface CalendarViewProps {
-  onSessionClick: (session: Session) => void;
-  onDateClick?: (date: Date) => void;
-}
-
 export function CalendarView({
+  sessions,
   onSessionClick,
   onDateClick,
 }: CalendarViewProps) {
@@ -52,41 +42,10 @@ export function CalendarView({
     left: number;
   } | null>(null);
 
-  // Convert coaching slots to sessions
-  const coachingSlotSessions: Session[] = useMemo(() => {
-    return mockCoachingSlots
-      .filter((slot) => slot.participants.some((p) => p === currentUser.name))
-      .map((slot) => {
-        const course = mockCourses.find((c) => c.id === slot.courseId);
-        return {
-          id: slot.id,
-          courseId: slot.courseId,
-          type: "coaching" as const,
-          title: course ? `${course.title} Coaching` : "Coaching",
-          program: course?.program || "DTI",
-          date: slot.date,
-          time: slot.time,
-          endTime: slot.endTime,
-          duration: slot.duration,
-          location: "Online",
-          locationType: "online",
-          attendance: "optional" as const,
-          objectives: [],
-          materials: [],
-          participants: slot.participants.length,
-        };
-      });
-  }, []);
-
-  // Combine all sessions (mock sessions + coaching slots)
-  const allSessions = useMemo(() => {
-    return [...mockSessions, ...coachingSlotSessions];
-  }, [coachingSlotSessions]);
-
   // Convert sessions to events
   const events = useMemo(() => {
-    return allSessions.map(sessionToEvent);
-  }, [allSessions]);
+    return sessions.map(sessionToEvent);
+  }, [sessions]);
 
   // Keyboard shortcuts for view switching
   useEffect(() => {
@@ -153,8 +112,7 @@ export function CalendarView({
     const target = event.currentTarget;
     const rect = target.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft =
-      window.pageXOffset || document.documentElement.scrollLeft;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
     // Calculate position - try to position below the cell, but adjust if needed
     const isMobile = window.innerWidth < 640; // sm breakpoint
@@ -171,10 +129,7 @@ export function CalendarView({
     // Adjust horizontal position - center on mobile if needed
     if (isMobile) {
       // On mobile, try to center horizontally
-      left = Math.max(
-        padding,
-        Math.min(left, viewportWidth - popoverWidth - padding)
-      );
+      left = Math.max(padding, Math.min(left, viewportWidth - popoverWidth - padding));
     } else {
       // On desktop, align to cell
       if (left + popoverWidth > viewportWidth - padding) {
@@ -309,7 +264,7 @@ export function CalendarView({
           {viewType === "list" && (
             <div className="flex-1 h-full min-h-0 overflow-hidden">
               <CalendarListView
-                sessions={allSessions}
+                sessions={sessions}
                 onSessionClick={onSessionClick}
               />
             </div>

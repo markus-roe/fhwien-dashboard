@@ -10,3 +10,10 @@ export interface CalendarEvent {
   endTime: Date;
   session: Session;
 }
+
+export interface CalendarViewProps {
+  sessions: Session[];
+  onSessionClick: (session: Session) => void;
+  onDateClick?: (date: Date) => void;
+}
+
