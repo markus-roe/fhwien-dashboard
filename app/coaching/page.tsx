@@ -30,6 +30,9 @@ export default function CoachingPage() {
   const [dateFilter, setDateFilter] = useState<"all" | "upcoming" | "past">(
     "upcoming"
   );
+  const [activeStudentTab, setActiveStudentTab] = useState<
+    "myBookings" | "available"
+  >("available");
 
   const isProfessor = currentUser.role === "professor";
 
@@ -243,7 +246,7 @@ export default function CoachingPage() {
                     placeholder="Alle Kurse"
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 sm:justify-end">
                   <Button
                     variant={dateFilter === "all" ? "primary" : "secondary"}
                     onClick={() => setDateFilter("all")}
@@ -270,6 +273,34 @@ export default function CoachingPage() {
                 </div>
               </div>
 
+              {/* Student: switch zwischen "Verfügbare Slots" und "Meine Buchungen" */}
+              {!isProfessor && (
+                <div className="mb-4 inline-flex w-full rounded-lg bg-zinc-50 p-1 border border-zinc-200 text-xs sm:text-sm">
+                  <button
+                    type="button"
+                    onClick={() => setActiveStudentTab("available")}
+                    className={`flex-1 px-2 py-1.5 rounded-md font-medium transition-colors ${
+                      activeStudentTab === "available"
+                        ? "bg-primary text-white shadow-sm"
+                        : "text-zinc-500 hover:text-zinc-800"
+                    }`}
+                  >
+                    Verfügbare Slots
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveStudentTab("myBookings")}
+                    className={`flex-1 px-2 py-1.5 rounded-md font-medium transition-colors ${
+                      activeStudentTab === "myBookings"
+                        ? "bg-primary text-white shadow-sm"
+                        : "text-zinc-500 hover:text-zinc-800"
+                    }`}
+                  >
+                    Meine Buchungen
+                  </button>
+                </div>
+              )}
+
               {isProfessor && mySlots.length > 0 && (
                 <div className="space-y-6">
                   <h2 className="text-base font-semibold text-zinc-900">
@@ -277,9 +308,6 @@ export default function CoachingPage() {
                   </h2>
                   {mySlotsByWeek.map((weekGroup) => (
                     <div key={weekGroup.weekKey} className="space-y-4">
-                      <h3 className="text-sm font-medium text-zinc-700">
-                        {weekGroup.weekLabel}
-                      </h3>
                       {weekGroup.days.map((dayGroup) => (
                         <div key={dayGroup.dayKey} className="space-y-3">
                           <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
@@ -315,105 +343,146 @@ export default function CoachingPage() {
                 </div>
               )}
 
-              {!isProfessor && mySlots.length > 0 && (
-                <div className="space-y-6">
-                  <h2 className="text-base font-semibold text-zinc-900">
-                    Meine Buchungen
-                  </h2>
-                  {mySlotsByWeek.map((weekGroup) => (
-                    <div key={weekGroup.weekKey} className="space-y-4">
-                      <h3 className="text-sm font-medium text-zinc-700">
-                        {weekGroup.weekLabel}
-                      </h3>
-                      {weekGroup.days.map((dayGroup) => (
-                        <div key={dayGroup.dayKey} className="space-y-3">
-                          <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
-                            {dayGroup.dayLabel}
-                          </h4>
-                          {dayGroup.timeGroups.map((timeGroup) => (
-                            <div key={timeGroup.timeKey} className="space-y-2">
-                              <h5 className="text-xs font-medium text-zinc-500">
-                                {timeGroup.timeLabel}
-                              </h5>
-                              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                                {timeGroup.slots.map((slot) => (
-                                  <div key={slot.id} id={`slot-${slot.id}`}>
-                                    <CoachingSlotCard
-                                      slot={slot}
-                                      course={mockCourses.find(
-                                        (c) => c.id === slot.courseId
-                                      )}
-                                      isProfessor={false}
-                                      onBook={handleBookSlot}
-                                      onCancelBooking={handleCancelBooking}
-                                      onDelete={handleDeleteSlot}
-                                    />
+              {/* Student-Ansicht: tab-basierte Darstellung */}
+              {!isProfessor && (
+                <>
+                  {activeStudentTab === "myBookings" && (
+                    <div className="space-y-6">
+                      <h2 className="text-base font-semibold text-zinc-900">
+                        Meine Buchungen
+                      </h2>
+                      {mySlots.length === 0 ? (
+                        <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
+                          <p className="text-sm text-zinc-600 mb-1">
+                            Du hast aktuell keine gebuchten Coaching-Slots.
+                          </p>
+                          <p className="text-xs text-zinc-500">
+                            Wechsle zur Ansicht{" "}
+                            <span className="font-medium">
+                              &quot;Verfügbare Slots&quot;
+                            </span>{" "}
+                            um einen Termin zu buchen.
+                          </p>
+                        </div>
+                      ) : (
+                        mySlotsByWeek.map((weekGroup) => (
+                          <div key={weekGroup.weekKey} className="space-y-4">
+                            {weekGroup.days.map((dayGroup) => (
+                              <div key={dayGroup.dayKey} className="space-y-3">
+                                <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
+                                  {dayGroup.dayLabel}
+                                </h4>
+                                {dayGroup.timeGroups.map((timeGroup) => (
+                                  <div
+                                    key={timeGroup.timeKey}
+                                    className="space-y-2"
+                                  >
+                                    <h5 className="text-xs font-medium text-zinc-500">
+                                      {timeGroup.timeLabel}
+                                    </h5>
+                                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                                      {timeGroup.slots.map((slot) => (
+                                        <div
+                                          key={slot.id}
+                                          id={`slot-${slot.id}`}
+                                        >
+                                          <CoachingSlotCard
+                                            slot={slot}
+                                            course={mockCourses.find(
+                                              (c) => c.id === slot.courseId
+                                            )}
+                                            isProfessor={false}
+                                            onBook={handleBookSlot}
+                                            onCancelBooking={
+                                              handleCancelBooking
+                                            }
+                                            onDelete={handleDeleteSlot}
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
+                            ))}
+                          </div>
+                        ))
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
+                  )}
 
-              {!isProfessor && availableSlots.length > 0 && (
-                <div
-                  className={`space-y-6 ${mySlots.length > 0 ? "mt-6" : ""}`}
-                >
-                  <h2 className="text-base font-semibold text-zinc-900">
-                    Verfügbare Slots
-                  </h2>
-                  {availableSlotsByWeek.map((weekGroup) => (
-                    <div key={weekGroup.weekKey} className="space-y-4">
-                      <h3 className="text-sm font-medium text-zinc-700">
-                        {weekGroup.weekLabel}
-                      </h3>
-                      {weekGroup.days.map((dayGroup) => (
-                        <div key={dayGroup.dayKey} className="space-y-3">
-                          <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
-                            {dayGroup.dayLabel}
-                          </h4>
-                          {dayGroup.timeGroups.map((timeGroup) => (
-                            <div key={timeGroup.timeKey} className="space-y-2">
-                              <h5 className="text-xs font-medium text-zinc-500">
-                                {timeGroup.timeLabel}
-                              </h5>
-                              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                                {timeGroup.slots.map((slot) => (
-                                  <div key={slot.id} id={`slot-${slot.id}`}>
-                                    <CoachingSlotCard
-                                      slot={slot}
-                                      course={mockCourses.find(
-                                        (c) => c.id === slot.courseId
-                                      )}
-                                      isProfessor={false}
-                                      onBook={handleBookSlot}
-                                      onCancelBooking={handleCancelBooking}
-                                      onDelete={handleDeleteSlot}
-                                    />
+                  {activeStudentTab === "available" && (
+                    <div className="space-y-6">
+                      <h2 className="text-base font-semibold text-zinc-900">
+                        Verfügbare Slots
+                      </h2>
+                      {availableSlots.length === 0 ? (
+                        <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
+                          <p className="text-sm text-zinc-600 mb-1">
+                            Für die aktuelle Auswahl wurden keine freien
+                            Coaching-Slots gefunden.
+                          </p>
+                          <p className="text-xs text-zinc-500">
+                            Probiere einen anderen Kurs oder ändere den
+                            Zeitfilter oben.
+                          </p>
+                        </div>
+                      ) : (
+                        availableSlotsByWeek.map((weekGroup) => (
+                          <div key={weekGroup.weekKey} className="space-y-4">
+                            {weekGroup.days.map((dayGroup) => (
+                              <div key={dayGroup.dayKey} className="space-y-3">
+                                <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
+                                  {dayGroup.dayLabel}
+                                </h4>
+                                {dayGroup.timeGroups.map((timeGroup) => (
+                                  <div
+                                    key={timeGroup.timeKey}
+                                    className="space-y-2"
+                                  >
+                                    <h5 className="text-xs font-medium text-zinc-500">
+                                      {timeGroup.timeLabel}
+                                    </h5>
+                                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                                      {timeGroup.slots.map((slot) => (
+                                        <div
+                                          key={slot.id}
+                                          id={`slot-${slot.id}`}
+                                        >
+                                          <CoachingSlotCard
+                                            slot={slot}
+                                            course={mockCourses.find(
+                                              (c) => c.id === slot.courseId
+                                            )}
+                                            isProfessor={false}
+                                            onBook={handleBookSlot}
+                                            onCancelBooking={
+                                              handleCancelBooking
+                                            }
+                                            onDelete={handleDeleteSlot}
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
+                            ))}
+                          </div>
+                        ))
+                      )}
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               )}
 
-              {filteredSlots.length === 0 && (
+              {/* Professor-Ansicht: generischer Empty-State */}
+              {isProfessor && filteredSlots.length === 0 && (
                 <div className="p-8 text-center">
                   <Calendar className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
                   <p className="text-sm text-zinc-500">
-                    {isProfessor
-                      ? "Keine Coaching-Slots gefunden. Erstellen Sie einen neuen Slot."
-                      : "Keine verfügbaren Coaching-Slots gefunden."}
+                    Keine Coaching-Slots gefunden. Erstellen Sie einen neuen
+                    Slot.
                   </p>
                 </div>
               )}
@@ -504,11 +573,9 @@ function groupSlotsByWeek(slots: CoachingSlot[]): WeekGroup[] {
       });
       const year = firstSlotDate.getFullYear();
 
-      const weekLabel = `KW ${weekNumber}, ${year} (${format(
-        weekStart,
-        "d. MMM",
-        { locale: de }
-      )} - ${format(weekEnd, "d. MMM", { locale: de })})`;
+      const weekLabel = `${format(weekStart, "d. MMM", {
+        locale: de,
+      })} – ${format(weekEnd, "d. MMM yyyy", { locale: de })}`;
 
       // Sort slots within week by date and time
       weekSlots.sort((a, b) => {
