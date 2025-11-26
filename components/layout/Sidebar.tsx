@@ -16,7 +16,6 @@ import {
 type SidebarProps = {
   showCalendar?: boolean;
   showNextUpCard?: boolean;
-  additionalSessions?: Session[]; // For group sessions from localStorage
   onSessionClick?: (session: Session) => void;
   emptyMessage?: string;
 };
@@ -24,7 +23,6 @@ type SidebarProps = {
 export function Sidebar({
   showCalendar = true,
   showNextUpCard = false,
-  additionalSessions = [],
   onSessionClick,
   emptyMessage,
 }: SidebarProps) {
@@ -66,8 +64,8 @@ export function Sidebar({
 
   // Combine all sessions (mock sessions + coaching slots + additional sessions)
   const combinedSessions = useMemo(() => {
-    return [...mockSessions, ...slotSessions, ...additionalSessions];
-  }, [slotSessions, additionalSessions]);
+    return [...mockSessions, ...slotSessions];
+  }, [slotSessions]);
 
   // Get next up session for NextUpCard
   const nextUpSession = useMemo(() => {
