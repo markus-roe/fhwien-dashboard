@@ -83,7 +83,14 @@ export function MonthView({
                   <div className="text-[10px] sm:text-sm text-gray-500 font-medium">
                     {format(day, "EEE", { locale: de })}
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-600">
+                  <div
+                    className="text-xs sm:text-sm text-gray-600 hover:underline cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDayClick(day);
+                      if (onDateClick) onDateClick(day);
+                    }}
+                  >
                     {format(day, "d")}
                   </div>
                   <div className="flex flex-col gap-0.5 flex-1 min-h-0">
@@ -108,9 +115,8 @@ export function MonthView({
                           </div>
                         ))}
                     </div>
-                    {events.filter((event) =>
-                      isSameDay(event.startTime, day)
-                    ).length > 3 && (
+                    {events.filter((event) => isSameDay(event.startTime, day))
+                      .length > 3 && (
                       <div
                         className="text-[10px] sm:text-xs text-gray-500 cursor-pointer hover:underline flex-shrink-0"
                         onClick={(e) => {
@@ -222,4 +228,3 @@ export function MonthView({
     </div>
   );
 }
-
