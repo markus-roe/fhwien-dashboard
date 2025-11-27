@@ -1,13 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   mockSessions,
   mockCoachingSlots,
   mockCourses,
+  mockGroups,
+  mockUsers,
   type Session,
   type CoachingSlot,
   type LocationType,
+  type Group,
+  type User,
+  type Program,
   currentUser,
 } from "@/data/mockData";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -34,6 +39,7 @@ import { Calendar, Edit3, Plus, CalendarClock, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { redirect } from "next/navigation";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 
 type AttendanceType = "mandatory" | "optional";
 
@@ -75,10 +81,22 @@ export default function DashboardPage() {
   const [coachingSlots, setCoachingSlots] = useState<CoachingSlot[]>(() => [
     ...mockCoachingSlots,
   ]);
+  const [groups, setGroups] = useState<Group[]>(() => [...mockGroups]);
 
   const [selectedCourseId, setSelectedCourseId] = useState<string>(
     mockCourses[0]?.id ?? ""
   );
+  const [selectedGroupId, setSelectedGroupId] = useState<string>(
+    mockGroups[0]?.id ?? ""
+  );
+  const [selectedUserId, setSelectedUserId] = useState<string>(
+    mockUsers[0]?.id ?? ""
+  );
+  const [activeDashboardTab, setActiveDashboardTab] = useState<
+    "lvs" | "coachings" | "groups" | "users"
+  >("lvs");
+  const [userSearch, setUserSearch] = useState("");
+  const [programFilter, setProgramFilter] = useState<Program | "all">("all");
 
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [editFormState, setEditFormState] =
@@ -103,6 +121,65 @@ export default function DashboardPage() {
       .filter((slot) => slot.courseId === selectedCourseId)
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [coachingSlots, selectedCourseId]);
+
+  const courseGroups = useMemo(() => {
+    return groups.filter((group) => group.courseId === selectedCourseId);
+  }, [groups, selectedCourseId]);
+
+  const totalGroupMembers = useMemo(() => {
+    return courseGroups.reduce((acc, group) => acc + group.members.length, 0);
+  }, [courseGroups]);
+
+  const totalFreeSeats = useMemo(() => {
+    return courseGroups.reduce((acc, group) => {
+      if (!group.maxMembers) return acc;
+      return acc + Math.max(group.maxMembers - group.members.length, 0);
+    }, 0);
+  }, [courseGroups]);
+
+  const userGroupsMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    groups.forEach((group) => {
+      group.members.forEach((member) => {
+        const user = mockUsers.find((u) => u.name === member);
+        if (!user) return;
+        map[user.id] = map[user.id]
+          ? [...map[user.id], group.name]
+          : [group.name];
+      });
+    });
+    return map;
+  }, [groups]);
+
+  const filteredUsers = useMemo(() => {
+    return mockUsers.filter((user) => {
+      const matchesProgram =
+        programFilter === "all" ? true : user.program === programFilter;
+      const query = userSearch.toLowerCase();
+      const matchesSearch =
+        !query ||
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query);
+      return matchesProgram && matchesSearch;
+    });
+  }, [programFilter, userSearch]);
+
+  const assignableGroups = courseGroups.length > 0 ? courseGroups : groups;
+
+  useEffect(() => {
+    if (
+      assignableGroups.length > 0 &&
+      !assignableGroups.some((group) => group.id === selectedGroupId)
+    ) {
+      setSelectedGroupId(assignableGroups[0].id);
+    }
+  }, [assignableGroups, selectedGroupId]);
+
+  useEffect(() => {
+    if (!mockUsers.some((user) => user.id === selectedUserId) && mockUsers[0]) {
+      setSelectedUserId(mockUsers[0].id);
+    }
+  }, [selectedUserId]);
 
   const handleOpenEditSession = (session: Session) => {
     setEditingSession(session);
@@ -227,6 +304,67 @@ export default function DashboardPage() {
     setCoachingSlots((prev) => prev.filter((slot) => slot.id !== slotId));
   };
 
+  const handleAssignUserToGroup = () => {
+    if (!selectedGroupId || !selectedUserId) return;
+
+    const user = mockUsers.find((u) => u.id === selectedUserId);
+    if (!user) return;
+
+    setGroups((prev) =>
+      prev.map((group) => {
+        if (group.id !== selectedGroupId) return group;
+
+        const isAlreadyMember = group.members.includes(user.name);
+        const isFull =
+          group.maxMembers && group.members.length >= group.maxMembers;
+        if (isAlreadyMember || isFull) {
+          return group;
+        }
+
+        return {
+          ...group,
+          members: [...group.members, user.name],
+        };
+      })
+    );
+  };
+
+  const handleRemoveUserFromGroup = (groupId: string, member: string) => {
+    setGroups((prev) =>
+      prev.map((group) =>
+        group.id === groupId
+          ? {
+              ...group,
+              members: group.members.filter((existing) => existing !== member),
+            }
+          : group
+      )
+    );
+  };
+
+  const dashboardTabOptions = [
+    {
+      value: "lvs",
+      label: "Lehrveranstaltungen",
+      badge: courseSessions.length,
+    },
+    {
+      value: "coachings",
+      label: "Coachings",
+      badge: courseCoachingSlots.length,
+    },
+    {
+      value: "groups",
+      label: "Gruppen",
+      badge: courseGroups.length || groups.length,
+    },
+    {
+      value: "users",
+      label: "Studenten",
+      badge: mockUsers.length,
+    },
+  ];
+
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
@@ -248,38 +386,49 @@ export default function DashboardPage() {
           </div>
 
           <Card>
-            <CardContent className="p-3 sm:p-4 space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
-                <div className="w-full md:max-w-xs">
-                  <label className="block text-xs font-medium text-zinc-600 mb-1">
-                    Fach auswählen
-                  </label>
-                  <Select
-                    options={mockCourses.map((course) => ({
-                      value: course.id,
-                      label: course.title,
-                    }))}
-                    value={selectedCourseId}
-                    onChange={(value) => setSelectedCourseId(value)}
-                  />
-                </div>
+            <CardContent className="p-3 sm:p-4 space-y-5">
+              <SegmentedTabs
+                value={activeDashboardTab}
+                options={dashboardTabOptions}
+                onChange={(value) =>
+                  setActiveDashboardTab(
+                    value as "lvs" | "coachings" | "groups" | "users"
+                  )
+                }
+              />
 
-                {selectedCourse && (
-                  <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-50 border border-zinc-200">
-                      <CalendarClock className="w-3 h-3 text-zinc-400" />
-                      {courseSessions.length} LV-Termine
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-50 border border-zinc-200">
-                      <Calendar className="w-3 h-3 text-zinc-400" />
-                      {courseCoachingSlots.length} Coaching-Slots
-                    </span>
+              {["lvs", "coachings"].includes(activeDashboardTab) && (
+                <div className="flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
+                  <div className="w-full md:max-w-xs">
+                    <label className="block text-xs font-medium text-zinc-600 mb-1">
+                      Fach auswählen
+                    </label>
+                    <Select
+                      options={mockCourses.map((course) => ({
+                        value: course.id,
+                        label: course.title,
+                      }))}
+                      value={selectedCourseId}
+                      onChange={(value) => setSelectedCourseId(value)}
+                    />
                   </div>
-                )}
-              </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
-                {/* Sessions Verwaltung */}
+                  {selectedCourse && (
+                    <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-50 border border-zinc-200">
+                        <CalendarClock className="w-3 h-3 text-zinc-400" />
+                        {courseSessions.length} LV-Termine
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-50 border border-zinc-200">
+                        <Calendar className="w-3 h-3 text-zinc-400" />
+                        {courseCoachingSlots.length} Coaching-Slots
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeDashboardTab === "lvs" && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
@@ -307,7 +456,6 @@ export default function DashboardPage() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {/* Desktop: Tabelle */}
                       <div className="hidden md:block rounded-lg border border-zinc-100 bg-white overflow-hidden">
                         <div className="grid grid-cols-[1.4fr,1.1fr,1.1fr,auto] text-xs font-medium text-zinc-500 border-b border-zinc-100 bg-zinc-50/60 px-3 py-2">
                           <span>Termin</span>
@@ -360,7 +508,6 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
-                      {/* Mobile: Karten */}
                       <div className="space-y-2 md:hidden">
                         {courseSessions.map((session) => (
                           <div
@@ -411,8 +558,9 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
+              )}
 
-                {/* Coaching Slots */}
+              {activeDashboardTab === "coachings" && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
@@ -456,7 +604,334 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
-              </div>
+              )}
+
+              {activeDashboardTab === "groups" && (
+                <div className="space-y-5">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div className="w-full md:max-w-xs">
+                      <label className="block text-xs font-medium text-zinc-600 mb-1">
+                        Fach auswählen
+                      </label>
+                      <Select
+                        options={mockCourses.map((course) => ({
+                          value: course.id,
+                          label: course.title,
+                        }))}
+                        value={selectedCourseId}
+                        onChange={(value) => setSelectedCourseId(value)}
+                      />
+                    </div>
+                    <div className="grid w-full md:w-auto grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                      <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2">
+                        <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">
+                          Gruppen
+                        </p>
+                        <p className="text-base font-semibold text-zinc-900">
+                          {courseGroups.length}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2">
+                        <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">
+                          Mitglieder
+                        </p>
+                        <p className="text-base font-semibold text-zinc-900">
+                          {totalGroupMembers}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2">
+                        <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">
+                          Freie Plätze
+                        </p>
+                        <p className="text-base font-semibold text-zinc-900">
+                          {totalFreeSeats}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <h2 className="text-sm font-semibold text-zinc-900">
+                        Gruppenübersicht
+                      </h2>
+                      <p className="text-xs text-zinc-500">
+                        Verwalten Sie Mitglieder je Kursgruppe.
+                      </p>
+                    </div>
+
+                    {courseGroups.length === 0 ? (
+                      <div className="border border-dashed border-zinc-200 rounded-lg p-4 text-center text-xs text-zinc-500 bg-zinc-50/60">
+                        Für dieses Fach sind noch keine Gruppen angelegt.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {courseGroups.map((group) => {
+                          const courseTitle =
+                            mockCourses.find((c) => c.id === group.courseId)
+                              ?.title ?? "Kurs";
+                          const isFull =
+                            group.maxMembers &&
+                            group.members.length >= group.maxMembers;
+
+                          return (
+                            <div
+                              key={group.id}
+                              className="rounded-lg border border-zinc-100 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                            >
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <p className="text-sm font-semibold text-zinc-900">
+                                    {group.name}
+                                  </p>
+                                  <p className="text-xs text-zinc-500">
+                                    {courseTitle}
+                                  </p>
+                                </div>
+                                <div className="text-xs text-zinc-500">
+                                  {group.members.length}
+                                  {group.maxMembers
+                                    ? ` / ${group.maxMembers}`
+                                    : ""}{" "}
+                                  Mitglieder
+                                  {isFull && (
+                                    <span className="ml-2 text-amber-600 font-medium">
+                                      Gruppe voll
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {group.members.length === 0 && (
+                                  <span className="text-xs text-zinc-500">
+                                    Noch keine Mitglieder
+                                  </span>
+                                )}
+                                {group.members.map((member) => (
+                                  <span
+                                    key={member}
+                                    className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700"
+                                  >
+                                    {member}
+                                    <button
+                                      type="button"
+                                      className="text-zinc-400 hover:text-zinc-700 transition-colors"
+                                      onClick={() =>
+                                        handleRemoveUserFromGroup(
+                                          group.id,
+                                          member
+                                        )
+                                      }
+                                    >
+                                      <span className="sr-only">
+                                        {member} entfernen
+                                      </span>
+                                      ×
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50/60 p-4 space-y-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-zinc-900">
+                        User zu Gruppen zuweisen
+                      </h3>
+                      <p className="text-xs text-zinc-500">
+                        Wählen Sie eine Person und eine Gruppe des Kurses.
+                      </p>
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-600 mb-1">
+                          User auswählen
+                        </label>
+                        <Select
+                          options={mockUsers.map((user) => ({
+                            value: user.id,
+                            label: `${user.name} – ${user.program}`,
+                          }))}
+                          value={selectedUserId}
+                          onChange={(value) => setSelectedUserId(value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-600 mb-1">
+                          Gruppe auswählen
+                        </label>
+                        <Select
+                          options={
+                            assignableGroups.length > 0
+                              ? assignableGroups.map((group) => ({
+                                  value: group.id,
+                                  label: `${group.name} (${
+                                    group.members.length
+                                  }/${group.maxMembers ?? "∞"})`,
+                                }))
+                              : groups.map((group) => ({
+                                  value: group.id,
+                                  label: group.name,
+                                }))
+                          }
+                          value={selectedGroupId}
+                          onChange={(value) => setSelectedGroupId(value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        className="min-w-[180px]"
+                        onClick={handleAssignUserToGroup}
+                        disabled={
+                          !selectedGroupId ||
+                          !selectedUserId ||
+                          assignableGroups.length === 0
+                        }
+                      >
+                        Hinzufügen
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeDashboardTab === "users" && (
+                <div className="space-y-5">
+                  <div className="grid gap-3 md:grid-cols-[minmax(0,280px),minmax(0,1fr)]">
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-600 mb-1">
+                        Programm filtern
+                      </label>
+                      <Select
+                        options={[
+                          { value: "all", label: "Alle Programme" },
+                          { value: "DTI", label: "DTI" },
+                          { value: "DI", label: "DI" },
+                        ]}
+                        value={programFilter}
+                        onChange={(value) =>
+                          setProgramFilter(value as Program | "all")
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-600 mb-1">
+                        User suchen
+                      </label>
+                      <Input
+                        value={userSearch}
+                        onChange={(e) => setUserSearch(e.target.value)}
+                        placeholder="Name oder E-Mail"
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+
+                  {filteredUsers.length === 0 ? (
+                    <div className="border border-dashed border-zinc-200 rounded-lg p-4 text-center text-xs text-zinc-500 bg-zinc-50/60">
+                      Keine User gefunden.
+                    </div>
+                  ) : (
+                    <>
+                      <div className="hidden md:block rounded-lg border border-zinc-100 bg-white overflow-hidden">
+                        <div className="grid grid-cols-[1.4fr,0.9fr,0.8fr,auto] text-xs font-medium text-zinc-500 border-b border-zinc-100 bg-zinc-50/60 px-3 py-2">
+                          <span>User</span>
+                          <span>Programm</span>
+                          <span>Rolle</span>
+                          <span>Gruppen</span>
+                        </div>
+                        <div className="divide-y divide-zinc-100">
+                          {filteredUsers.map((user) => {
+                            const groupsForUser = userGroupsMap[user.id] ?? [];
+                            return (
+                              <div
+                                key={user.id}
+                                className="grid grid-cols-[1.4fr,0.9fr,0.8fr,auto] items-center gap-2 px-3 py-2.5 text-xs"
+                              >
+                                <div>
+                                  <p className="font-medium text-zinc-900">
+                                    {user.name}
+                                  </p>
+                                  <p className="text-xs text-zinc-500">
+                                    {user.email}
+                                  </p>
+                                </div>
+                                <div className="text-xs text-zinc-600">
+                                  {user.program}
+                                </div>
+                                <div className="text-xs text-zinc-600 capitalize">
+                                  {user.role ?? "student"}
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {groupsForUser.length > 0 ? (
+                                    groupsForUser.map((groupName) => (
+                                      <span
+                                        key={groupName}
+                                        className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] text-zinc-700"
+                                      >
+                                        {groupName}
+                                      </span>
+                                    ))
+                                  ) : (
+                                    <span className="text-[11px] text-zinc-400">
+                                      Keine Gruppe
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 md:hidden">
+                        {filteredUsers.map((user) => {
+                          const groupsForUser = userGroupsMap[user.id] ?? [];
+                          return (
+                            <div
+                              key={user.id}
+                              className="border border-zinc-100 rounded-lg p-3 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] text-xs"
+                            >
+                              <div className="font-semibold text-zinc-900">
+                                {user.name}
+                              </div>
+                              <div className="text-zinc-500">{user.email}</div>
+                              <div className="mt-1 text-zinc-600">
+                                Programm: {user.program}
+                              </div>
+                              <div className="text-zinc-600">
+                                Rolle: {user.role ?? "student"}
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {groupsForUser.length > 0 ? (
+                                  groupsForUser.map((groupName) => (
+                                    <span
+                                      key={groupName}
+                                      className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] text-zinc-700"
+                                    >
+                                      {groupName}
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="text-[11px] text-zinc-400">
+                                    Keine Gruppe
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

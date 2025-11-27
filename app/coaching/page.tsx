@@ -19,6 +19,7 @@ import { useSessionPanel } from "@/components/schedule/hooks/useSessionPanel";
 import { SessionPanel } from "@/components/schedule/SessionPanel";
 import { getWeek, startOfWeek, endOfWeek, format, isSameDay } from "date-fns";
 import { de } from "date-fns/locale";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 
 export default function CoachingPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
@@ -224,30 +225,17 @@ export default function CoachingPage() {
               </div>
 
               {/* Student: switch zwischen "Verfügbare Slots" und "Meine Buchungen" */}
-              <div className="mb-4 inline-flex w-full rounded-lg bg-zinc-50 p-1 border border-zinc-200 text-xs sm:text-sm">
-                <button
-                  type="button"
-                  onClick={() => setActiveStudentTab("available")}
-                  className={`flex-1 px-2 py-1.5 rounded-md font-medium transition-colors ${
-                    activeStudentTab === "available"
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-zinc-500 hover:text-zinc-800"
-                  }`}
-                >
-                  Verfügbare Slots
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveStudentTab("myBookings")}
-                  className={`flex-1 px-2 py-1.5 rounded-md font-medium transition-colors ${
-                    activeStudentTab === "myBookings"
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-zinc-500 hover:text-zinc-800"
-                  }`}
-                >
-                  Meine Buchungen
-                </button>
-              </div>
+              <SegmentedTabs
+                value={activeStudentTab}
+                onChange={(value) =>
+                  setActiveStudentTab(value as "myBookings" | "available")
+                }
+                options={[
+                  { value: "available", label: "Verfügbare Slots" },
+                  { value: "myBookings", label: "Meine Buchungen" },
+                ]}
+                className="mb-4"
+              />
 
               {/* Student-Ansicht: tab-basierte Darstellung */}
               {activeStudentTab === "myBookings" && (
