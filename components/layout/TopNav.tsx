@@ -91,7 +91,7 @@ export const TopNav = () => {
                     : "text-zinc-500 hover:text-zinc-900"
                 }`}
               >
-                Coaching
+                Coachings
               </Link>
             </div>
           </div>

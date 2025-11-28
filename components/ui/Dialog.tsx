@@ -14,6 +14,7 @@ interface DialogContentProps {
 
 interface DialogHeaderProps {
   children: ReactNode;
+  onClose?: () => void;
 }
 
 interface DialogTitleProps {
@@ -55,7 +56,7 @@ export const DialogContent = ({
 }: DialogContentProps) => {
   return (
     <div
-      className={`relative bg-white rounded-xl shadow-lg max-h-[90vh] overflow-y-auto w-full max-w-md mx-auto ${className}`}
+      className={`relative bg-white sm:rounded-xl rounded-none shadow-lg max-h-[90vh] overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto ${className}`}
       onClick={(e) => e.stopPropagation()}
     >
       {children}
@@ -63,18 +64,29 @@ export const DialogContent = ({
   );
 };
 
-export const DialogHeader = ({ children }: DialogHeaderProps) => {
-  return <div className="p-4 sm:p-6 border-b border-zinc-200 relative">{children}</div>;
+export const DialogHeader = ({ children, onClose }: DialogHeaderProps) => {
+  return (
+    <div className="sticky top-0 sm:static bg-white z-10 p-4 sm:p-6 border-b border-zinc-200 relative">
+      {children}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 sm:hidden p-2 -mr-2 -mt-2 text-zinc-500 hover:text-zinc-700 transition-colors"
+          aria-label="Schließen"
+        >
+          <X size={20} />
+        </button>
+      )}
+    </div>
+  );
 };
 
-export const DialogTitle = ({
-  children,
-  className = "",
-}: DialogTitleProps) => {
+export const DialogTitle = ({ children, className = "" }: DialogTitleProps) => {
   return (
-    <h2 className={`text-lg sm:text-xl font-semibold text-zinc-900 ${className}`}>
+    <h2
+      className={`text-lg sm:text-xl font-semibold text-zinc-900 ${className}`}
+    >
       {children}
     </h2>
   );
 };
-

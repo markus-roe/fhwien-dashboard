@@ -84,19 +84,19 @@ export function CreateAppointmentDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader>
+        <DialogHeader onClose={() => onOpenChange(false)}>
           <DialogTitle>
             Termin hinzufügen {groupName ? `für ${groupName}` : ""}
           </DialogTitle>
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-all"
+            className="absolute top-4 right-4 hidden sm:block p-1 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-all"
             aria-label="Schließen"
           >
             <X className="w-5 h-5" />
           </button>
         </DialogHeader>
-        <div className="p-4 sm:p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4 overflow-x-hidden min-w-0">
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
               Titel

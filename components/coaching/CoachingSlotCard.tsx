@@ -40,7 +40,7 @@ export function CoachingSlotCard({
         isPast ? "opacity-60" : ""
       }`}
     >
-      <CardContent className="p-2.5">
+      <CardContent className="p-3.5">
         <div className="space-y-2">
           {/* Header: Course name and expand button */}
           <div className="flex items-center justify-between gap-2">
