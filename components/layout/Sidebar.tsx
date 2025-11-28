@@ -18,6 +18,8 @@ type SidebarProps = {
   showNextUpCard?: boolean;
   onSessionClick?: (session: Session) => void;
   emptyMessage?: string;
+  visibleCourseIds?: Set<string>;
+  onCourseVisibilityChange?: (courseId: string, visible: boolean) => void;
 };
 
 export function Sidebar({
@@ -25,6 +27,8 @@ export function Sidebar({
   showNextUpCard = false,
   onSessionClick,
   emptyMessage,
+  visibleCourseIds,
+  onCourseVisibilityChange,
 }: SidebarProps) {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDayEvents, setSelectedDayEvents] = useState<
@@ -62,10 +66,35 @@ export function Sidebar({
       });
   }, []);
 
-  // Combine all sessions (mock sessions + coaching slots + additional sessions)
-  const combinedSessions = useMemo(() => {
+  // Get all sessions (unfiltered) for computing available courses
+  const allSessionsUnfiltered = useMemo(() => {
     return [...mockSessions, ...slotSessions];
   }, [slotSessions]);
+
+  // Get all unique courses from all sessions (unfiltered)
+  const availableCourses = useMemo(() => {
+    const courseIds = new Set<string>();
+    allSessionsUnfiltered.forEach((session) => {
+      if (session.courseId) {
+        courseIds.add(session.courseId);
+      }
+    });
+    return mockCourses
+      .filter((course) => courseIds.has(course.id))
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [allSessionsUnfiltered]);
+
+  // Combine all sessions (mock sessions + coaching slots + additional sessions)
+  // Filter by visible courses if filter is provided
+  const combinedSessions = useMemo(() => {
+    // Filter by visible courses if filter is provided
+    if (visibleCourseIds !== undefined) {
+      return allSessionsUnfiltered.filter(
+        (session) => !session.courseId || visibleCourseIds.has(session.courseId)
+      );
+    }
+    return allSessionsUnfiltered;
+  }, [allSessionsUnfiltered, visibleCourseIds]);
 
   // Get next up session for NextUpCard
   const nextUpSession = useMemo(() => {
@@ -230,22 +259,84 @@ export function Sidebar({
     <>
       <div className="flex-shrink-0 space-y-4">
         <div className="flex flex-col gap-3">
-          {showNextUpCard && nextUpSession && (
+          {/* {showNextUpCard && nextUpSession && (
             <NextUpCard
               session={nextUpSession}
               onOpenPanel={handleNextUpCardClick}
             />
-          )}
-          {showCalendar && (
-            <div className="w-full">
-              <SmallCalendar
-                allSessions={combinedSessions}
-                onDayClick={handleCalendarDayClick}
-                date={calendarDate}
-                onDateChange={handleDateChange}
-              />
-            </div>
-          )}
+          )} */}
+          {/* {showCalendar && ( */}
+          <div className="w-full">
+            <SmallCalendar
+              allSessions={combinedSessions}
+              onDayClick={handleCalendarDayClick}
+              date={calendarDate}
+              onDateChange={handleDateChange}
+              footerContent={
+                visibleCourseIds !== undefined &&
+                availableCourses.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {availableCourses.map((course) => {
+                      const isVisible = visibleCourseIds.has(course.id);
+                      const courseColor = "var(--primary)";
+                      return (
+                        <label
+                          key={course.id}
+                          className="flex items-center gap-2 cursor-pointer group py-1 select-none"
+                        >
+                          <div className="relative flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={isVisible}
+                              onChange={(e) => {
+                                onCourseVisibilityChange?.(
+                                  course.id,
+                                  e.target.checked
+                                );
+                              }}
+                              className="sr-only"
+                            />
+                            <div
+                              className="w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
+                              style={{
+                                borderColor: isVisible
+                                  ? courseColor
+                                  : "#d1d5db",
+                                backgroundColor: isVisible
+                                  ? courseColor
+                                  : "transparent",
+                              }}
+                            >
+                              {isVisible && (
+                                <svg
+                                  className="w-3 h-3 text-white"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-xs font-medium text-zinc-900 truncate group-hover:text-blue-600 transition-colors">
+                              {course.title}
+                            </span>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : null
+              }
+            />
+          </div>
+          {/* )} */}
+
           <div className="flex-1 min-w-0">
             <NextUpList
               emptyMessage={emptyMessage}

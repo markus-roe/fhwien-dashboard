@@ -239,7 +239,7 @@ export default function CoachingPage() {
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
-        <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 lg:overflow-y-auto">
+        <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 lg:overflow-y-scroll">
           <Sidebar
             showCalendar={true}
             showNextUpCard={false}
@@ -249,16 +249,22 @@ export default function CoachingPage() {
         </aside>
 
         <div className="flex-1 min-w-0 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-zinc-900">
-                Coaching Termine
-              </h1>
-            </div>
-          </div>
-
           <Card>
             <CardContent className="p-3 sm:p-4">
+              <div className="mb-4">
+                <h1 className="text-xl sm:text-2xl font-bold text-zinc-900">
+                  Coaching Termine
+                </h1>
+              </div>
+              <div className="mb-4">
+                <Input
+                  type="text"
+                  placeholder="Coachings durchsuchen..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
               {/* Student: switch zwischen "Verfügbare Slots" und "Meine Buchungen" */}
               <SegmentedTabs
                 value={activeStudentTab}
@@ -282,15 +288,6 @@ export default function CoachingPage() {
                 ]}
                 className="mb-4"
               />
-
-              <div className="mb-4">
-                <Input
-                  type="text"
-                  placeholder="Coachings durchsuchen..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="sm:w-[200px] shrink-0 space-y-3">

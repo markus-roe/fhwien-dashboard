@@ -46,4 +46,3 @@ export const getEventDuration = (event: CalendarEvent): number => {
     (event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60 * 60)
   ); // hours
 };
-

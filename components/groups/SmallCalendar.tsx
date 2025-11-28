@@ -1,4 +1,10 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import {
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from "react";
 import type { MouseEvent } from "react";
 import {
   addDays,
@@ -26,6 +32,7 @@ type SmallCalendarProps = {
   ) => void;
   date?: Date;
   onDateChange?: (date: Date) => void;
+  footerContent?: ReactNode;
 };
 
 export function SmallCalendar({
@@ -33,6 +40,7 @@ export function SmallCalendar({
   onDayClick,
   date: controlledDate,
   onDateChange,
+  footerContent,
 }: SmallCalendarProps) {
   const [internalDate, setInternalDate] = useState(new Date());
   const calendarDate = controlledDate ?? internalDate;
@@ -86,7 +94,7 @@ export function SmallCalendar({
     }, new Map<string, Session[]>());
 
     return (
-      <Card className="relative overflow-hidden">
+      <Card className="relative overflow-hidden select-none">
         <div className="absolute top-0 left-0 w-full h-1 bg-[var(--primary)]" />
         <CardHeader className="p-2">
           <div className="flex items-center justify-center gap-2">
@@ -185,10 +193,21 @@ export function SmallCalendar({
               })}
             </div>
           </div>
+          {footerContent && (
+            <div className="pt-2 mt-2 border-t border-zinc-200">
+              {footerContent}
+            </div>
+          )}
         </CardContent>
       </Card>
     );
-  }, [allSessions, calendarDate, handleCalendarDayClick, setCalendarDate]);
+  }, [
+    allSessions,
+    calendarDate,
+    handleCalendarDayClick,
+    setCalendarDate,
+    footerContent,
+  ]);
 
   return calendarContent;
 }

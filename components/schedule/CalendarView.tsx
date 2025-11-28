@@ -35,11 +35,13 @@ import { EventPopover } from "./EventPopover";
 interface CalendarViewProps {
   onSessionClick: (session: Session) => void;
   onDateClick?: (date: Date) => void;
+  visibleCourseIds?: Set<string>;
 }
 
 export function CalendarView({
   onSessionClick,
   onDateClick,
+  visibleCourseIds,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewType, setViewType] = useState<ViewType>("month");
@@ -80,8 +82,15 @@ export function CalendarView({
 
   // Combine all sessions (mock sessions + coaching slots)
   const allSessions = useMemo(() => {
-    return [...mockSessions, ...coachingSlotSessions];
-  }, [coachingSlotSessions]);
+    const combined = [...mockSessions, ...coachingSlotSessions];
+    // Filter by visible courses if filter is provided
+    if (visibleCourseIds !== undefined) {
+      return combined.filter((session) => 
+        !session.courseId || visibleCourseIds.has(session.courseId)
+      );
+    }
+    return combined;
+  }, [coachingSlotSessions, visibleCourseIds]);
 
   // Convert sessions to events
   const events = useMemo(() => {
