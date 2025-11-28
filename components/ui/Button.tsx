@@ -6,7 +6,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "destructive";
   icon?: LucideIcon;
   iconPosition?: "left" | "right";
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   disabled?: boolean;
 }
 
@@ -32,6 +32,7 @@ export const Button = ({
   };
 
   const sizeClasses = {
+    xs: "text-xs",
     sm: "text-xs",
     md: "text-sm",
     lg: "text-base",

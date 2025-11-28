@@ -9,7 +9,6 @@ import {
   mockUsers,
   type Session,
   type CoachingSlot,
-  type LocationType,
   type Group,
   type User,
   type Program,
@@ -20,11 +19,10 @@ import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/Dialog";
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/Popover";
 import { CreateCoachingSlotDialog } from "@/components/coaching/CreateCoachingSlotDialog";
 import { Sidebar } from "@/components/layout/Sidebar";
 import {
@@ -34,9 +32,7 @@ import {
   CalendarClock,
   Trash2,
   MapPin,
-  Clock,
   Video,
-  Building2,
   ChevronDown,
   ChevronUp,
   History,
@@ -46,11 +42,19 @@ import { format, isToday, isPast } from "date-fns";
 import { de } from "date-fns/locale";
 import { redirect } from "next/navigation";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
-import { Badge } from "@/components/ui/Badge";
 import {
   EditSessionDialog,
   type EditSessionFormState,
 } from "@/components/dashboard/EditSessionDialog";
+import {
+  CreateGroupDialog,
+  type CreateGroupFormData,
+} from "@/components/groups/CreateGroupDialog";
+import {
+  CreateStudentDialog,
+  type CreateStudentFormData,
+} from "@/components/dashboard/CreateStudentDialog";
+import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
 
 function calculateDuration(startTime: string, endTime: string): string {
   const [startHours, startMinutes] = startTime.split(":").map(Number);
@@ -80,6 +84,7 @@ export default function DashboardPage() {
     ...mockCoachingSlots,
   ]);
   const [groups, setGroups] = useState<Group[]>(() => [...mockGroups]);
+  const [users, setUsers] = useState<User[]>(() => [...mockUsers]);
 
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string>(
@@ -99,10 +104,17 @@ export default function DashboardPage() {
   const [editFormState, setEditFormState] =
     useState<EditSessionFormState | null>(null);
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
+  const [studentToDelete, setStudentToDelete] = useState<User | null>(null);
+  const [coachingSlotToDelete, setCoachingSlotToDelete] =
+    useState<CoachingSlot | null>(null);
+  const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
 
   const [isCreateCoachingOpen, setIsCreateCoachingOpen] = useState(false);
   const [editingCoachingSlot, setEditingCoachingSlot] =
     useState<CoachingSlot | null>(null);
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+  const [isCreateStudentOpen, setIsCreateStudentOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<User | null>(null);
 
   const selectedCourse = useMemo(
     () => mockCourses.find((c) => c.id === selectedCourseId) || null,
@@ -129,33 +141,8 @@ export default function DashboardPage() {
       : groups;
   }, [groups, selectedCourseId]);
 
-  const totalGroupMembers = useMemo(() => {
-    return courseGroups.reduce((acc, group) => acc + group.members.length, 0);
-  }, [courseGroups]);
-
-  const totalFreeSeats = useMemo(() => {
-    return courseGroups.reduce((acc, group) => {
-      if (!group.maxMembers) return acc;
-      return acc + Math.max(group.maxMembers - group.members.length, 0);
-    }, 0);
-  }, [courseGroups]);
-
-  const userGroupsMap = useMemo(() => {
-    const map: Record<string, string[]> = {};
-    groups.forEach((group) => {
-      group.members.forEach((member) => {
-        const user = mockUsers.find((u) => u.name === member);
-        if (!user) return;
-        map[user.id] = map[user.id]
-          ? [...map[user.id], group.name]
-          : [group.name];
-      });
-    });
-    return map;
-  }, [groups]);
-
   const filteredUsers = useMemo(() => {
-    return mockUsers.filter((user) => {
+    return users.filter((user) => {
       const matchesProgram =
         programFilter === "all" ? true : user.program === programFilter;
       const query = userSearch.toLowerCase();
@@ -165,7 +152,7 @@ export default function DashboardPage() {
         user.email.toLowerCase().includes(query);
       return matchesProgram && matchesSearch;
     });
-  }, [programFilter, userSearch]);
+  }, [programFilter, userSearch, users]);
 
   const assignableGroups = courseGroups.length > 0 ? courseGroups : groups;
 
@@ -179,10 +166,10 @@ export default function DashboardPage() {
   }, [assignableGroups, selectedGroupId]);
 
   useEffect(() => {
-    if (!mockUsers.some((user) => user.id === selectedUserId) && mockUsers[0]) {
-      setSelectedUserId(mockUsers[0].id);
+    if (!users.some((user) => user.id === selectedUserId) && users[0]) {
+      setSelectedUserId(users[0].id);
     }
-  }, [selectedUserId]);
+  }, [selectedUserId, users]);
 
   const handleOpenEditSession = (session: Session) => {
     setEditingSession(session);
@@ -292,7 +279,7 @@ export default function DashboardPage() {
     // Convert participant IDs to names
     const participantNames = data.participants
       .map((id) => {
-        const user = mockUsers.find((u) => u.id === id);
+        const user = users.find((u) => u.id === id);
         return user?.name;
       })
       .filter((name): name is string => !!name);
@@ -333,7 +320,7 @@ export default function DashboardPage() {
       // Update existing coaching slot
       const participantNames = data.participants
         .map((id) => {
-          const user = mockUsers.find((u) => u.id === id);
+          const user = users.find((u) => u.id === id);
           return user?.name;
         })
         .filter((name): name is string => !!name);
@@ -365,17 +352,23 @@ export default function DashboardPage() {
 
   const handleDeleteCoaching = (slotId: string) => {
     setCoachingSlots((prev) => prev.filter((slot) => slot.id !== slotId));
+    setCoachingSlotToDelete(null);
   };
 
-  const handleAssignUserToGroup = () => {
-    if (!selectedGroupId || !selectedUserId) return;
+  const handleDeleteGroup = (groupId: string) => {
+    setGroups((prev) => prev.filter((group) => group.id !== groupId));
+    setGroupToDelete(null);
+  };
 
-    const user = mockUsers.find((u) => u.id === selectedUserId);
+  const handleAssignUserToGroup = (groupId: string, userId: string) => {
+    if (!groupId || !userId) return;
+
+    const user = users.find((u) => u.id === userId);
     if (!user) return;
 
     setGroups((prev) =>
       prev.map((group) => {
-        if (group.id !== selectedGroupId) return group;
+        if (group.id !== groupId) return group;
 
         const isAlreadyMember = group.members.includes(user.name);
         const isFull =
@@ -405,6 +398,64 @@ export default function DashboardPage() {
     );
   };
 
+  const handleCreateGroup = (data: CreateGroupFormData) => {
+    const courseId = data.courseId || selectedCourseId;
+    if (!courseId || !data.name.trim()) return;
+
+    const newGroup: Group = {
+      id: `g-${Date.now()}`,
+      courseId,
+      name: data.name,
+      description: data.description || undefined,
+      maxMembers: data.maxMembers || undefined,
+      members: [],
+      createdAt: new Date(),
+    };
+
+    setGroups((prev) => [...prev, newGroup]);
+  };
+
+  const handleCreateOrEditStudent = (data: CreateStudentFormData) => {
+    if (editingStudent) {
+      // Update existing user
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === editingStudent.id
+            ? {
+                ...user,
+                name: data.name,
+                email: data.email,
+                program: data.program,
+                role: "student",
+                initials: data.initials,
+              }
+            : user
+        )
+      );
+      setEditingStudent(null);
+    } else {
+      // Create new user
+      const newUser: User = {
+        id: `u-${Date.now()}`,
+        name: data.name,
+        email: data.email,
+        program: data.program,
+        role: "student",
+        initials: data.initials,
+      };
+      setUsers((prev) => [...prev, newUser]);
+    }
+  };
+
+  const handleOpenEditStudent = (user: User) => {
+    setEditingStudent(user);
+    setIsCreateStudentOpen(true);
+  };
+
+  const handleDeleteStudent = (userId: string) => {
+    setUsers((prev) => prev.filter((user) => user.id !== userId));
+  };
+
   const dashboardTabs = [
     {
       value: "lvs",
@@ -425,7 +476,7 @@ export default function DashboardPage() {
     {
       value: "users",
       label: "Studenten",
-      badge: mockUsers.length > 0 ? mockUsers.length : undefined,
+      badge: users.length > 0 ? users.length : undefined,
     },
   ];
 
@@ -495,18 +546,13 @@ export default function DashboardPage() {
 
                 {activeDashboardTab === "lvs" && (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <h2 className="text-sm font-semibold text-zinc-900">
-                          LV-Termine verwalten
-                        </h2>
-                        <p className="text-xs text-zinc-500">
-                          Passen Sie Datum, Zeit und Ort Ihrer Einheiten an.
-                        </p>
-                      </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <h2 className="text-xs sm:text-sm font-semibold text-zinc-900 flex-1">
+                        LV-Termine verwalten
+                      </h2>
                       <Button
                         size="sm"
-                        className="h-8 px-3 text-xs"
+                        className="h-8 px-2 sm:px-3 text-xs shrink-0 w-full sm:w-auto"
                         icon={Plus}
                         iconPosition="left"
                         onClick={handleOpenCreateSession}
@@ -948,19 +994,13 @@ export default function DashboardPage() {
 
                 {activeDashboardTab === "coachings" && (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <h2 className="text-sm font-semibold text-zinc-900">
-                          Coaching-Slots
-                        </h2>
-                        <p className="text-xs text-zinc-500">
-                          Bieten Sie zusätzliche Coaching-Termine für dieses
-                          Fach an.
-                        </p>
-                      </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <h2 className="text-xs sm:text-sm font-semibold text-zinc-900 flex-1">
+                        Coaching-Slots
+                      </h2>
                       <Button
                         size="sm"
-                        className="h-8 px-3 text-xs"
+                        className="h-8 px-2 sm:px-3 text-xs shrink-0 w-full sm:w-auto"
                         icon={Plus}
                         iconPosition="left"
                         onClick={() => {
@@ -1197,7 +1237,7 @@ export default function DashboardPage() {
                                           variant="destructive"
                                           className="h-7 w-7 p-0"
                                           onClick={() =>
-                                            handleDeleteCoaching(slot.id)
+                                            setCoachingSlotToDelete(slot)
                                           }
                                           title="Löschen"
                                         >
@@ -1325,7 +1365,7 @@ export default function DashboardPage() {
                                           variant="destructive"
                                           className="h-7 w-7 p-0"
                                           onClick={() =>
-                                            handleDeleteCoaching(slot.id)
+                                            setCoachingSlotToDelete(slot)
                                           }
                                           title="Löschen"
                                         >
@@ -1346,43 +1386,20 @@ export default function DashboardPage() {
 
                 {activeDashboardTab === "groups" && (
                   <div className="space-y-5">
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                      <div className="grid w-full md:w-auto grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                        <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2">
-                          <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">
-                            Gruppen
-                          </p>
-                          <p className="text-base font-semibold text-zinc-900">
-                            {courseGroups.length}
-                          </p>
-                        </div>
-                        <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2">
-                          <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">
-                            Mitglieder
-                          </p>
-                          <p className="text-base font-semibold text-zinc-900">
-                            {totalGroupMembers}
-                          </p>
-                        </div>
-                        <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2">
-                          <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">
-                            Freie Plätze
-                          </p>
-                          <p className="text-base font-semibold text-zinc-900">
-                            {totalFreeSeats}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
                     <div className="space-y-3">
-                      <div>
-                        <h2 className="text-sm font-semibold text-zinc-900">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <h2 className="text-xs sm:text-sm font-semibold text-zinc-900 flex-1">
                           Gruppenübersicht
                         </h2>
-                        <p className="text-xs text-zinc-500">
-                          Verwalten Sie Mitglieder je Kursgruppe.
-                        </p>
+                        <Button
+                          size="sm"
+                          className="h-8 px-2 sm:px-3 text-xs shrink-0 w-full sm:w-auto"
+                          icon={Plus}
+                          iconPosition="left"
+                          onClick={() => setIsCreateGroupOpen(true)}
+                        >
+                          Neue Gruppe
+                        </Button>
                       </div>
 
                       {courseGroups.length === 0 ? (
@@ -1402,10 +1419,10 @@ export default function DashboardPage() {
                             return (
                               <div
                                 key={group.id}
-                                className="rounded-lg border border-zinc-100 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                                className="group rounded-lg border border-zinc-100 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
                               >
                                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                  <div>
+                                  <div className="flex-1">
                                     <p className="text-sm font-semibold text-zinc-900">
                                       {group.name}
                                     </p>
@@ -1413,20 +1430,31 @@ export default function DashboardPage() {
                                       {courseTitle}
                                     </p>
                                   </div>
-                                  <div className="text-xs text-zinc-500">
-                                    {group.members.length}
-                                    {group.maxMembers
-                                      ? ` / ${group.maxMembers}`
-                                      : ""}{" "}
-                                    Mitglieder
-                                    {isFull && (
-                                      <span className="ml-2 text-amber-600 font-medium">
-                                        Gruppe voll
-                                      </span>
-                                    )}
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-xs text-zinc-500">
+                                      {group.members.length}
+                                      {group.maxMembers
+                                        ? ` / ${group.maxMembers}`
+                                        : ""}{" "}
+                                      Mitglieder
+                                      {isFull && (
+                                        <span className="ml-2 text-amber-600 font-medium">
+                                          Gruppe voll
+                                        </span>
+                                      )}
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                      onClick={() => setGroupToDelete(group)}
+                                      title="Löschen"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
                                   </div>
                                 </div>
-                                <div className="mt-3 flex flex-wrap gap-2">
+                                <div className="mt-3 flex flex-wrap items-center gap-2">
                                   {group.members.length === 0 && (
                                     <span className="text-xs text-zinc-500">
                                       Noch keine Mitglieder
@@ -1455,73 +1483,69 @@ export default function DashboardPage() {
                                       </button>
                                     </span>
                                   ))}
+                                  {!isFull && (
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Button
+                                          size="xs"
+                                          variant="secondary"
+                                          className="h-6 px-1.5 text-xs shrink-0"
+                                          icon={Plus}
+                                          iconPosition="left"
+                                        >
+                                          Student hinzufügen
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent
+                                        className="w-64 p-1"
+                                        align="start"
+                                      >
+                                        <div className="max-h-[200px] overflow-auto space-y-0.5">
+                                          {users
+                                            .filter(
+                                              (user) =>
+                                                !group.members.includes(
+                                                  user.name
+                                                )
+                                            )
+                                            .map((user) => (
+                                              <button
+                                                key={user.id}
+                                                type="button"
+                                                onClick={() => {
+                                                  handleAssignUserToGroup(
+                                                    group.id,
+                                                    user.id
+                                                  );
+                                                }}
+                                                className="w-full px-3 py-2 text-sm text-left rounded-lg hover:bg-zinc-100 transition-colors text-zinc-700"
+                                              >
+                                                <div className="font-medium">
+                                                  {user.name}
+                                                </div>
+                                                <div className="text-xs text-zinc-500">
+                                                  {user.program}
+                                                </div>
+                                              </button>
+                                            ))}
+                                          {users.filter(
+                                            (user) =>
+                                              !group.members.includes(user.name)
+                                          ).length === 0 && (
+                                            <div className="px-3 py-2 text-xs text-zinc-500 text-center">
+                                              Keine verfügbaren User
+                                            </div>
+                                          )}
+                                        </div>
+                                      </PopoverContent>
+                                    </Popover>
+                                  )}
                                 </div>
                               </div>
                             );
                           })}
                         </div>
                       )}
-                    </div>
-
-                    <div className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50/60 p-4 space-y-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-zinc-900">
-                          User zu Gruppen zuweisen
-                        </h3>
-                        <p className="text-xs text-zinc-500">
-                          Wählen Sie eine Person und eine Gruppe des Kurses.
-                        </p>
-                      </div>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <div>
-                          <label className="block text-xs font-medium text-zinc-600 mb-1">
-                            User auswählen
-                          </label>
-                          <Select
-                            options={mockUsers.map((user) => ({
-                              value: user.id,
-                              label: `${user.name} – ${user.program}`,
-                            }))}
-                            value={selectedUserId}
-                            onChange={(value) => setSelectedUserId(value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-zinc-600 mb-1">
-                            Gruppe auswählen
-                          </label>
-                          <Select
-                            options={
-                              assignableGroups.length > 0
-                                ? assignableGroups.map((group) => ({
-                                    value: group.id,
-                                    label: `${group.name} (${
-                                      group.members.length
-                                    }/${group.maxMembers ?? "∞"})`,
-                                  }))
-                                : groups.map((group) => ({
-                                    value: group.id,
-                                    label: group.name,
-                                  }))
-                            }
-                            value={selectedGroupId}
-                            onChange={(value) => setSelectedGroupId(value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
-                        <Button
-                          className="min-w-[180px]"
-                          onClick={handleAssignUserToGroup}
-                          disabled={
-                            !selectedGroupId ||
-                            !selectedUserId ||
-                            assignableGroups.length === 0
-                          }
-                        >
-                          Hinzufügen
-                        </Button>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -1547,7 +1571,7 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-zinc-600 mb-1">
-                          User suchen
+                          Student suchen
                         </label>
                         <Input
                           value={userSearch}
@@ -1564,21 +1588,36 @@ export default function DashboardPage() {
                       </div>
                     ) : (
                       <>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <h2 className="text-xs sm:text-sm font-semibold text-zinc-900 flex-1">
+                            Studenten
+                          </h2>
+                          <Button
+                            size="sm"
+                            className="h-8 px-2 sm:px-3 text-xs shrink-0 w-full sm:w-auto"
+                            icon={Plus}
+                            iconPosition="left"
+                            onClick={() => {
+                              setEditingStudent(null);
+                              setIsCreateStudentOpen(true);
+                            }}
+                          >
+                            Neuer Student
+                          </Button>
+                        </div>
                         <div className="hidden md:block rounded-lg border border-zinc-100 bg-white overflow-hidden">
                           <div className="grid grid-cols-[1.4fr,0.9fr,0.8fr,auto] text-xs font-medium text-zinc-500 border-b border-zinc-100 bg-zinc-50/60 px-3 py-2">
                             <span>User</span>
                             <span>Programm</span>
                             <span>Rolle</span>
-                            <span>Gruppen</span>
+                            <span className="text-right">Aktionen</span>
                           </div>
                           <div className="divide-y divide-zinc-100">
                             {filteredUsers.map((user) => {
-                              const groupsForUser =
-                                userGroupsMap[user.id] ?? [];
                               return (
                                 <div
                                   key={user.id}
-                                  className="grid grid-cols-[1.4fr,0.9fr,0.8fr,auto] items-center gap-2 px-3 py-2.5 text-xs"
+                                  className="group grid grid-cols-[1.4fr,0.9fr,0.8fr,auto] items-center gap-2 px-3 py-2.5 text-xs hover:bg-zinc-50 transition-colors"
                                 >
                                   <div>
                                     <p className="font-medium text-zinc-900">
@@ -1594,21 +1633,27 @@ export default function DashboardPage() {
                                   <div className="text-xs text-zinc-600 capitalize">
                                     {user.role ?? "student"}
                                   </div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {groupsForUser.length > 0 ? (
-                                      groupsForUser.map((groupName) => (
-                                        <span
-                                          key={groupName}
-                                          className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] text-zinc-700"
-                                        >
-                                          {groupName}
-                                        </span>
-                                      ))
-                                    ) : (
-                                      <span className="text-[11px] text-zinc-400">
-                                        Keine Gruppe
-                                      </span>
-                                    )}
+                                  <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button
+                                      size="sm"
+                                      variant="secondary"
+                                      className="h-7 w-7 p-0"
+                                      onClick={() =>
+                                        handleOpenEditStudent(user)
+                                      }
+                                      title="Bearbeiten"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      className="h-7 w-7 p-0"
+                                      onClick={() => setStudentToDelete(user)}
+                                      title="Löschen"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
                                   </div>
                                 </div>
                               );
@@ -1618,39 +1663,48 @@ export default function DashboardPage() {
 
                         <div className="space-y-2 md:hidden">
                           {filteredUsers.map((user) => {
-                            const groupsForUser = userGroupsMap[user.id] ?? [];
                             return (
                               <div
                                 key={user.id}
                                 className="border border-zinc-100 rounded-lg p-3 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] text-xs"
                               >
-                                <div className="font-semibold text-zinc-900">
-                                  {user.name}
-                                </div>
-                                <div className="text-zinc-500">
-                                  {user.email}
-                                </div>
-                                <div className="mt-1 text-zinc-600">
-                                  Programm: {user.program}
-                                </div>
-                                <div className="text-zinc-600">
-                                  Rolle: {user.role ?? "student"}
-                                </div>
-                                <div className="mt-2 flex flex-wrap gap-1">
-                                  {groupsForUser.length > 0 ? (
-                                    groupsForUser.map((groupName) => (
-                                      <span
-                                        key={groupName}
-                                        className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] text-zinc-700"
-                                      >
-                                        {groupName}
-                                      </span>
-                                    ))
-                                  ) : (
-                                    <span className="text-[11px] text-zinc-400">
-                                      Keine Gruppe
-                                    </span>
-                                  )}
+                                <div className="flex items-start justify-between gap-2 mb-1.5">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-zinc-900">
+                                      {user.name}
+                                    </div>
+                                    <div className="text-zinc-500">
+                                      {user.email}
+                                    </div>
+                                    <div className="mt-1 text-zinc-600">
+                                      Programm: {user.program}
+                                    </div>
+                                    <div className="text-zinc-600">
+                                      Rolle: {user.role ?? "student"}
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-1 shrink-0">
+                                    <Button
+                                      size="sm"
+                                      variant="secondary"
+                                      className="h-7 w-7 p-0"
+                                      onClick={() =>
+                                        handleOpenEditStudent(user)
+                                      }
+                                      title="Bearbeiten"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      className="h-7 w-7 p-0"
+                                      onClick={() => setStudentToDelete(user)}
+                                      title="Löschen"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -1688,59 +1742,118 @@ export default function DashboardPage() {
           }
         }}
         courses={mockCourses}
-        users={mockUsers}
+        users={users}
         onSubmit={handleSaveCoaching}
         mode={editingCoachingSlot ? "edit" : "create"}
         initialData={editingCoachingSlot || undefined}
       />
 
+      <CreateGroupDialog
+        isOpen={isCreateGroupOpen}
+        onOpenChange={setIsCreateGroupOpen}
+        courses={mockCourses}
+        defaultCourseId={selectedCourseId}
+        onSubmit={handleCreateGroup}
+      />
+
+      <CreateStudentDialog
+        isOpen={isCreateStudentOpen}
+        onOpenChange={(open) => {
+          setIsCreateStudentOpen(open);
+          if (!open) {
+            setEditingStudent(null);
+          }
+        }}
+        onSubmit={handleCreateOrEditStudent}
+        mode={editingStudent ? "edit" : "create"}
+        initialData={editingStudent || undefined}
+      />
+
       {/* Bestätigungsdialog für Löschen eines LV-Termins */}
-      {sessionToDelete && (
-        <Dialog open onOpenChange={() => setSessionToDelete(null)}>
-          <DialogContent className="max-w-sm">
-            <DialogHeader onClose={() => setSessionToDelete(null)}>
-              <DialogTitle>LV-Termin löschen?</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3 px-6 py-2">
-              <p className="text-sm text-zinc-600">
-                Möchten Sie den folgenden Termin wirklich löschen?
-              </p>
-              <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-                <p className="text-sm font-medium text-zinc-900 truncate">
-                  {sessionToDelete.title}
-                </p>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  {format(sessionToDelete.date, "d. MMM yyyy, EEEE HH:mm", {
-                    locale: de,
-                  })}
-                </p>
-              </div>
-              <p className="text-xs text-zinc-500">
-                Diese Aktion kann nicht rückgängig gemacht werden.
-              </p>
-            </div>
-            <div className="flex gap-3 px-6 pb-3 pt-2">
-              <Button
-                className="flex-1"
-                variant="secondary"
-                onClick={() => setSessionToDelete(null)}
-              >
-                Abbrechen
-              </Button>
-              <Button
-                className="flex-1"
-                variant="destructive"
-                onClick={() => {
-                  handleDeleteSession(sessionToDelete.id);
-                  setSessionToDelete(null);
-                }}
-              >
-                Löschen
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <DeleteConfirmationDialog
+        isOpen={!!sessionToDelete}
+        onClose={() => setSessionToDelete(null)}
+        onConfirm={() => {
+          if (sessionToDelete) {
+            handleDeleteSession(sessionToDelete.id);
+          }
+        }}
+        title="LV-Termin löschen?"
+        description="Möchten Sie den folgenden Termin wirklich löschen?"
+        itemName={sessionToDelete?.title}
+        itemDetails={
+          sessionToDelete
+            ? format(sessionToDelete.date, "d. MMM yyyy, EEEE HH:mm", {
+                locale: de,
+              })
+            : undefined
+        }
+      />
+
+      {/* Bestätigungsdialog für Löschen eines Studenten */}
+      <DeleteConfirmationDialog
+        isOpen={!!studentToDelete}
+        onClose={() => setStudentToDelete(null)}
+        onConfirm={() => {
+          if (studentToDelete) {
+            handleDeleteStudent(studentToDelete.id);
+          }
+        }}
+        title="Student löschen?"
+        description="Möchten Sie den folgenden Studenten wirklich löschen?"
+        itemName={studentToDelete?.name}
+        itemDetails={studentToDelete?.email}
+      />
+
+      {/* Bestätigungsdialog für Löschen eines Coaching-Slots */}
+      <DeleteConfirmationDialog
+        isOpen={!!coachingSlotToDelete}
+        onClose={() => setCoachingSlotToDelete(null)}
+        onConfirm={() => {
+          if (coachingSlotToDelete) {
+            handleDeleteCoaching(coachingSlotToDelete.id);
+          }
+        }}
+        title="Coaching-Slot löschen?"
+        description="Möchten Sie den folgenden Coaching-Slot wirklich löschen?"
+        itemName={
+          coachingSlotToDelete
+            ? `${coachingSlotToDelete.participants.length}/${coachingSlotToDelete.maxParticipants} Teilnehmer`
+            : undefined
+        }
+        itemDetails={
+          coachingSlotToDelete
+            ? format(coachingSlotToDelete.date, "d. MMM yyyy, EEEE HH:mm", {
+                locale: de,
+              }) +
+              (coachingSlotToDelete.endTime
+                ? ` - ${coachingSlotToDelete.endTime}`
+                : "")
+            : undefined
+        }
+      />
+
+      {/* Bestätigungsdialog für Löschen einer Gruppe */}
+      <DeleteConfirmationDialog
+        isOpen={!!groupToDelete}
+        onClose={() => setGroupToDelete(null)}
+        onConfirm={() => {
+          if (groupToDelete) {
+            handleDeleteGroup(groupToDelete.id);
+          }
+        }}
+        title="Gruppe löschen?"
+        description="Möchten Sie die folgende Gruppe wirklich löschen?"
+        itemName={groupToDelete?.name}
+        itemDetails={
+          groupToDelete
+            ? `${
+                mockCourses.find((c) => c.id === groupToDelete.courseId)
+                  ?.title ?? "Kurs"
+              } • ${groupToDelete.members.length} Mitglieder`
+            : undefined
+        }
+      />
     </div>
   );
 }

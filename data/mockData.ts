@@ -737,22 +737,6 @@ export const mockUsers: User[] = [
     program: "DTI",
     role: "student",
   },
-  {
-    id: "u11",
-    name: "Professor Becker",
-    initials: "PB",
-    email: "becker@fhwien.ac.at",
-    program: "DTI",
-    role: "professor",
-  },
-  {
-    id: "u12",
-    name: "Professor Bauer",
-    initials: "PB",
-    email: "bauer@fhwien.ac.at",
-    program: "DI",
-    role: "professor",
-  },
 ];
 
 export const currentUser = {
