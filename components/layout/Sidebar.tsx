@@ -71,18 +71,12 @@ export function Sidebar({
     return [...mockSessions, ...slotSessions];
   }, [slotSessions]);
 
-  // Get all unique courses from all sessions (unfiltered)
+  // Get all courses from mockData filtered by current user's program
   const availableCourses = useMemo(() => {
-    const courseIds = new Set<string>();
-    allSessionsUnfiltered.forEach((session) => {
-      if (session.courseId) {
-        courseIds.add(session.courseId);
-      }
-    });
     return mockCourses
-      .filter((course) => courseIds.has(course.id))
+      .filter((course) => course.program.includes(currentUser.program))
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [allSessionsUnfiltered]);
+  }, []);
 
   // Combine all sessions (mock sessions + coaching slots + additional sessions)
   // Filter by visible courses if filter is provided

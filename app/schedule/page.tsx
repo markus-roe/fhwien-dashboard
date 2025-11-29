@@ -17,18 +17,11 @@ export default function SchedulePage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
 
-  // Get all unique course IDs from sessions
+  // Get all course IDs for current user's program (from mockData, not just sessions)
   const allCourseIds = useMemo(() => {
-    const courseIds = new Set<string>();
-    mockSessions.forEach((session) => {
-      if (session.courseId) courseIds.add(session.courseId);
-    });
-    mockCoachingSlots
-      .filter((slot) => slot.participants.some((p) => p === currentUser.name))
-      .forEach((slot) => {
-        if (slot.courseId) courseIds.add(slot.courseId);
-      });
-    return Array.from(courseIds);
+    return mockCourses
+      .filter((course) => course.program.includes(currentUser.program))
+      .map((course) => course.id);
   }, []);
 
   // Initialize all courses as visible
