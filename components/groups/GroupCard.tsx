@@ -23,7 +23,7 @@ export function GroupCard({
   onLeaveGroup,
 }: GroupCardProps) {
   return (
-    <Card className="hover:border-zinc-300 hover:shadow-sm transition-all group">
+    <Card className="hover:border-zinc-300 hover:shadow-sm transition-all group max-w-2xl">
       <CardContent className="p-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">

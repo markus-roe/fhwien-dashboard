@@ -64,11 +64,7 @@ export function DeleteConfirmationDialog({
           </p>
         </div>
         <div className="flex gap-3 px-6 pb-3 pt-2">
-          <Button
-            className="flex-1"
-            variant="secondary"
-            onClick={onClose}
-          >
+          <Button className="flex-1" variant="secondary" onClick={onClose}>
             {cancelLabel}
           </Button>
           <Button
@@ -83,4 +79,3 @@ export function DeleteConfirmationDialog({
     </Dialog>
   );
 }
-

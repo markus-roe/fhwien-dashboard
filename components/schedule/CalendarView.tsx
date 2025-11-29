@@ -85,8 +85,8 @@ export function CalendarView({
     const combined = [...mockSessions, ...coachingSlotSessions];
     // Filter by visible courses if filter is provided
     if (visibleCourseIds !== undefined) {
-      return combined.filter((session) => 
-        !session.courseId || visibleCourseIds.has(session.courseId)
+      return combined.filter(
+        (session) => !session.courseId || visibleCourseIds.has(session.courseId)
       );
     }
     return combined;
