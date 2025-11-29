@@ -118,9 +118,8 @@ export function CalendarView({
   const visibleDateRange = useMemo(() => {
     if (viewType === "month") {
       const monthStart = startOfMonth(currentDate);
-      const monthEnd = endOfMonth(currentDate);
       const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
-      const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+      const endDate = addDays(startDate, 41);
       return { startDate, endDate };
     } else if (viewType === "week") {
       const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });

@@ -659,16 +659,8 @@ export const mockGroups: Group[] = [
     courseId: "software",
     name: "Gruppe 1",
     description: "",
-    maxMembers: 7,
-    members: [
-      "Öznur",
-      "Markus",
-      "Melanie",
-      "Andreas",
-      "Johannes",
-      "Thomas",
-      "Gökhan",
-    ],
+    maxMembers: 4,
+    members: ["Öznur", "Markus", "Melanie", "Johannes"],
     createdAt: new Date("2025-10-15"),
   },
 ];
