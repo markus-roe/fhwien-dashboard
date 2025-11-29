@@ -1,33 +1,104 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { SessionPanel } from "@/components/schedule/SessionPanel";
 import { useSessionPanel } from "@/components/schedule/hooks/useSessionPanel";
 import { CalendarView } from "@/components/schedule/CalendarView";
 import { Sidebar } from "@/components/layout/Sidebar";
-import {
-  mockSessions,
-  mockCoachingSlots,
-  mockCourses,
-  currentUser,
-} from "@/data/mockData";
-import type { Session } from "@/data/mockData";
+import { currentUser } from "@/data/mockData";
+import { useCourses } from "@/hooks/useCourses";
+
+const STORAGE_KEY = "schedule-visible-course-ids";
 
 export default function SchedulePage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
 
-  // Get all course IDs for current user's program (from mockData, not just sessions)
+  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+
+  // Get all course IDs for current user's program
   const allCourseIds = useMemo(() => {
     return mockCourses
       .filter((course) => course.program.includes(currentUser.program))
       .map((course) => course.id);
-  }, []);
+  }, [mockCourses]);
 
-  // Initialize all courses as visible
-  const [visibleCourseIds, setVisibleCourseIds] = useState<Set<string>>(
-    () => new Set(allCourseIds)
-  );
+  // Initialize visibleCourseIds from localStorage or default to all courses
+  const [visibleCourseIds, setVisibleCourseIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as string[];
+        return new Set(parsed);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load visible course IDs from localStorage:",
+        error
+      );
+    }
+
+    return new Set();
+  });
+
+  // Update visibleCourseIds when courses are loaded
+  useEffect(() => {
+    if (allCourseIds.length > 0 && !coursesLoading) {
+      setVisibleCourseIds((prev) => {
+        // If visibleCourseIds is empty, initialize with all course IDs
+        if (prev.size === 0) {
+          const newSet = new Set(allCourseIds);
+          // Save to localStorage
+          try {
+            localStorage.setItem(
+              STORAGE_KEY,
+              JSON.stringify(Array.from(newSet))
+            );
+          } catch (error) {
+            console.error(
+              "Failed to save visible course IDs to localStorage:",
+              error
+            );
+          }
+          return newSet;
+        } else {
+          // Merge with new course IDs (in case new courses were added)
+          const newSet = new Set(prev);
+          let hasChanges = false;
+          allCourseIds.forEach((id) => {
+            if (!newSet.has(id)) {
+              newSet.add(id);
+              hasChanges = true;
+            }
+          });
+          // Remove course IDs that no longer exist
+          Array.from(newSet).forEach((id) => {
+            if (!allCourseIds.includes(id)) {
+              newSet.delete(id);
+              hasChanges = true;
+            }
+          });
+          if (hasChanges) {
+            try {
+              localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(Array.from(newSet))
+              );
+            } catch (error) {
+              console.error(
+                "Failed to save visible course IDs to localStorage:",
+                error
+              );
+            }
+            return newSet;
+          }
+          return prev;
+        }
+      });
+    }
+  }, [allCourseIds, coursesLoading]);
 
   const handleCourseVisibilityChange = (courseId: string, visible: boolean) => {
     setVisibleCourseIds((prev) => {
@@ -36,6 +107,15 @@ export default function SchedulePage() {
         next.add(courseId);
       } else {
         next.delete(courseId);
+      }
+      // Save to localStorage
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
+      } catch (error) {
+        console.error(
+          "Failed to save visible course IDs to localStorage:",
+          error
+        );
       }
       return next;
     });

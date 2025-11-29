@@ -16,13 +16,10 @@ import {
 } from "date-fns";
 import { de } from "date-fns/locale";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import {
-  currentUser,
-  mockCoachingSlots,
-  mockCourses,
-  mockSessions,
-  type Session,
-} from "@/data/mockData";
+import { currentUser, type Session } from "@/data/mockData";
+import { useSessions } from "@/hooks/useSessions";
+import { useCoachingSlots } from "@/hooks/useCoachingSlots";
+import { useCourses } from "@/hooks/useCourses";
 import type { CalendarEvent, ViewType } from "./types/calendar";
 import { sessionToEvent } from "./utils/calendarHelpers";
 import { CalendarNavigation } from "./CalendarNavigation";
@@ -54,9 +51,14 @@ export function CalendarView({
     left: number;
   } | null>(null);
 
+  // Fetch data using hooks
+  const { sessions: mockSessions } = useSessions();
+  const { slots: coachingSlots } = useCoachingSlots();
+  const { courses: mockCourses } = useCourses();
+
   // Convert coaching slots to sessions
   const coachingSlotSessions: Session[] = useMemo(() => {
-    return mockCoachingSlots
+    return coachingSlots
       .filter((slot) => slot.participants.some((p) => p === currentUser.name))
       .map((slot) => {
         const course = mockCourses.find((c) => c.id === slot.courseId);
@@ -65,20 +67,20 @@ export function CalendarView({
           courseId: slot.courseId,
           type: "coaching" as const,
           title: course ? `${course.title} Coaching` : "Coaching",
-          program: course?.program || "DTI",
+          program: course?.program || ["DTI"],
           date: slot.date,
           time: slot.time,
           endTime: slot.endTime,
           duration: slot.duration,
           location: "Online",
-          locationType: "online",
+          locationType: "online" as const,
           attendance: "optional" as const,
           objectives: [],
           materials: [],
           participants: slot.participants.length,
         };
       });
-  }, []);
+  }, [coachingSlots, mockCourses]);
 
   // Combine all sessions (mock sessions + coaching slots)
   const allSessions = useMemo(() => {
@@ -90,7 +92,7 @@ export function CalendarView({
       );
     }
     return combined;
-  }, [coachingSlotSessions, visibleCourseIds]);
+  }, [mockSessions, coachingSlotSessions, visibleCourseIds]);
 
   // Convert sessions to events
   const events = useMemo(() => {

@@ -8,12 +8,9 @@ import {
   CreateGroupDialog,
   type CreateGroupFormData,
 } from "@/components/groups/CreateGroupDialog";
-import {
-  mockGroups,
-  mockCourses,
-  currentUser,
-  type Group,
-} from "@/data/mockData";
+import { currentUser, type Group } from "@/data/mockData";
+import { useGroups } from "@/hooks/useGroups";
+import { useCourses } from "@/hooks/useCourses";
 import { Card, CardContent } from "@/components/ui/Card";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { Input } from "@/components/ui/Input";
@@ -24,7 +21,6 @@ import { GroupCard } from "@/components/groups/GroupCard";
 export default function GruppenPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [groups, setGroups] = useState<Group[]>(mockGroups);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"myGroups" | "allGroups">(
     "allGroups"
@@ -32,8 +28,34 @@ export default function GruppenPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
 
+  // Always fetch all groups, filter client-side
+  const {
+    groups: allGroups,
+    loading: groupsLoading,
+    createGroup,
+    joinGroup,
+    leaveGroup,
+  } = useGroups();
+
+  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+
+  // Calculate counts based on ALL groups
+  const totalGroupCount = allGroups.length;
+
+  const courseGroupCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    mockCourses.forEach((course) => {
+      counts[course.id] = 0;
+    });
+    allGroups.forEach((group) => {
+      counts[group.courseId] = (counts[group.courseId] ?? 0) + 1;
+    });
+    return counts;
+  }, [allGroups, mockCourses]);
+
+  // Filter groups by selected course and search query (client-side)
   const filteredGroups = useMemo(() => {
-    let filtered = groups;
+    let filtered = allGroups;
 
     // Filter by course
     if (selectedCourseId) {
@@ -56,7 +78,7 @@ export default function GruppenPage() {
     }
 
     return filtered;
-  }, [selectedCourseId, groups, searchQuery]);
+  }, [selectedCourseId, allGroups, searchQuery, mockCourses]);
 
   const myGroups = useMemo(() => {
     return filteredGroups.filter((g) =>
@@ -65,76 +87,48 @@ export default function GruppenPage() {
   }, [filteredGroups]);
 
   const totalMyGroupsCount = useMemo(() => {
-    return groups.filter((g) => g.members.some((m) => m === currentUser.name))
-      .length;
-  }, [groups]);
+    return allGroups.filter((g) =>
+      g.members.some((m) => m === currentUser.name)
+    ).length;
+  }, [allGroups]);
 
   const courseGroups = useMemo(() => {
     return filteredGroups;
   }, [filteredGroups]);
 
-  const totalGroupCount = groups.length;
+  // Update groups reference for compatibility with existing code
+  const groups = filteredGroups;
 
-  const courseGroupCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    mockCourses.forEach((course) => {
-      counts[course.id] = 0;
-    });
-    groups.forEach((group) => {
-      counts[group.courseId] = (counts[group.courseId] ?? 0) + 1;
-    });
-    return counts;
-  }, [groups]);
-
-  const handleCreateGroup = (data: CreateGroupFormData) => {
+  const handleCreateGroup = async (data: CreateGroupFormData) => {
     const courseId = data.courseId || selectedCourseId;
     if (!courseId || !data.name.trim()) return;
 
-    const newGroup: Group = {
-      id: `g${Date.now()}`,
-      courseId,
-      name: data.name,
-      description: data.description || undefined,
-      maxMembers: data.maxMembers || undefined,
-      members: [currentUser.name],
-      createdAt: new Date(),
-    };
-
-    setGroups((prev) => [...prev, newGroup]);
+    try {
+      await createGroup({
+        courseId,
+        name: data.name,
+        description: data.description,
+        maxMembers: data.maxMembers,
+      });
+    } catch (error) {
+      console.error("Failed to create group:", error);
+    }
   };
 
-  const handleJoinGroup = (groupId: string) => {
-    setGroups((prev) =>
-      prev.map((group) => {
-        if (group.id !== groupId) return group;
-
-        const isAlreadyMember = group.members.some(
-          (m) => m === currentUser.name
-        );
-        if (isAlreadyMember) return group;
-
-        if (group.maxMembers && group.members.length >= group.maxMembers) {
-          return group;
-        }
-
-        return {
-          ...group,
-          members: [...group.members, currentUser.name],
-        };
-      })
-    );
+  const handleJoinGroup = async (groupId: string) => {
+    try {
+      await joinGroup(groupId);
+    } catch (error) {
+      console.error("Failed to join group:", error);
+    }
   };
 
-  const handleLeaveGroup = (groupId: string) => {
-    setGroups((prev) =>
-      prev.map((group) => {
-        if (group.id !== groupId) return group;
-        return {
-          ...group,
-          members: group.members.filter((m) => m !== currentUser.name),
-        };
-      })
-    );
+  const handleLeaveGroup = async (groupId: string) => {
+    try {
+      await leaveGroup(groupId);
+    } catch (error) {
+      console.error("Failed to leave group:", error);
+    }
   };
 
   const isUserInGroup = (group: Group) => {

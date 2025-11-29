@@ -3,13 +3,13 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
-  mockCoachingSlots,
-  mockCourses,
   currentUser,
   type CoachingSlot,
   type Session,
   type LocationType,
 } from "@/data/mockData";
+import { useCoachingSlots } from "@/hooks/useCoachingSlots";
+import { useCourses } from "@/hooks/useCourses";
 import { CoachingSlotCard } from "@/components/coaching/CoachingSlotCard";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useSessionPanel } from "@/components/schedule/hooks/useSessionPanel";
@@ -24,7 +24,6 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 export default function CoachingPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
-  const [slots, setSlots] = useState<CoachingSlot[]>(mockCoachingSlots);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [activeStudentTab, setActiveStudentTab] = useState<
     "myBookings" | "available"
@@ -32,13 +31,67 @@ export default function CoachingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showPastSlots, setShowPastSlots] = useState(false);
 
-  // Separate upcoming and past slots
+  // Always fetch all slots, filter client-side
+  const {
+    slots: allSlots,
+    loading: slotsLoading,
+    bookSlot,
+    cancelBooking,
+    deleteSlot,
+  } = useCoachingSlots();
+
+  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+
+  // Separate upcoming and past slots from ALL slots
+  const { upcomingSlots: allUpcomingSlots, pastSlots: allPastSlots } =
+    useMemo(() => {
+      const now = new Date();
+      const upcoming: CoachingSlot[] = [];
+      const past: CoachingSlot[] = [];
+
+      allSlots.forEach((slot) => {
+        const slotDateTime = new Date(slot.date);
+        slotDateTime.setHours(
+          parseInt(slot.time.split(":")[0]),
+          parseInt(slot.time.split(":")[1])
+        );
+        if (slotDateTime >= now) {
+          upcoming.push(slot);
+        } else {
+          past.push(slot);
+        }
+      });
+
+      return { upcomingSlots: upcoming, pastSlots: past };
+    }, [allSlots]);
+
+  // Calculate counts based on ALL upcoming slots
+  const totalSlotCount = allUpcomingSlots.length;
+
+  const courseSlotCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    mockCourses.forEach((course) => {
+      counts[course.id] = 0;
+    });
+    allUpcomingSlots.forEach((slot) => {
+      counts[slot.courseId] = (counts[slot.courseId] ?? 0) + 1;
+    });
+    return counts;
+  }, [allUpcomingSlots, mockCourses]);
+
+  // Filter slots by selected course (client-side)
+  const filteredAllSlots = useMemo(() => {
+    if (!selectedCourseId) return allSlots;
+    return allSlots.filter((slot) => slot.courseId === selectedCourseId);
+  }, [allSlots, selectedCourseId]);
+
+  // Separate upcoming and past slots from filtered slots
   const { upcomingSlots, pastSlots } = useMemo(() => {
     const now = new Date();
     const upcoming: CoachingSlot[] = [];
     const past: CoachingSlot[] = [];
 
-    slots.forEach((slot) => {
+    filteredAllSlots.forEach((slot) => {
       const slotDateTime = new Date(slot.date);
       slotDateTime.setHours(
         parseInt(slot.time.split(":")[0]),
@@ -52,21 +105,7 @@ export default function CoachingPage() {
     });
 
     return { upcomingSlots: upcoming, pastSlots: past };
-  }, [slots]);
-
-  // For badge counts, only use upcoming slots
-  const totalSlotCount = upcomingSlots.length;
-
-  const courseSlotCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    mockCourses.forEach((course) => {
-      counts[course.id] = 0;
-    });
-    upcomingSlots.forEach((slot) => {
-      counts[slot.courseId] = (counts[slot.courseId] ?? 0) + 1;
-    });
-    return counts;
-  }, [upcomingSlots]);
+  }, [filteredAllSlots]);
 
   // Filter upcoming slots
   const filteredUpcomingSlots = useMemo(() => {
@@ -143,10 +182,13 @@ export default function CoachingPage() {
   }, [filteredUpcomingSlots]);
 
   const totalMyBookingsCount = useMemo(() => {
-    return upcomingSlots.filter((slot) =>
+    return allUpcomingSlots.filter((slot) =>
       slot.participants.some((p) => p === currentUser.name)
     ).length;
-  }, [upcomingSlots]);
+  }, [allUpcomingSlots]);
+
+  // Update slots reference for compatibility with existing code
+  const slots = filteredAllSlots;
 
   const myPastSlots = useMemo(() => {
     return filteredPastSlots.filter((slot) =>
@@ -175,35 +217,28 @@ export default function CoachingPage() {
     return groupSlotsByDay(filteredPastSlots);
   }, [filteredPastSlots]);
 
-  const handleBookSlot = (slotId: string) => {
-    setSlots((prev) =>
-      prev.map((slot) => {
-        if (slot.id !== slotId) return slot;
-        if (slot.participants.length >= slot.maxParticipants) return slot;
-        if (slot.participants.some((p) => p === currentUser.name)) return slot;
-
-        return {
-          ...slot,
-          participants: [...slot.participants, currentUser.name],
-        };
-      })
-    );
+  const handleBookSlot = async (slotId: string) => {
+    try {
+      await bookSlot(slotId);
+    } catch (error) {
+      console.error("Failed to book slot:", error);
+    }
   };
 
-  const handleCancelBooking = (slotId: string) => {
-    setSlots((prev) =>
-      prev.map((slot) => {
-        if (slot.id !== slotId) return slot;
-        return {
-          ...slot,
-          participants: slot.participants.filter((p) => p !== currentUser.name),
-        };
-      })
-    );
+  const handleCancelBooking = async (slotId: string) => {
+    try {
+      await cancelBooking(slotId);
+    } catch (error) {
+      console.error("Failed to cancel booking:", error);
+    }
   };
 
-  const handleDeleteSlot = (slotId: string) => {
-    setSlots((prev) => prev.filter((slot) => slot.id !== slotId));
+  const handleDeleteSlot = async (slotId: string) => {
+    try {
+      await deleteSlot(slotId);
+    } catch (error) {
+      console.error("Failed to delete slot:", error);
+    }
   };
 
   const handleSessionClick = (session: Session) => {

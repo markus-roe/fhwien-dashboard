@@ -6,12 +6,10 @@ import { NextUpCard } from "@/components/schedule/NextUpCard";
 import { EventPopover } from "@/components/schedule/EventPopover";
 import { sessionToEvent } from "@/components/schedule/utils/calendarHelpers";
 import type { CalendarEvent } from "@/components/schedule/types/calendar";
-import {
-  mockSessions,
-  mockCoachingSlots,
-  mockCourses,
-  currentUser,
-} from "@/data/mockData";
+import { currentUser } from "@/data/mockData";
+import { useSessions } from "@/hooks/useSessions";
+import { useCoachingSlots } from "@/hooks/useCoachingSlots";
+import { useCourses } from "@/hooks/useCourses";
 
 type SidebarProps = {
   showCalendar?: boolean;
@@ -40,9 +38,14 @@ export function Sidebar({
   } | null>(null);
   const [showEventPopover, setShowEventPopover] = useState(false);
 
+  // Fetch data using hooks
+  const { sessions: mockSessions } = useSessions();
+  const { slots: coachingSlots } = useCoachingSlots();
+  const { courses: mockCourses } = useCourses();
+
   // Convert coaching slots to sessions for calendar
   const slotSessions: Session[] = useMemo(() => {
-    return mockCoachingSlots
+    return coachingSlots
       .filter((slot) => slot.participants.some((p) => p === currentUser.name))
       .map((slot) => {
         const course = mockCourses.find((c) => c.id === slot.courseId);
@@ -51,32 +54,32 @@ export function Sidebar({
           courseId: slot.courseId,
           type: "coaching" as const,
           title: course ? `${course.title} Coaching` : "Coaching",
-          program: course?.program || "DTI",
+          program: course?.program || ["DTI"],
           date: slot.date,
           time: slot.time,
           endTime: slot.endTime,
           duration: slot.duration,
           location: "Online",
-          locationType: "online",
+          locationType: "online" as const,
           attendance: "optional" as const,
           objectives: [],
           materials: [],
           participants: slot.participants.length,
         };
       });
-  }, []);
+  }, [coachingSlots, mockCourses]);
 
   // Get all sessions (unfiltered) for computing available courses
   const allSessionsUnfiltered = useMemo(() => {
     return [...mockSessions, ...slotSessions];
-  }, [slotSessions]);
+  }, [mockSessions, slotSessions]);
 
   // Get all courses from mockData filtered by current user's program
   const availableCourses = useMemo(() => {
     return mockCourses
       .filter((course) => course.program.includes(currentUser.program))
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, []);
+  }, [mockCourses]);
 
   // Combine all sessions (mock sessions + coaching slots + additional sessions)
   // Filter by visible courses if filter is provided

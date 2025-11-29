@@ -2,11 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  mockSessions,
-  mockCoachingSlots,
-  mockCourses,
-  mockGroups,
-  mockUsers,
   type Session,
   type CoachingSlot,
   type Group,
@@ -14,6 +9,11 @@ import {
   type Program,
   currentUser,
 } from "@/data/mockData";
+import { useSessions } from "@/hooks/useSessions";
+import { useCoachingSlots } from "@/hooks/useCoachingSlots";
+import { useGroups } from "@/hooks/useGroups";
+import { useUsers } from "@/hooks/useUsers";
+import { useCourses } from "@/hooks/useCourses";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Calendar, CalendarClock } from "lucide-react";
@@ -47,25 +47,95 @@ export default function DashboardPage() {
     redirect("/schedule");
   }
 
-  const [sessions, setSessions] = useState<Session[]>(() => [...mockSessions]);
-  const [coachingSlots, setCoachingSlots] = useState<CoachingSlot[]>(() => [
-    ...mockCoachingSlots,
-  ]);
-  const [groups, setGroups] = useState<Group[]>(() => [...mockGroups]);
-  const [users, setUsers] = useState<User[]>(() => [...mockUsers]);
-
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [selectedGroupId, setSelectedGroupId] = useState<string>(
-    mockGroups[0]?.id ?? ""
-  );
-  const [selectedUserId, setSelectedUserId] = useState<string>(
-    mockUsers[0]?.id ?? ""
-  );
   const [activeDashboardTab, setActiveDashboardTab] = useState<
     "lvs" | "coachings" | "groups" | "users"
   >("lvs");
   const [userSearch, setUserSearch] = useState("");
   const [programFilter, setProgramFilter] = useState<Program | "all">("all");
+
+  // Always fetch all data, filter client-side
+  const {
+    sessions: allSessions,
+    loading: sessionsLoading,
+    createSession,
+    updateSession,
+    deleteSession,
+  } = useSessions();
+
+  const {
+    slots: allCoachingSlots,
+    loading: coachingSlotsLoading,
+    createSlot: createCoachingSlot,
+    updateSlot: updateCoachingSlot,
+    deleteSlot: deleteCoachingSlot,
+  } = useCoachingSlots();
+
+  const {
+    groups: allGroups,
+    loading: groupsLoading,
+    createGroup,
+    updateGroup,
+    deleteGroup,
+  } = useGroups();
+
+  const {
+    users: allUsers,
+    loading: usersLoading,
+    createUser,
+    updateUser,
+    deleteUser,
+  } = useUsers();
+
+  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+
+  // Filter data client-side
+  const sessions = useMemo(() => {
+    if (!selectedCourseId) return allSessions;
+    return allSessions.filter(
+      (session) => session.courseId === selectedCourseId
+    );
+  }, [allSessions, selectedCourseId]);
+
+  const coachingSlots = useMemo(() => {
+    if (!selectedCourseId) return allCoachingSlots;
+    return allCoachingSlots.filter(
+      (slot) => slot.courseId === selectedCourseId
+    );
+  }, [allCoachingSlots, selectedCourseId]);
+
+  const groups = useMemo(() => {
+    if (!selectedCourseId) return allGroups;
+    return allGroups.filter((group) => group.courseId === selectedCourseId);
+  }, [allGroups, selectedCourseId]);
+
+  const users = useMemo(() => {
+    let filtered = allUsers;
+
+    // Filter by program
+    if (programFilter !== "all") {
+      filtered = filtered.filter((user) => user.program === programFilter);
+    }
+
+    // Filter by search
+    if (userSearch.trim()) {
+      const query = userSearch.toLowerCase();
+      filtered = filtered.filter(
+        (user) =>
+          user.name.toLowerCase().includes(query) ||
+          user.email.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [allUsers, programFilter, userSearch]);
+
+  const [selectedGroupId, setSelectedGroupId] = useState<string>(
+    groups[0]?.id ?? ""
+  );
+  const [selectedUserId, setSelectedUserId] = useState<string>(
+    users[0]?.id ?? ""
+  );
 
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [editFormState, setEditFormState] =
@@ -88,40 +158,13 @@ export default function DashboardPage() {
     [selectedCourseId]
   );
 
-  const courseSessions = useMemo(() => {
-    const filtered = selectedCourseId
-      ? sessions.filter((session) => session.courseId === selectedCourseId)
-      : sessions;
-    return filtered;
-  }, [sessions, selectedCourseId]);
+  // These are now just aliases for the filtered data
+  const courseSessions = sessions;
+  const courseCoachingSlots = coachingSlots;
+  const courseGroups = groups;
+  const filteredUsers = users;
 
-  const courseCoachingSlots = useMemo(() => {
-    const filtered = selectedCourseId
-      ? coachingSlots.filter((slot) => slot.courseId === selectedCourseId)
-      : coachingSlots;
-    return filtered;
-  }, [coachingSlots, selectedCourseId]);
-
-  const courseGroups = useMemo(() => {
-    return selectedCourseId
-      ? groups.filter((group) => group.courseId === selectedCourseId)
-      : groups;
-  }, [groups, selectedCourseId]);
-
-  const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      const matchesProgram =
-        programFilter === "all" ? true : user.program === programFilter;
-      const query = userSearch.toLowerCase();
-      const matchesSearch =
-        !query ||
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query);
-      return matchesProgram && matchesSearch;
-    });
-  }, [programFilter, userSearch, users]);
-
-  const assignableGroups = courseGroups.length > 0 ? courseGroups : groups;
+  const assignableGroups = courseGroups.length > 0 ? courseGroups : allGroups;
 
   useEffect(() => {
     if (
@@ -171,68 +214,55 @@ export default function DashboardPage() {
     });
   };
 
-  const handleDeleteSession = (sessionId: string) => {
-    setSessions((prev) => prev.filter((session) => session.id !== sessionId));
+  const handleDeleteSession = async (sessionId: string) => {
+    try {
+      await deleteSession(sessionId);
+    } catch (error) {
+      console.error("Failed to delete session:", error);
+    }
   };
 
-  const handleSaveSession = () => {
+  const handleSaveSession = async () => {
     if (!editFormState || !editFormState.courseId) return;
 
-    const updatedDuration = calculateDuration(
-      editFormState.time,
-      editFormState.endTime
-    );
-
-    // Update bestehende Session
-    if (editingSession) {
-      setSessions((prev) =>
-        prev.map((session) =>
-          session.id === editingSession.id
-            ? {
-                ...session,
-                courseId: editFormState.courseId!,
-                title: editFormState.title,
-                date: editFormState.date,
-                time: editFormState.time,
-                endTime: editFormState.endTime,
-                duration: updatedDuration,
-                location: editFormState.location,
-                locationType: editFormState.locationType,
-                attendance: editFormState.attendance,
-              }
-            : session
-        )
-      );
-    } else {
-      // Neue Session anlegen
-      const course = mockCourses.find((c) => c.id === editFormState.courseId);
-
-      if (course) {
-        const newSession: Session = {
-          id: `s-${Date.now()}`,
+    try {
+      if (editingSession) {
+        // Update bestehende Session
+        await updateSession(editingSession.id, {
+          courseId: editFormState.courseId,
+          title: editFormState.title,
+          date: editFormState.date,
+          time: editFormState.time,
+          endTime: editFormState.endTime,
+          location: editFormState.location,
+          locationType: editFormState.locationType,
+          attendance: editFormState.attendance,
+        });
+      } else {
+        // Neue Session anlegen
+        await createSession({
           courseId: editFormState.courseId,
           type: "lecture",
           title: editFormState.title,
           date: editFormState.date,
           time: editFormState.time,
           endTime: editFormState.endTime,
-          duration: updatedDuration,
           location: editFormState.location,
           locationType: editFormState.locationType,
           attendance: editFormState.attendance,
           objectives: [],
           materials: [],
-        };
-
-        setSessions((prev) => [...prev, newSession]);
+        });
       }
-    }
 
-    setEditingSession(null);
-    setEditFormState(null);
+      setEditingSession(null);
+      setEditFormState(null);
+    } catch (error) {
+      console.error("Failed to save session:", error);
+    }
   };
 
-  const handleCreateCoaching = (data: {
+  const handleCreateCoaching = async (data: {
     courseId: string;
     date: Date;
     time: string;
@@ -243,28 +273,19 @@ export default function DashboardPage() {
     participants: string[];
     description?: string;
   }) => {
-    // Convert participant IDs to names
-    const participantNames = data.participants
-      .map((id) => {
-        const user = users.find((u) => u.id === id);
-        return user?.name;
-      })
-      .filter((name): name is string => !!name);
-
-    const newSlot: CoachingSlot = {
-      id: `cs-${Date.now()}`,
-      courseId: data.courseId,
-      date: data.date,
-      time: data.time,
-      endTime: data.endTime,
-      duration: calculateDuration(data.time, data.endTime),
-      maxParticipants: data.maxParticipants,
-      participants: participantNames,
-      description: data.description,
-      createdAt: new Date(),
-    };
-
-    setCoachingSlots((prev) => [...prev, newSlot]);
+    try {
+      await createCoachingSlot({
+        courseId: data.courseId,
+        date: data.date,
+        time: data.time,
+        endTime: data.endTime,
+        maxParticipants: data.maxParticipants,
+        participants: data.participants,
+        description: data.description,
+      });
+    } catch (error) {
+      console.error("Failed to create coaching slot:", error);
+    }
   };
 
   const handleOpenEditCoaching = (slot: CoachingSlot) => {
@@ -272,7 +293,7 @@ export default function DashboardPage() {
     setIsCreateCoachingOpen(true);
   };
 
-  const handleSaveCoaching = (data: {
+  const handleSaveCoaching = async (data: {
     courseId: string;
     date: Date;
     time: string;
@@ -283,134 +304,126 @@ export default function DashboardPage() {
     participants: string[];
     description?: string;
   }) => {
-    if (editingCoachingSlot) {
-      // Update existing coaching slot
-      const participantNames = data.participants
-        .map((id) => {
-          const user = users.find((u) => u.id === id);
-          return user?.name;
-        })
-        .filter((name): name is string => !!name);
-
-      setCoachingSlots((prev) =>
-        prev.map((slot) =>
-          slot.id === editingCoachingSlot.id
-            ? {
-                ...slot,
-                courseId: data.courseId,
-                date: data.date,
-                time: data.time,
-                endTime: data.endTime,
-                duration: calculateDuration(data.time, data.endTime),
-                maxParticipants: data.maxParticipants,
-                participants: participantNames,
-                description: data.description,
-              }
-            : slot
-        )
-      );
-      setEditingCoachingSlot(null);
-    } else {
-      // Create new coaching slot
-      handleCreateCoaching(data);
+    try {
+      if (editingCoachingSlot) {
+        // Update existing coaching slot
+        await updateCoachingSlot(editingCoachingSlot.id, {
+          courseId: data.courseId,
+          date: data.date,
+          time: data.time,
+          endTime: data.endTime,
+          maxParticipants: data.maxParticipants,
+          participants: data.participants,
+          description: data.description,
+        });
+        setEditingCoachingSlot(null);
+      } else {
+        // Create new coaching slot
+        await handleCreateCoaching(data);
+      }
+      setIsCreateCoachingOpen(false);
+    } catch (error) {
+      console.error("Failed to save coaching slot:", error);
     }
-    setIsCreateCoachingOpen(false);
   };
 
-  const handleDeleteCoaching = (slotId: string) => {
-    setCoachingSlots((prev) => prev.filter((slot) => slot.id !== slotId));
-    setCoachingSlotToDelete(null);
+  const handleDeleteCoaching = async (slotId: string) => {
+    try {
+      await deleteCoachingSlot(slotId);
+      setCoachingSlotToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete coaching slot:", error);
+    }
   };
 
-  const handleDeleteGroup = (groupId: string) => {
-    setGroups((prev) => prev.filter((group) => group.id !== groupId));
-    setGroupToDelete(null);
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+      await deleteGroup(groupId);
+      setGroupToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete group:", error);
+    }
   };
 
-  const handleAssignUserToGroup = (groupId: string, userId: string) => {
+  const handleAssignUserToGroup = async (groupId: string, userId: string) => {
     if (!groupId || !userId) return;
 
-    const user = users.find((u) => u.id === userId);
-    if (!user) return;
+    try {
+      // Note: The API uses currentUser, so we need to use join endpoint
+      // For now, we'll use updateGroup to add the user
+      // Use allGroups to find the group even if it's filtered out
+      const group = allGroups.find((g) => g.id === groupId);
+      // Use allUsers to find the user even if it's filtered out
+      const user = allUsers.find((u) => u.id === userId);
+      if (!group || !user) return;
 
-    setGroups((prev) =>
-      prev.map((group) => {
-        if (group.id !== groupId) return group;
+      const isAlreadyMember = group.members.includes(user.name);
+      const isFull =
+        group.maxMembers && group.members.length >= group.maxMembers;
+      if (isAlreadyMember || isFull) return;
 
-        const isAlreadyMember = group.members.includes(user.name);
-        const isFull =
-          group.maxMembers && group.members.length >= group.maxMembers;
-        if (isAlreadyMember || isFull) {
-          return group;
-        }
-
-        return {
-          ...group,
-          members: [...group.members, user.name],
-        };
-      })
-    );
+      await updateGroup(groupId, {
+        members: [...group.members, user.name],
+      });
+    } catch (error) {
+      console.error("Failed to assign user to group:", error);
+    }
   };
 
-  const handleRemoveUserFromGroup = (groupId: string, member: string) => {
-    setGroups((prev) =>
-      prev.map((group) =>
-        group.id === groupId
-          ? {
-              ...group,
-              members: group.members.filter((existing) => existing !== member),
-            }
-          : group
-      )
-    );
+  const handleRemoveUserFromGroup = async (groupId: string, member: string) => {
+    try {
+      // Use allGroups to find the group even if it's filtered out
+      const group = allGroups.find((g) => g.id === groupId);
+      if (!group) return;
+
+      await updateGroup(groupId, {
+        members: group.members.filter((existing) => existing !== member),
+      });
+    } catch (error) {
+      console.error("Failed to remove user from group:", error);
+    }
   };
 
-  const handleCreateGroup = (data: CreateGroupFormData) => {
+  const handleCreateGroup = async (data: CreateGroupFormData) => {
     const courseId = data.courseId || selectedCourseId;
     if (!courseId || !data.name.trim()) return;
 
-    const newGroup: Group = {
-      id: `g-${Date.now()}`,
-      courseId,
-      name: data.name,
-      description: data.description || undefined,
-      maxMembers: data.maxMembers || undefined,
-      members: [],
-      createdAt: new Date(),
-    };
-
-    setGroups((prev) => [...prev, newGroup]);
+    try {
+      await createGroup({
+        courseId,
+        name: data.name,
+        description: data.description,
+        maxMembers: data.maxMembers,
+      });
+    } catch (error) {
+      console.error("Failed to create group:", error);
+    }
   };
 
-  const handleCreateOrEditStudent = (data: CreateStudentFormData) => {
-    if (editingStudent) {
-      // Update existing user
-      setUsers((prev) =>
-        prev.map((user) =>
-          user.id === editingStudent.id
-            ? {
-                ...user,
-                name: data.name,
-                email: data.email,
-                program: data.program,
-                role: "student",
-                initials: data.initials,
-              }
-            : user
-        )
-      );
-      setEditingStudent(null);
-    } else {
-      // Create new user
-      const newUser: User = {
-        id: `u-${Date.now()}`,
-        name: data.name,
-        email: data.email,
-        program: data.program,
-        role: "student",
-        initials: data.initials,
-      };
-      setUsers((prev) => [...prev, newUser]);
+  const handleCreateOrEditStudent = async (data: CreateStudentFormData) => {
+    try {
+      if (editingStudent) {
+        // Update existing user
+        await updateUser(editingStudent.id, {
+          name: data.name,
+          email: data.email,
+          program: data.program,
+          initials: data.initials,
+          role: "student",
+        });
+        setEditingStudent(null);
+      } else {
+        // Create new user
+        await createUser({
+          name: data.name,
+          email: data.email,
+          program: data.program,
+          initials: data.initials,
+          role: "student",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save student:", error);
     }
   };
 
@@ -419,31 +432,34 @@ export default function DashboardPage() {
     setIsCreateStudentOpen(true);
   };
 
-  const handleDeleteStudent = (userId: string) => {
-    setUsers((prev) => prev.filter((user) => user.id !== userId));
+  const handleDeleteStudent = async (userId: string) => {
+    try {
+      await deleteUser(userId);
+    } catch (error) {
+      console.error("Failed to delete student:", error);
+    }
   };
 
   const dashboardTabs = [
     {
       value: "lvs",
       label: "Lehrveranstaltungen",
-      badge: courseSessions.length > 0 ? courseSessions.length : undefined,
+      badge: allSessions.length > 0 ? allSessions.length : undefined,
     },
     {
       value: "coachings",
       label: "Coachings",
-      badge:
-        courseCoachingSlots.length > 0 ? courseCoachingSlots.length : undefined,
+      badge: allCoachingSlots.length > 0 ? allCoachingSlots.length : undefined,
     },
     {
       value: "groups",
       label: "Gruppen",
-      badge: courseGroups.length > 0 ? courseGroups.length : undefined,
+      badge: allGroups.length > 0 ? allGroups.length : undefined,
     },
     {
       value: "users",
       label: "Studenten",
-      badge: users.length > 0 ? users.length : undefined,
+      badge: allUsers.length > 0 ? allUsers.length : undefined,
     },
   ];
 
