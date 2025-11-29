@@ -4,7 +4,12 @@ import { useMemo } from "react";
 import { format, isToday, isTomorrow, isYesterday } from "date-fns";
 import { de } from "date-fns/locale";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import { mockSessions, mockCoachingSlots, mockCourses } from "@/data/mockData";
+import {
+  mockSessions,
+  mockCoachingSlots,
+  mockCourses,
+  currentUser,
+} from "@/data/mockData";
 import type { Session } from "@/data/mockData";
 
 interface NextUpListProps {
@@ -20,26 +25,28 @@ export const NextUpList = ({
 }: NextUpListProps) => {
   // Convert coaching slots to sessions (only if no sessions provided)
   const coachingSlotSessions: Session[] = useMemo(() => {
-    return mockCoachingSlots.map((slot) => {
-      const course = mockCourses.find((c) => c.id === slot.courseId);
-      return {
-        id: slot.id,
-        courseId: slot.courseId,
-        type: "coaching" as const,
-        title: course ? `${course.title} Coaching` : "Coaching",
-        program: course?.program || "DTI",
-        date: slot.date,
-        time: slot.time,
-        endTime: slot.endTime,
-        duration: slot.duration,
-        location: "Online",
-        locationType: "online",
-        attendance: "optional" as const,
-        objectives: [],
-        materials: [],
-        participants: slot.participants.length,
-      };
-    });
+    return mockCoachingSlots
+      .filter((slot) => slot.participants.includes(currentUser.name))
+      .map((slot) => {
+        const course = mockCourses.find((c) => c.id === slot.courseId);
+        return {
+          id: slot.id,
+          courseId: slot.courseId,
+          type: "coaching" as const,
+          title: course ? `${course.title} Coaching` : "Coaching",
+          program: course?.program || "DTI",
+          date: slot.date,
+          time: slot.time,
+          endTime: slot.endTime,
+          duration: slot.duration,
+          location: "Online",
+          locationType: "online",
+          attendance: "optional" as const,
+          objectives: [],
+          materials: [],
+          participants: slot.participants.length,
+        };
+      });
   }, []);
 
   // Combine all sessions (mock sessions + coaching slots) - only if no sessions provided
