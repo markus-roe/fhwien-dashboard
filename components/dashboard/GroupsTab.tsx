@@ -2,6 +2,8 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { CourseSelector } from "./CourseSelector";
 import {
   Popover,
   PopoverTrigger,
@@ -13,20 +15,28 @@ type GroupsTabProps = {
   groups: Group[];
   courses: Course[];
   users: User[];
+  selectedCourseId: string | null;
+  onCourseChange: (courseId: string | null) => void;
   onDelete: (groupId: string) => void;
   onAssignUser: (groupId: string, userId: string) => void;
   onRemoveUser: (groupId: string, member: string) => void;
   onCreate: () => void;
+  search: string;
+  onSearchChange: (search: string) => void;
 };
 
 export function GroupsTab({
   groups,
   courses,
   users,
+  selectedCourseId,
+  onCourseChange,
   onDelete,
   onAssignUser,
   onRemoveUser,
   onCreate,
+  search,
+  onSearchChange,
 }: GroupsTabProps) {
   // Group groups by courseId
   const groupsByCourse = groups.reduce((acc, group) => {
@@ -47,6 +57,26 @@ export function GroupsTab({
 
   return (
     <div className="space-y-5">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,280px),minmax(0,1fr)]">
+        <CourseSelector
+          courses={courses}
+          selectedCourseId={selectedCourseId}
+          onCourseChange={onCourseChange}
+        />
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">
+            Gruppen suchen
+          </label>
+          <Input
+            type="text"
+            placeholder="Gruppenname, Mitglieder oder Fach durchsuchen..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full"
+          />
+        </div>
+      </div>
+
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h2 className="text-xs sm:text-sm font-semibold text-zinc-900 flex-1">

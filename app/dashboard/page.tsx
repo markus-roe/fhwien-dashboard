@@ -16,7 +16,6 @@ import { useUsers } from "@/hooks/useUsers";
 import { useCourses } from "@/hooks/useCourses";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Calendar, CalendarClock } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { redirect } from "next/navigation";
@@ -35,7 +34,6 @@ import {
 } from "@/components/dashboard/CreateStudentDialog";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
 import { CreateCoachingSlotDialog } from "@/components/coaching/CreateCoachingSlotDialog";
-import { CourseSelector } from "@/components/dashboard/CourseSelector";
 import { SessionsTab } from "@/components/dashboard/SessionsTab";
 import { CoachingSlotsTab } from "@/components/dashboard/CoachingSlotsTab";
 import { GroupsTab } from "@/components/dashboard/GroupsTab";
@@ -53,6 +51,9 @@ export default function DashboardPage() {
   >("lvs");
   const [userSearch, setUserSearch] = useState("");
   const [programFilter, setProgramFilter] = useState<Program | "all">("all");
+  const [sessionSearch, setSessionSearch] = useState("");
+  const [coachingSlotSearch, setCoachingSlotSearch] = useState("");
+  const [groupSearch, setGroupSearch] = useState("");
 
   // Always fetch all data, filter client-side
   const {
@@ -91,23 +92,84 @@ export default function DashboardPage() {
 
   // Filter data client-side
   const sessions = useMemo(() => {
-    if (!selectedCourseId) return allSessions;
-    return allSessions.filter(
-      (session) => session.courseId === selectedCourseId
-    );
-  }, [allSessions, selectedCourseId]);
+    let filtered = allSessions;
+
+    // Filter by course
+    if (selectedCourseId) {
+      filtered = filtered.filter(
+        (session) => session.courseId === selectedCourseId
+      );
+    }
+
+    // Filter by search
+    if (sessionSearch.trim()) {
+      const query = sessionSearch.toLowerCase();
+      filtered = filtered.filter((session) => {
+        const course = mockCourses.find((c) => c.id === session.courseId);
+        return (
+          session.title.toLowerCase().includes(query) ||
+          session.location.toLowerCase().includes(query) ||
+          course?.title.toLowerCase().includes(query) ||
+          false
+        );
+      });
+    }
+
+    return filtered;
+  }, [allSessions, selectedCourseId, sessionSearch, mockCourses]);
 
   const coachingSlots = useMemo(() => {
-    if (!selectedCourseId) return allCoachingSlots;
-    return allCoachingSlots.filter(
-      (slot) => slot.courseId === selectedCourseId
-    );
-  }, [allCoachingSlots, selectedCourseId]);
+    let filtered = allCoachingSlots;
+
+    // Filter by course
+    if (selectedCourseId) {
+      filtered = filtered.filter((slot) => slot.courseId === selectedCourseId);
+    }
+
+    // Filter by search
+    if (coachingSlotSearch.trim()) {
+      const query = coachingSlotSearch.toLowerCase();
+      filtered = filtered.filter((slot) => {
+        const course = mockCourses.find((c) => c.id === slot.courseId);
+        return (
+          slot.description?.toLowerCase().includes(query) ||
+          course?.title.toLowerCase().includes(query) ||
+          slot.participants.some((p) => p.toLowerCase().includes(query)) ||
+          false
+        );
+      });
+    }
+
+    return filtered;
+  }, [allCoachingSlots, selectedCourseId, coachingSlotSearch, mockCourses]);
 
   const groups = useMemo(() => {
-    if (!selectedCourseId) return allGroups;
-    return allGroups.filter((group) => group.courseId === selectedCourseId);
-  }, [allGroups, selectedCourseId]);
+    let filtered = allGroups;
+
+    // Filter by course
+    if (selectedCourseId) {
+      filtered = filtered.filter(
+        (group) => group.courseId === selectedCourseId
+      );
+    }
+
+    // Filter by search
+    if (groupSearch.trim()) {
+      const query = groupSearch.toLowerCase();
+      filtered = filtered.filter((group) => {
+        const course = mockCourses.find((c) => c.id === group.courseId);
+        return (
+          group.name.toLowerCase().includes(query) ||
+          group.description?.toLowerCase().includes(query) ||
+          course?.title.toLowerCase().includes(query) ||
+          group.members.some((m) => m.toLowerCase().includes(query)) ||
+          false
+        );
+      });
+    }
+
+    return filtered;
+  }, [allGroups, selectedCourseId, groupSearch, mockCourses]);
 
   const users = useMemo(() => {
     let filtered = allUsers;
@@ -155,7 +217,7 @@ export default function DashboardPage() {
 
   const selectedCourse = useMemo(
     () => mockCourses.find((c) => c.id === selectedCourseId) || null,
-    [selectedCourseId]
+    [selectedCourseId, mockCourses]
   );
 
   // These are now just aliases for the filtered data
@@ -493,29 +555,6 @@ export default function DashboardPage() {
                 className="mb-4"
               />
               <div className="flex-1 min-w-0 space-y-5">
-                {activeDashboardTab !== "users" && (
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <CourseSelector
-                      courses={mockCourses}
-                      selectedCourseId={selectedCourseId}
-                      onCourseChange={setSelectedCourseId}
-                    />
-                    {["lvs", "coachings"].includes(activeDashboardTab) &&
-                      selectedCourse && (
-                        <div className="flex flex-wrap gap-2 text-xs text-zinc-500 sm:items-end">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-50 border border-zinc-200">
-                            <CalendarClock className="w-3 h-3 text-zinc-400" />
-                            {courseSessions.length} Lehrveranstaltungen
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-50 border border-zinc-200">
-                            <Calendar className="w-3 h-3 text-zinc-400" />
-                            {courseCoachingSlots.length} Coaching-Slots
-                          </span>
-                        </div>
-                      )}
-                  </div>
-                )}
-
                 {activeDashboardTab === "lvs" && (
                   <SessionsTab
                     sessions={courseSessions}
@@ -525,6 +564,8 @@ export default function DashboardPage() {
                     onEdit={handleOpenEditSession}
                     onDelete={setSessionToDelete}
                     onCreate={handleOpenCreateSession}
+                    search={sessionSearch}
+                    onSearchChange={setSessionSearch}
                   />
                 )}
 
@@ -533,12 +574,15 @@ export default function DashboardPage() {
                     slots={courseCoachingSlots}
                     courses={mockCourses}
                     selectedCourseId={selectedCourseId}
+                    onCourseChange={setSelectedCourseId}
                     onEdit={handleOpenEditCoaching}
                     onDelete={setCoachingSlotToDelete}
                     onCreate={() => {
                       setEditingCoachingSlot(null);
                       setIsCreateCoachingOpen(true);
                     }}
+                    search={coachingSlotSearch}
+                    onSearchChange={setCoachingSlotSearch}
                   />
                 )}
 
@@ -547,10 +591,14 @@ export default function DashboardPage() {
                     groups={courseGroups}
                     courses={mockCourses}
                     users={users}
+                    selectedCourseId={selectedCourseId}
+                    onCourseChange={setSelectedCourseId}
                     onDelete={handleDeleteGroup}
                     onAssignUser={handleAssignUserToGroup}
                     onRemoveUser={handleRemoveUserFromGroup}
                     onCreate={() => setIsCreateGroupOpen(true)}
+                    search={groupSearch}
+                    onSearchChange={setGroupSearch}
                   />
                 )}
 

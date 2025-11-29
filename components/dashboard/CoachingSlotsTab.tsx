@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { CourseSelector } from "./CourseSelector";
 import { DataTable } from "./DataTable";
 import { CoachingSlotRow } from "./CoachingSlotRow";
 import { CoachingSlotCard } from "./CoachingSlotCard";
@@ -13,18 +15,24 @@ type CoachingSlotsTabProps = {
   slots: CoachingSlot[];
   courses: Course[];
   selectedCourseId: string | null;
+  onCourseChange: (courseId: string | null) => void;
   onEdit: (slot: CoachingSlot) => void;
   onDelete: (slot: CoachingSlot) => void;
   onCreate: () => void;
+  search: string;
+  onSearchChange: (search: string) => void;
 };
 
 export function CoachingSlotsTab({
   slots,
   courses,
   selectedCourseId,
+  onCourseChange,
   onEdit,
   onDelete,
   onCreate,
+  search,
+  onSearchChange,
 }: CoachingSlotsTabProps) {
   const [showPastSlots, setShowPastSlots] = useState(false);
   const { pastSlots, slotsToShow } = useCoachingSlots(slots, showPastSlots);
@@ -38,7 +46,27 @@ export function CoachingSlotsTab({
     : "grid-cols-[140px,100px,180px,200px,1fr,auto]";
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,280px),minmax(0,1fr)]">
+        <CourseSelector
+          courses={courses}
+          selectedCourseId={selectedCourseId}
+          onCourseChange={onCourseChange}
+        />
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">
+            Coaching-Slots suchen
+          </label>
+          <Input
+            type="text"
+            placeholder="Beschreibung, Teilnehmer oder Fach durchsuchen..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full"
+          />
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h2 className="text-xs sm:text-sm font-semibold text-zinc-900 flex-1">
           Coaching-Slots

@@ -37,11 +37,11 @@ export function UsersTab({
       <div className="grid gap-3 md:grid-cols-[minmax(0,280px),minmax(0,1fr)]">
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1">
-            Programm filtern
+            Programm auswählen
           </label>
           <Select
             options={[
-              { value: "all", label: "Alle Programme" },
+              { value: "all", label: "Alle" },
               { value: "DTI", label: "DTI" },
               { value: "DI", label: "DI" },
             ]}

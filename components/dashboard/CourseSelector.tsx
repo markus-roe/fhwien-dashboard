@@ -28,7 +28,7 @@ export function CourseSelector({
       }));
 
   return (
-    <div className="flex-1">
+    <div>
       <label className="block text-xs font-medium text-zinc-600 mb-1">
         Fach auswählen
       </label>

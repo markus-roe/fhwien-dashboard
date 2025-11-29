@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { CourseSelector } from "./CourseSelector";
 import { DataTable } from "./DataTable";
 import { SessionRow } from "./SessionRow";
 import { SessionCard } from "./SessionCard";
@@ -17,6 +19,8 @@ type SessionsTabProps = {
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
   onCreate: () => void;
+  search: string;
+  onSearchChange: (search: string) => void;
 };
 
 export function SessionsTab({
@@ -27,6 +31,8 @@ export function SessionsTab({
   onEdit,
   onDelete,
   onCreate,
+  search,
+  onSearchChange,
 }: SessionsTabProps) {
   const [showPastSessions, setShowPastSessions] = useState(false);
   const { pastSessions, sessionsToShow } = useSessions(
@@ -43,7 +49,27 @@ export function SessionsTab({
     : "grid-cols-[140px,100px,180px,1fr,180px,auto]";
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,280px),minmax(0,1fr)]">
+        <CourseSelector
+          courses={courses}
+          selectedCourseId={selectedCourseId}
+          onCourseChange={onCourseChange}
+        />
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">
+            Lehrveranstaltungen suchen
+          </label>
+          <Input
+            type="text"
+            placeholder="Titel, Ort oder Fach durchsuchen..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full"
+          />
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h2 className="text-xs sm:text-sm font-semibold text-zinc-900 flex-1">
           Lehrveranstaltungen verwalten
