@@ -1,10 +1,14 @@
-import { InputHTMLAttributes } from 'react'
+import { InputHTMLAttributes } from "react";
 
 interface CheckboxProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string
+  label?: string;
 }
 
-export const Checkbox = ({ label, className = '', ...props }: CheckboxProps) => {
+export const Checkbox = ({
+  label,
+  className = "",
+  ...props
+}: CheckboxProps) => {
   return (
     <label className="flex items-start gap-3 cursor-pointer group">
       <input
@@ -20,6 +24,5 @@ export const Checkbox = ({ label, className = '', ...props }: CheckboxProps) => 
         </div>
       )}
     </label>
-  )
-}
-
+  );
+};
