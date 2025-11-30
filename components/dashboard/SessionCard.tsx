@@ -10,7 +10,6 @@ import {
 type SessionCardProps = {
   session: Session;
   course?: Course;
-  showCourse?: boolean;
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
 };
@@ -18,7 +17,6 @@ type SessionCardProps = {
 export function SessionCard({
   session,
   course,
-  showCourse = false,
   onEdit,
   onDelete,
 }: SessionCardProps) {
@@ -48,7 +46,7 @@ export function SessionCard({
               )}
             </span>
           </div>
-          {showCourse && course && (
+          {course && (
             <div className="text-[10px] font-medium text-zinc-600 mb-0.5">
               {course.title}
             </div>

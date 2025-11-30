@@ -10,7 +10,6 @@ import {
 type CoachingSlotRowProps = {
   slot: CoachingSlot;
   course?: Course;
-  showCourse?: boolean;
   onEdit: (slot: CoachingSlot) => void;
   onDelete: (slot: CoachingSlot) => void;
 };
@@ -18,7 +17,6 @@ type CoachingSlotRowProps = {
 export function CoachingSlotRow({
   slot,
   course,
-  showCourse = false,
   onEdit,
   onDelete,
 }: CoachingSlotRowProps) {
@@ -28,11 +26,9 @@ export function CoachingSlotRow({
 
   return (
     <div
-      className={`group grid gap-3 px-4 py-2.5 items-center hover:bg-zinc-50 transition-colors ${
-        showCourse
-          ? "grid-cols-[140px,100px,180px,200px,1fr,auto]"
-          : "grid-cols-[140px,100px,200px,1fr,auto]"
-      } ${isPastSlot ? "opacity-60" : ""}`}
+      className={`group grid gap-3 px-4 py-2.5 items-center hover:bg-zinc-50 transition-colors grid-cols-[140px,100px,180px,200px,1fr,auto] ${
+        isPastSlot ? "opacity-60" : ""
+      }`}
     >
       {/* Datum */}
       <div className="text-xs">
@@ -52,12 +48,10 @@ export function CoachingSlotRow({
         )}
       </div>
 
-      {/* Fach (nur wenn alle Coachings ausgewählt) */}
-      {showCourse && (
-        <div className="text-xs font-medium text-zinc-700 truncate">
-          {course?.title || "Unbekannt"}
-        </div>
-      )}
+      {/* Fach */}
+      <div className="text-xs font-medium text-zinc-700 truncate">
+        {course?.title || "Unbekannt"}
+      </div>
 
       {/* Teilnehmer */}
       <div className="text-xs text-zinc-600">

@@ -11,7 +11,6 @@ import { isToday } from "date-fns";
 type SessionRowProps = {
   session: Session;
   course?: Course;
-  showCourse?: boolean;
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
 };
@@ -19,7 +18,6 @@ type SessionRowProps = {
 export function SessionRow({
   session,
   course,
-  showCourse = false,
   onEdit,
   onDelete,
 }: SessionRowProps) {
@@ -29,11 +27,9 @@ export function SessionRow({
 
   return (
     <div
-      className={`group grid gap-3 px-4 py-2.5 items-center hover:bg-zinc-50 transition-colors ${
-        showCourse
-          ? "grid-cols-[140px,100px,180px,1fr,180px,auto]"
-          : "grid-cols-[140px,100px,1fr,180px,auto]"
-      } ${isPastSession ? "opacity-60" : ""}`}
+      className={`group grid gap-3 px-4 py-2.5 items-center hover:bg-zinc-50 transition-colors grid-cols-[140px,100px,180px,1fr,180px,auto] ${
+        isPastSession ? "opacity-60" : ""
+      }`}
     >
       {/* Datum */}
       <div className="text-xs">
@@ -53,12 +49,10 @@ export function SessionRow({
         )}
       </div>
 
-      {/* Fach (nur wenn Alle ausgewählt) */}
-      {showCourse && (
-        <div className="text-xs font-medium text-zinc-700 truncate">
-          {course?.title || "Unbekannt"}
-        </div>
-      )}
+      {/* Fach */}
+      <div className="text-xs font-medium text-zinc-700 truncate">
+        {course?.title || "Unbekannt"}
+      </div>
 
       {/* Titel */}
       <div className="text-xs font-medium text-zinc-900 truncate">

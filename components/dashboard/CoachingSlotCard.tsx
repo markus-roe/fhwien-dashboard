@@ -10,7 +10,6 @@ import {
 type CoachingSlotCardProps = {
   slot: CoachingSlot;
   course?: Course;
-  showCourse?: boolean;
   onEdit: (slot: CoachingSlot) => void;
   onDelete: (slot: CoachingSlot) => void;
 };
@@ -18,7 +17,6 @@ type CoachingSlotCardProps = {
 export function CoachingSlotCard({
   slot,
   course,
-  showCourse = false,
   onEdit,
   onDelete,
 }: CoachingSlotCardProps) {
@@ -48,7 +46,7 @@ export function CoachingSlotCard({
               )}
             </span>
           </div>
-          {showCourse && course && (
+          {course && (
             <div className="text-[10px] font-medium text-zinc-600 mb-0.5">
               {course.title}
             </div>

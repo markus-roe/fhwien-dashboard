@@ -38,7 +38,6 @@ import { SessionsTab } from "@/components/dashboard/SessionsTab";
 import { CoachingSlotsTab } from "@/components/dashboard/CoachingSlotsTab";
 import { GroupsTab } from "@/components/dashboard/GroupsTab";
 import { UsersTab } from "@/components/dashboard/UsersTab";
-import { calculateDuration } from "@/lib/dashboardUtils";
 
 export default function DashboardPage() {
   if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
@@ -401,7 +400,6 @@ export default function DashboardPage() {
   const handleDeleteGroup = async (groupId: string) => {
     try {
       await deleteGroup(groupId);
-      setGroupToDelete(null);
     } catch (error) {
       console.error("Failed to delete group:", error);
     }
@@ -593,7 +591,12 @@ export default function DashboardPage() {
                     users={users}
                     selectedCourseId={selectedCourseId}
                     onCourseChange={setSelectedCourseId}
-                    onDelete={handleDeleteGroup}
+                    onDelete={(groupId) => {
+                      const group = allGroups.find((g) => g.id === groupId);
+                      if (group) {
+                        setGroupToDelete(group);
+                      }
+                    }}
                     onAssignUser={handleAssignUserToGroup}
                     onRemoveUser={handleRemoveUserFromGroup}
                     onCreate={() => setIsCreateGroupOpen(true)}
@@ -738,12 +741,14 @@ export default function DashboardPage() {
       />
 
       {/* Bestätigungsdialog für Löschen einer Gruppe */}
+      {/* Bestätigungsdialog für Löschen einer Gruppe */}
       <DeleteConfirmationDialog
         isOpen={!!groupToDelete}
         onClose={() => setGroupToDelete(null)}
         onConfirm={() => {
           if (groupToDelete) {
             handleDeleteGroup(groupToDelete.id);
+            setGroupToDelete(null);
           }
         }}
         title="Gruppe löschen?"
