@@ -18,7 +18,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import { redirect } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import {
   EditSessionDialog,
@@ -39,22 +39,32 @@ import { CoachingSlotsTab } from "@/components/dashboard/CoachingSlotsTab";
 import { GroupsTab } from "@/components/dashboard/GroupsTab";
 import { UsersTab } from "@/components/dashboard/UsersTab";
 
+const VALID_TABS = ["lvs", "coachings", "groups", "users"] as const;
+
 export default function DashboardPage() {
   if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
     redirect("/schedule");
   }
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const tabFromUrl = searchParams.get("tab");
+  const initialTab =
+    tabFromUrl && VALID_TABS.includes(tabFromUrl as (typeof VALID_TABS)[number])
+      ? (tabFromUrl as (typeof VALID_TABS)[number])
+      : "lvs";
+
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [activeDashboardTab, setActiveDashboardTab] = useState<
     "lvs" | "coachings" | "groups" | "users"
-  >("lvs");
+  >(initialTab);
   const [userSearch, setUserSearch] = useState("");
   const [programFilter, setProgramFilter] = useState<Program | "all">("all");
   const [sessionSearch, setSessionSearch] = useState("");
   const [coachingSlotSearch, setCoachingSlotSearch] = useState("");
   const [groupSearch, setGroupSearch] = useState("");
 
-  // Always fetch all data, filter client-side
   const {
     sessions: allSessions,
     loading: sessionsLoading,
@@ -241,6 +251,24 @@ export default function DashboardPage() {
       setSelectedUserId(users[0].id);
     }
   }, [selectedUserId, users]);
+
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (
+      tabFromUrl &&
+      VALID_TABS.includes(tabFromUrl as (typeof VALID_TABS)[number])
+    ) {
+      const urlTab = tabFromUrl as (typeof VALID_TABS)[number];
+      if (urlTab !== activeDashboardTab) {
+        setActiveDashboardTab(urlTab);
+      }
+    } else if (!tabFromUrl && activeDashboardTab !== "lvs") {
+      // If no tab in URL, default to "lvs" and update URL
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", "lvs");
+      router.replace(`/dashboard?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParams, activeDashboardTab, router]);
 
   const handleOpenEditSession = (session: Session) => {
     setEditingSession(session);
@@ -544,11 +572,19 @@ export default function DashboardPage() {
               </div>
               <SegmentedTabs
                 value={activeDashboardTab}
-                onChange={(value) =>
-                  setActiveDashboardTab(
-                    value as "lvs" | "coachings" | "groups" | "users"
-                  )
-                }
+                onChange={(value) => {
+                  const newTab = value as
+                    | "lvs"
+                    | "coachings"
+                    | "groups"
+                    | "users";
+                  setActiveDashboardTab(newTab);
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set("tab", newTab);
+                  router.replace(`/dashboard?${params.toString()}`, {
+                    scroll: false,
+                  });
+                }}
                 options={dashboardTabs}
                 className="mb-4"
               />
