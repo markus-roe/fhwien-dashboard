@@ -45,20 +45,18 @@ export function GroupCard({
       <CardContent className="p-3 sm:p-4">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="mb-1.5 relative">
-              <div className="pr-8 sm:pr-0">
-                <h3 className="text-sm sm:text-md font-semibold text-zinc-900 group-hover:text-[var(--primary)] transition-colors mb-0.5">
-                  {group.name}
-                </h3>
-                {course && (
-                  <span className="text-xs text-zinc-400">{course.title}</span>
-                )}
-              </div>
+            <div className="mb-1.5 relative pr-8">
+              <h3 className="text-sm sm:text-md font-semibold text-zinc-900 group-hover:text-[var(--primary)] transition-colors mb-0.5">
+                {group.name}
+              </h3>
+              {course && (
+                <span className="text-xs text-zinc-400">{course.title}</span>
+              )}
               {isAdmin && onDelete && (
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="absolute top-0 right-0 h-7 w-7 p-0 shrink-0"
+                  className="absolute top-0 right-0 !w-7 h-7 !p-0 shrink-0"
                   onClick={() => onDelete(group.id)}
                   title="Löschen"
                 >
