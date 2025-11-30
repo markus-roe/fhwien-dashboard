@@ -15,7 +15,7 @@ import {
   format,
 } from "date-fns";
 import { de } from "date-fns/locale";
-import { Card, CardContent, CardHeader } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { currentUser, type Session } from "@/data/mockData";
 import { useSessions } from "@/hooks/useSessions";
 import { useCoachingSlots } from "@/hooks/useCoachingSlots";
@@ -274,56 +274,61 @@ export function CalendarView({
   return (
     <div className="h-full flex flex-col min-h-0">
       <Card className="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
-        <CardHeader className="pb-1 sm:pb-2 shrink-0">
-          <CalendarNavigation
-            viewType={viewType}
-            currentDate={currentDate}
-            dateTitle={getDateTitle()}
-            onViewChange={setViewType}
-            onNavigateDate={navigateDate}
-            onGoToToday={goToToday}
-          />
-        </CardHeader>
-        <CardContent className="p-1 sm:p-2 flex-1 min-h-0 flex flex-col overflow-hidden">
-          {viewType === "month" && (
-            <div className="flex-1 min-h-0 overflow-auto sm:overflow-hidden flex flex-col">
-              <MonthView
-                currentDate={currentDate}
-                events={visibleEvents}
-                onSessionClick={onSessionClick}
-                onDateClick={onDateClick}
-                onDayClick={handleDayClick}
-                onDayMoreClick={handleDayMoreClick}
-                onWeekClick={handleWeekClick}
-              />
-            </div>
-          )}
-          {viewType === "week" && (
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <WeekView
-                currentDate={currentDate}
-                events={visibleEvents}
-                onSessionClick={onSessionClick}
-              />
-            </div>
-          )}
-          {viewType === "day" && (
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <DayView
-                currentDate={currentDate}
-                events={visibleEvents}
-                onSessionClick={onSessionClick}
-              />
-            </div>
-          )}
-          {viewType === "list" && (
-            <div className="flex-1 h-full min-h-0 overflow-hidden">
-              <CalendarListView
-                sessions={allSessions}
-                onSessionClick={onSessionClick}
-              />
-            </div>
-          )}
+        <CardContent className="p-3 sm:p-4 flex-1 min-h-0 flex flex-col overflow-hidden">
+          <div className="mb-4 shrink-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 mb-4">
+              Kalender
+            </h1>
+            <CalendarNavigation
+              viewType={viewType}
+              currentDate={currentDate}
+              dateTitle={getDateTitle()}
+              onViewChange={setViewType}
+              onNavigateDate={navigateDate}
+              onGoToToday={goToToday}
+            />
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+            {viewType === "month" && (
+              <div className="flex-1 min-h-0 overflow-auto sm:overflow-hidden flex flex-col">
+                <MonthView
+                  currentDate={currentDate}
+                  events={visibleEvents}
+                  onSessionClick={onSessionClick}
+                  onDateClick={onDateClick}
+                  onDayClick={handleDayClick}
+                  onDayMoreClick={handleDayMoreClick}
+                  onWeekClick={handleWeekClick}
+                />
+              </div>
+            )}
+            {viewType === "week" && (
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <WeekView
+                  currentDate={currentDate}
+                  events={visibleEvents}
+                  onSessionClick={onSessionClick}
+                />
+              </div>
+            )}
+            {viewType === "day" && (
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <DayView
+                  currentDate={currentDate}
+                  events={visibleEvents}
+                  onSessionClick={onSessionClick}
+                />
+              </div>
+            )}
+            {viewType === "list" && (
+              <div className="flex-1 h-full min-h-0 overflow-hidden">
+                <CalendarListView
+                  sessions={allSessions}
+                  onSessionClick={onSessionClick}
+                />
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
