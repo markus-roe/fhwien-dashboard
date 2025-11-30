@@ -34,6 +34,10 @@ export const TopNav = () => {
     return pathname === path;
   };
 
+  const isDashboardActive = () => {
+    return pathname.startsWith("/dashboard");
+  };
+
   // Prevent body scroll when menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -101,7 +105,7 @@ export const TopNav = () => {
 
           <div className="flex items-center gap-4">
             {canSeeDashboard && (
-              <Link href="/dashboard" className="hidden md:block">
+              <Link href="/dashboard/lvs" className="hidden md:block">
                 <Button
                   variant="primary"
                   size="sm"
@@ -262,19 +266,17 @@ export const TopNav = () => {
                 </Link>
                 {canSeeDashboard && (
                   <Link
-                    href="/dashboard"
+                    href="/dashboard/lvs"
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${
-                      isActive("/dashboard")
+                      isDashboardActive()
                         ? "text-zinc-900 font-medium"
                         : "text-zinc-600 hover:text-zinc-900"
                     }`}
                   >
                     <GraduationCap
                       className={`w-5 h-5 flex-shrink-0 ${
-                        isActive("/dashboard")
-                          ? "text-zinc-900"
-                          : "text-zinc-400"
+                        isDashboardActive() ? "text-zinc-900" : "text-zinc-400"
                       }`}
                     />
                     <span className="text-base">Dashboard</span>

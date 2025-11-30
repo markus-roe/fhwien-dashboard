@@ -17,6 +17,13 @@ import { Input } from "@/components/ui/Input";
 import { CourseFilterButtons } from "@/components/groups/CourseFilterButtons";
 import { Button } from "@/components/ui/Button";
 import { GroupCard } from "@/components/groups/GroupCard";
+import {
+  LoadingState,
+  LoadingSkeletonCard,
+  LoadingSkeletonGroupCard,
+  LoadingSkeleton,
+  LoadingSkeletonGroupCards,
+} from "@/components/ui/LoadingSkeleton";
 
 export default function GruppenPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -38,6 +45,7 @@ export default function GruppenPage() {
   } = useGroups();
 
   const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const isLoading = groupsLoading || coursesLoading;
 
   // Calculate counts based on ALL groups
   const totalGroupCount = allGroups.length;
@@ -238,15 +246,13 @@ export default function GruppenPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                {activeTab === "allGroups" && (
-                  <Button
-                    onClick={() => setIsCreateModalOpen(true)}
-                    iconPosition="left"
-                    className="w-full sm:w-auto"
-                  >
-                    <span className="inline">Neue Gruppe</span>
-                  </Button>
-                )}
+                <Button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  iconPosition="left"
+                  className="w-full sm:w-auto"
+                >
+                  <span className="inline">Neue Gruppe</span>
+                </Button>
               </div>
 
               <SegmentedTabs
@@ -259,12 +265,14 @@ export default function GruppenPage() {
                     value: "allGroups",
                     label: "Alle Gruppen",
                     badge: totalGroupCount > 0 ? totalGroupCount : undefined,
+                    loading: isLoading,
                   },
                   {
                     value: "myGroups",
                     label: "Meine Gruppen",
                     badge:
                       totalMyGroupsCount > 0 ? totalMyGroupsCount : undefined,
+                    loading: isLoading,
                   },
                 ]}
                 className="mb-4"
@@ -278,6 +286,7 @@ export default function GruppenPage() {
                     onSelectCourse={setSelectedCourseId}
                     totalGroupCount={totalGroupCount}
                     courseGroupCounts={courseGroupCounts}
+                    loading={isLoading}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -305,7 +314,9 @@ export default function GruppenPage() {
 
                   {activeTab === "allGroups" && (
                     <div className="space-y-6">
-                      {courseGroups.length === 0 ? (
+                      {isLoading ? (
+                        <LoadingSkeletonGroupCards />
+                      ) : courseGroups.length === 0 ? (
                         <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
                           <p className="text-sm text-zinc-600 mb-1">
                             Keine Gruppen gefunden.

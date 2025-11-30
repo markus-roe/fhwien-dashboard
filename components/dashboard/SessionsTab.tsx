@@ -21,6 +21,7 @@ type SessionsTabProps = {
   onCreate: () => void;
   search: string;
   onSearchChange: (search: string) => void;
+  loading?: boolean;
 };
 
 export function SessionsTab({
@@ -33,6 +34,7 @@ export function SessionsTab({
   onCreate,
   search,
   onSearchChange,
+  loading = false,
 }: SessionsTabProps) {
   const [showPastSessions, setShowPastSessions] = useState(false);
   const { pastSessions, sessionsToShow } = useSessions(
@@ -100,6 +102,7 @@ export function SessionsTab({
         showPastItems={showPastSessions}
         onTogglePastItems={() => setShowPastSessions(!showPastSessions)}
         pastItemsLabel="Vergangene Termine"
+        loading={loading}
       />
     </div>
   );

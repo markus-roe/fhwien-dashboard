@@ -17,7 +17,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const tabs = useDashboardTabs();
+  const { tabs, isLoading } = useDashboardTabs();
 
   // Extract active tab from pathname
   const activeTab = (pathname.split("/").pop() || "lvs") as TabValue;

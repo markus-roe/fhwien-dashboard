@@ -5,6 +5,10 @@ import { CourseSelector } from "./CourseSelector";
 import { TabFilters } from "./TabFilters";
 import { TabHeader } from "./TabHeader";
 import { GroupCard } from "@/components/groups/GroupCard";
+import {
+  LoadingSkeleton,
+  LoadingSkeletonGroupCard,
+} from "@/components/ui/LoadingSkeleton";
 import type { Group, Course, User } from "@/data/mockData";
 
 type GroupsTabProps = {
@@ -19,6 +23,7 @@ type GroupsTabProps = {
   onCreate: () => void;
   search: string;
   onSearchChange: (search: string) => void;
+  loading?: boolean;
 };
 
 export function GroupsTab({
@@ -33,6 +38,7 @@ export function GroupsTab({
   onCreate,
   search,
   onSearchChange,
+  loading = false,
 }: GroupsTabProps) {
   // Group groups by courseId
   const groupsByCourse = groups.reduce((acc, group) => {
@@ -75,7 +81,27 @@ export function GroupsTab({
           onButtonClick={onCreate}
         />
 
-        {groups.length === 0 ? (
+        {loading ? (
+          <div className="w-full">
+            <div className="space-y-4">
+              {[...Array(2)].map((_, courseIndex) => (
+                <div key={courseIndex}>
+                  {courseIndex > 0 && (
+                    <div className="border-t border-zinc-100 mb-4" />
+                  )}
+                  <div className="mb-2.5">
+                    <LoadingSkeleton height="0.75rem" width="5rem" />
+                  </div>
+                  <div className="space-y-2.5">
+                    {[...Array(2)].map((_, i) => (
+                      <LoadingSkeletonGroupCard key={i} isAdmin={true} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : groups.length === 0 ? (
           <div className="border border-dashed border-zinc-200 rounded-lg p-4 text-center text-xs text-zinc-500 bg-zinc-50/60">
             Für dieses Fach sind noch keine Gruppen angelegt.
           </div>

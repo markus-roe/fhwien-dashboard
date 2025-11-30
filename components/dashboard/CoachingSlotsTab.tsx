@@ -21,6 +21,7 @@ type CoachingSlotsTabProps = {
   onCreate: () => void;
   search: string;
   onSearchChange: (search: string) => void;
+  loading?: boolean;
 };
 
 export function CoachingSlotsTab({
@@ -33,6 +34,7 @@ export function CoachingSlotsTab({
   onCreate,
   search,
   onSearchChange,
+  loading = false,
 }: CoachingSlotsTabProps) {
   const [showPastSlots, setShowPastSlots] = useState(false);
   const { pastSlots, slotsToShow } = useCoachingSlots(slots, showPastSlots);
@@ -97,6 +99,7 @@ export function CoachingSlotsTab({
         showPastItems={showPastSlots}
         onTogglePastItems={() => setShowPastSlots(!showPastSlots)}
         pastItemsLabel="Vergangene Slots"
+        loading={loading}
       />
     </div>
   );

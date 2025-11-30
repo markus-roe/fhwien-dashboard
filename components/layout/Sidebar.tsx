@@ -10,6 +10,7 @@ import { currentUser } from "@/data/mockData";
 import { useSessions } from "@/hooks/useSessions";
 import { useCoachingSlots } from "@/hooks/useCoachingSlots";
 import { useCourses } from "@/hooks/useCourses";
+import { LoadingSkeletonSmallCalendar } from "@/components/ui/LoadingSkeleton";
 
 type SidebarProps = {
   showCalendar?: boolean;
@@ -18,6 +19,7 @@ type SidebarProps = {
   emptyMessage?: string;
   visibleCourseIds?: Set<string>;
   onCourseVisibilityChange?: (courseId: string, visible: boolean) => void;
+  loading?: boolean;
 };
 
 export function Sidebar({
@@ -27,6 +29,7 @@ export function Sidebar({
   emptyMessage,
   visibleCourseIds,
   onCourseVisibilityChange,
+  loading = false,
 }: SidebarProps) {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDayEvents, setSelectedDayEvents] = useState<
@@ -39,9 +42,12 @@ export function Sidebar({
   const [showEventPopover, setShowEventPopover] = useState(false);
 
   // Fetch data using hooks
-  const { sessions: mockSessions } = useSessions();
-  const { slots: coachingSlots } = useCoachingSlots();
-  const { courses: mockCourses } = useCourses();
+  const { sessions: mockSessions, loading: sessionsLoading } = useSessions();
+  const { slots: coachingSlots, loading: slotsLoading } = useCoachingSlots();
+  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+
+  const isLoading =
+    loading || sessionsLoading || slotsLoading || coursesLoading;
 
   // Convert coaching slots to sessions for calendar
   const slotSessions: Session[] = useMemo(() => {
@@ -264,80 +270,90 @@ export function Sidebar({
           )} */}
           {/* {showCalendar && ( */}
           <div className="w-full">
-            <SmallCalendar
-              allSessions={combinedSessions}
-              onDayClick={handleCalendarDayClick}
-              date={calendarDate}
-              onDateChange={handleDateChange}
-              footerContent={
-                visibleCourseIds !== undefined &&
-                availableCourses.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {availableCourses.map((course) => {
-                      const isVisible = visibleCourseIds.has(course.id);
-                      const courseColor = "var(--primary)";
-                      return (
-                        <label
-                          key={course.id}
-                          className="flex items-center gap-2 cursor-pointer group py-1 select-none"
-                        >
-                          <div className="relative flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={isVisible}
-                              onChange={(e) => {
-                                onCourseVisibilityChange?.(
-                                  course.id,
-                                  e.target.checked
-                                );
-                              }}
-                              className="sr-only"
-                            />
-                            <div
-                              className="w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
-                              style={{
-                                borderColor: isVisible
-                                  ? courseColor
-                                  : "#d1d5db",
-                                backgroundColor: isVisible
-                                  ? courseColor
-                                  : "transparent",
-                              }}
-                            >
-                              {isVisible && (
-                                <svg
-                                  className="w-3 h-3 text-white"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
+            {isLoading ? (
+              <LoadingSkeletonSmallCalendar
+                showCourseFilterButtons={
+                  visibleCourseIds !== undefined && availableCourses.length > 0
+                }
+              />
+            ) : (
+              <SmallCalendar
+                allSessions={combinedSessions}
+                onDayClick={handleCalendarDayClick}
+                date={calendarDate}
+                onDateChange={handleDateChange}
+                footerContent={
+                  visibleCourseIds !== undefined &&
+                  availableCourses.length > 0 ? (
+                    <div className="space-y-1.5">
+                      {availableCourses.map((course) => {
+                        const isVisible = visibleCourseIds.has(course.id);
+                        const courseColor = "var(--primary)";
+                        return (
+                          <label
+                            key={course.id}
+                            className="flex items-center gap-2 cursor-pointer group py-1 select-none"
+                          >
+                            <div className="relative flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={isVisible}
+                                onChange={(e) => {
+                                  onCourseVisibilityChange?.(
+                                    course.id,
+                                    e.target.checked
+                                  );
+                                }}
+                                className="sr-only"
+                              />
+                              <div
+                                className="w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
+                                style={{
+                                  borderColor: isVisible
+                                    ? courseColor
+                                    : "#d1d5db",
+                                  backgroundColor: isVisible
+                                    ? courseColor
+                                    : "transparent",
+                                }}
+                              >
+                                {isVisible && (
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-xs font-medium text-zinc-900 truncate group-hover:text-blue-600 transition-colors">
-                              {course.title}
-                            </span>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                ) : null
-              }
-            />
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="text-xs font-medium text-zinc-900 truncate group-hover:text-blue-600 transition-colors">
+                                {course.title}
+                              </span>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : null
+                }
+              />
+            )}
           </div>
           {/* )} */}
 
           <div className="flex-1 min-w-0">
             <NextUpList
+              title="Nächste 7 Tage"
               emptyMessage={emptyMessage}
               onSessionClick={handleSessionClick}
+              loading={isLoading}
             />
           </div>
         </div>

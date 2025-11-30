@@ -20,12 +20,13 @@ export default function GroupsPage() {
 
   const {
     groups: allGroups,
+    loading: groupsLoading,
     createGroup,
     updateGroup,
     deleteGroup,
   } = useGroups();
-  const { users: allUsers } = useUsers();
-  const { courses: mockCourses } = useCourses();
+  const { users: allUsers, loading: usersLoading } = useUsers();
+  const { courses: mockCourses, loading: coursesLoading } = useCourses();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [groupSearch, setGroupSearch] = useState("");
@@ -141,6 +142,7 @@ export default function GroupsPage() {
         onCreate={() => setIsCreateGroupOpen(true)}
         search={groupSearch}
         onSearchChange={setGroupSearch}
+        loading={groupsLoading || coursesLoading || usersLoading}
       />
 
       <CreateGroupDialog

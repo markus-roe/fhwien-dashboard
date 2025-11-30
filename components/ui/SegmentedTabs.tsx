@@ -1,11 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { LoadingSkeleton } from "./LoadingSkeleton";
 
 export type SegmentedTabOption = {
   value: string;
   label: string;
   badge?: string | number;
+  loading?: boolean;
 };
 
 type SegmentedTabsProps = {
@@ -46,18 +48,25 @@ export function SegmentedTabs({
             >
               <span className="flex items-center gap-2">
                 <span>{option.label}</span>
-                {option.badge !== undefined && (
+                {option.loading ? (
+                  <LoadingSkeleton
+                    width={28}
+                    height={16}
+                    className="rounded-full"
+                    color="bg-zinc-50"
+                  />
+                ) : option.badge !== undefined ? (
                   <span
                     className={cn(
-                      "inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none",
+                      "inline-flex min-w-[28px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none",
                       isActive
                         ? "bg-primary/10 text-primary"
-                        : "bg-zinc-100 text-zinc-600"
+                        : "bg-zinc-50 text-zinc-600"
                     )}
                   >
                     {option.badge}
                   </span>
-                )}
+                ) : null}
               </span>
             </button>
           );

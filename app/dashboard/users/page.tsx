@@ -18,6 +18,7 @@ export default function UsersPage() {
 
   const {
     users: allUsers,
+    loading: usersLoading,
     createUser,
     updateUser,
     deleteUser,
@@ -103,6 +104,7 @@ export default function UsersPage() {
           setEditingStudent(null);
           setIsCreateStudentOpen(true);
         }}
+        loading={usersLoading}
       />
 
       <CreateStudentDialog

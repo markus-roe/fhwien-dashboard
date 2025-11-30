@@ -7,6 +7,8 @@ import { CalendarView } from "@/components/schedule/CalendarView";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { currentUser } from "@/data/mockData";
 import { useCourses } from "@/hooks/useCourses";
+import { useSessions } from "@/hooks/useSessions";
+import { useCoachingSlots } from "@/hooks/useCoachingSlots";
 
 const STORAGE_KEY = "schedule-visible-course-ids";
 
@@ -15,6 +17,9 @@ export default function SchedulePage() {
     useSessionPanel();
 
   const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const { sessions: mockSessions, loading: sessionsLoading } = useSessions();
+  const { slots: coachingSlots, loading: coachingSlotsLoading } =
+    useCoachingSlots();
 
   // Get all course IDs for current user's program
   const allCourseIds = useMemo(() => {
@@ -121,6 +126,8 @@ export default function SchedulePage() {
     });
   };
 
+  const isLoading = coursesLoading || sessionsLoading || coachingSlotsLoading;
+
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
@@ -132,6 +139,7 @@ export default function SchedulePage() {
             onSessionClick={openSessionPanel}
             visibleCourseIds={visibleCourseIds}
             onCourseVisibilityChange={handleCourseVisibilityChange}
+            loading={isLoading}
           />
         </aside>
 

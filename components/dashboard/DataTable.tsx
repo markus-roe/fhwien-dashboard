@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { PastItemsToggle } from "./PastItemsToggle";
+import { LoadingSkeletonDataTable } from "@/components/ui/LoadingSkeleton";
 
 type DataTableProps<T> = {
   items: T[];
@@ -12,6 +13,7 @@ type DataTableProps<T> = {
   showPastItems?: boolean;
   onTogglePastItems?: () => void;
   pastItemsLabel?: string;
+  loading?: boolean;
 };
 
 export function DataTable<T>({
@@ -25,7 +27,18 @@ export function DataTable<T>({
   showPastItems = false,
   onTogglePastItems,
   pastItemsLabel,
+  loading = false,
 }: DataTableProps<T>) {
+  if (loading) {
+    return (
+      <LoadingSkeletonDataTable
+        headerColumns={headerColumns}
+        gridCols={gridCols}
+        pastItemsLabel={pastItemsLabel}
+      />
+    );
+  }
+
   if (items.length === 0) {
     return (
       <div className="border border-dashed border-zinc-200 rounded-lg p-4 text-center text-xs text-zinc-500 bg-zinc-50/60">

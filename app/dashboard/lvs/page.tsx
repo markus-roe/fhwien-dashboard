@@ -21,11 +21,12 @@ export default function LVsPage() {
 
   const {
     sessions: allSessions,
+    loading: sessionsLoading,
     createSession,
     updateSession,
     deleteSession,
   } = useSessions();
-  const { courses: mockCourses } = useCourses();
+  const { courses: mockCourses, loading: coursesLoading } = useCourses();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [sessionSearch, setSessionSearch] = useState("");
@@ -151,6 +152,7 @@ export default function LVsPage() {
         onCreate={handleOpenCreateSession}
         search={sessionSearch}
         onSearchChange={setSessionSearch}
+        loading={sessionsLoading || coursesLoading}
       />
 
       {editFormState && (

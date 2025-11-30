@@ -11,17 +11,20 @@ import {
   currentUser,
 } from "@/data/mockData";
 import type { Session } from "@/data/mockData";
+import { LoadingSkeletonNextUpList } from "@/components/ui/LoadingSkeleton";
 
 interface NextUpListProps {
   onSessionClick?: (sessionId: string) => void;
-  title?: string;
+  title: string;
   emptyMessage?: string;
+  loading?: boolean;
 }
 
 export const NextUpList = ({
   onSessionClick,
-  title = "Nächste 7 Tage",
+  title,
   emptyMessage = "Keine Sessions geplant.",
+  loading = false,
 }: NextUpListProps) => {
   // Convert coaching slots to sessions (only if no sessions provided)
   const coachingSlotSessions: Session[] = useMemo(() => {
@@ -166,6 +169,21 @@ export const NextUpList = ({
     if (isYesterday(sessionDate)) return "Gestern";
     return format(sessionDate, "EEEE, dd.MM", { locale: de });
   };
+
+  if (loading) {
+    return (
+      <Card className="shadow-sm">
+        <CardHeader className="!pb-0 !px-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
+          </div>
+        </CardHeader>
+        <CardContent className="p-3 sm:p-5 pt-3 sm:pt-4">
+          <LoadingSkeletonNextUpList />
+        </CardContent>
+      </Card>
+    );
+  }
 
   const content = (
     <div className="p-0">

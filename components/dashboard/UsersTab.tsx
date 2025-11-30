@@ -19,6 +19,7 @@ type UsersTabProps = {
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onCreate: () => void;
+  loading?: boolean;
 };
 
 export function UsersTab({
@@ -31,6 +32,7 @@ export function UsersTab({
   onEdit,
   onDelete,
   onCreate,
+  loading = false,
 }: UsersTabProps) {
   return (
     <div className="space-y-5">
@@ -87,6 +89,7 @@ export function UsersTab({
             onDelete={onDelete}
           />
         )}
+        loading={loading}
       />
     </div>
   );

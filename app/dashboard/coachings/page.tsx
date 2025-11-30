@@ -19,12 +19,13 @@ export default function CoachingsPage() {
 
   const {
     slots: allCoachingSlots,
+    loading: slotsLoading,
     createSlot: createCoachingSlot,
     updateSlot: updateCoachingSlot,
     deleteSlot: deleteCoachingSlot,
   } = useCoachingSlots();
-  const { users: allUsers } = useUsers();
-  const { courses: mockCourses } = useCourses();
+  const { users: allUsers, loading: usersLoading } = useUsers();
+  const { courses: mockCourses, loading: coursesLoading } = useCourses();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(
     null
@@ -146,6 +147,7 @@ export default function CoachingsPage() {
         }}
         search={coachingSlotSearch}
         onSearchChange={setCoachingSlotSearch}
+        loading={slotsLoading || coursesLoading || usersLoading}
       />
 
       <CreateCoachingSlotDialog

@@ -20,6 +20,13 @@ import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { CourseFilterButtons } from "@/components/groups/CourseFilterButtons";
 import { Input } from "@/components/ui/Input";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  LoadingState,
+  LoadingSkeletonCard,
+  LoadingSkeletonCoachingCard,
+  LoadingSkeleton,
+  LoadingSkeletonCoachingCards,
+} from "@/components/ui/LoadingSkeleton";
 
 export default function CoachingPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
@@ -41,6 +48,7 @@ export default function CoachingPage() {
   } = useCoachingSlots();
 
   const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const isLoading = slotsLoading || coursesLoading;
 
   // Separate upcoming and past slots from ALL slots
   const { upcomingSlots: allUpcomingSlots, pastSlots: allPastSlots } =
@@ -311,6 +319,7 @@ export default function CoachingPage() {
                     value: "available",
                     label: "Alle Coachings",
                     badge: totalSlotCount > 0 ? totalSlotCount : undefined,
+                    loading: isLoading,
                   },
                   {
                     value: "myBookings",
@@ -319,6 +328,7 @@ export default function CoachingPage() {
                       totalMyBookingsCount > 0
                         ? totalMyBookingsCount
                         : undefined,
+                    loading: isLoading,
                   },
                 ]}
                 className="mb-4"
@@ -332,138 +342,135 @@ export default function CoachingPage() {
                     onSelectCourse={setSelectedCourseId}
                     totalGroupCount={totalSlotCount}
                     courseGroupCounts={courseSlotCounts}
+                    loading={isLoading}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   {/* Student-Ansicht: tab-basierte Darstellung */}
                   {activeStudentTab === "myBookings" && (
                     <div className="space-y-6">
-                      {myUpcomingSlots.length === 0 &&
-                      myPastSlots.length === 0 ? (
-                        <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
-                          <p className="text-sm text-zinc-600 mb-1">
-                            Du hast aktuell keine gebuchten Coaching-Slots.
-                          </p>
-                          <p className="text-xs text-zinc-500">
-                            Wechsle zur Ansicht{" "}
-                            <span className="font-medium">
-                              &quot;Alle Coachings&quot;
-                            </span>{" "}
-                            um einen Termin zu buchen.
-                          </p>
-                        </div>
+                      myUpcomingSlots.length === 0 && myPastSlots.length === 0 ?
+                      (
+                      <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
+                        <p className="text-sm text-zinc-600 mb-1">
+                          Du hast aktuell keine gebuchten Coaching-Slots.
+                        </p>
+                        <p className="text-xs text-zinc-500">
+                          Wechsle zur Ansicht{" "}
+                          <span className="font-medium">
+                            &quot;Alle Coachings&quot;
+                          </span>{" "}
+                          um einen Termin zu buchen.
+                        </p>
+                      </div>
                       ) : (
-                        <>
-                          {/* Upcoming slots */}
-                          {myUpcomingSlotsByDay.length > 0 &&
-                            myUpcomingSlotsByDay.map((dayGroup) => (
-                              <div key={dayGroup.dayKey} className="space-y-3">
-                                <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
-                                  {dayGroup.dayLabel}
-                                </h4>
-                                {dayGroup.timeGroups.map((timeGroup) => (
-                                  <div
-                                    key={timeGroup.timeKey}
-                                    className="space-y-2"
-                                  >
-                                    <h5 className="text-xs font-medium text-zinc-500">
-                                      {timeGroup.timeLabel}
-                                    </h5>
-                                    <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
-                                      {timeGroup.slots.map((slot) => (
-                                        <div
-                                          key={slot.id}
-                                          id={`slot-${slot.id}`}
-                                        >
-                                          <CoachingSlotCard
-                                            slot={slot}
-                                            course={mockCourses.find(
-                                              (c) => c.id === slot.courseId
-                                            )}
-                                            isProfessor={false}
-                                            onBook={handleBookSlot}
-                                            onCancelBooking={
-                                              handleCancelBooking
-                                            }
-                                            onDelete={handleDeleteSlot}
-                                          />
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-
-                          {/* Past slots - collapsible */}
-                          {myPastSlotsByDay.length > 0 && (
-                            <div className="space-y-4">
-                              <button
-                                onClick={() => setShowPastSlots(!showPastSlots)}
-                                className="flex items-center gap-2 text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
-                              >
-                                {showPastSlots ? (
-                                  <ChevronUp className="w-4 h-4" />
-                                ) : (
-                                  <ChevronDown className="w-4 h-4" />
-                                )}
-                                <span>
-                                  Vergangene Buchungen ({myPastSlots.length})
-                                </span>
-                              </button>
-                              {showPastSlots &&
-                                myPastSlotsByDay.map((dayGroup) => (
-                                  <div
-                                    key={dayGroup.dayKey}
-                                    className="space-y-3 opacity-60"
-                                  >
-                                    <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
-                                      {dayGroup.dayLabel}
-                                    </h4>
-                                    {dayGroup.timeGroups.map((timeGroup) => (
-                                      <div
-                                        key={timeGroup.timeKey}
-                                        className="space-y-2"
-                                      >
-                                        <h5 className="text-xs font-medium text-zinc-500">
-                                          {timeGroup.timeLabel}
-                                        </h5>
-                                        <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
-                                          {timeGroup.slots.map((slot) => (
-                                            <div
-                                              key={slot.id}
-                                              id={`slot-${slot.id}`}
-                                            >
-                                              <CoachingSlotCard
-                                                slot={slot}
-                                                course={mockCourses.find(
-                                                  (c) => c.id === slot.courseId
-                                                )}
-                                                isProfessor={false}
-                                                onBook={handleBookSlot}
-                                                onCancelBooking={
-                                                  handleCancelBooking
-                                                }
-                                                onDelete={handleDeleteSlot}
-                                              />
-                                            </div>
-                                          ))}
-                                        </div>
+                      <>
+                        {/* Upcoming slots */}
+                        {myUpcomingSlotsByDay.length > 0 &&
+                          myUpcomingSlotsByDay.map((dayGroup) => (
+                            <div key={dayGroup.dayKey} className="space-y-3">
+                              <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
+                                {dayGroup.dayLabel}
+                              </h4>
+                              {dayGroup.timeGroups.map((timeGroup) => (
+                                <div
+                                  key={timeGroup.timeKey}
+                                  className="space-y-2"
+                                >
+                                  <h5 className="text-xs font-medium text-zinc-500">
+                                    {timeGroup.timeLabel}
+                                  </h5>
+                                  <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                                    {timeGroup.slots.map((slot) => (
+                                      <div key={slot.id} id={`slot-${slot.id}`}>
+                                        <CoachingSlotCard
+                                          slot={slot}
+                                          course={mockCourses.find(
+                                            (c) => c.id === slot.courseId
+                                          )}
+                                          isProfessor={false}
+                                          onBook={handleBookSlot}
+                                          onCancelBooking={handleCancelBooking}
+                                          onDelete={handleDeleteSlot}
+                                        />
                                       </div>
                                     ))}
                                   </div>
-                                ))}
+                                </div>
+                              ))}
                             </div>
-                          )}
-                        </>
-                      )}
+                          ))}
+
+                        {/* Past slots - collapsible */}
+                        {myPastSlotsByDay.length > 0 && (
+                          <div className="space-y-4">
+                            <button
+                              onClick={() => setShowPastSlots(!showPastSlots)}
+                              className="flex items-center gap-2 text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
+                            >
+                              {showPastSlots ? (
+                                <ChevronUp className="w-4 h-4" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                              <span>
+                                Vergangene Buchungen ({myPastSlots.length})
+                              </span>
+                            </button>
+                            {showPastSlots &&
+                              myPastSlotsByDay.map((dayGroup) => (
+                                <div
+                                  key={dayGroup.dayKey}
+                                  className="space-y-3 opacity-60"
+                                >
+                                  <h4 className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
+                                    {dayGroup.dayLabel}
+                                  </h4>
+                                  {dayGroup.timeGroups.map((timeGroup) => (
+                                    <div
+                                      key={timeGroup.timeKey}
+                                      className="space-y-2"
+                                    >
+                                      <h5 className="text-xs font-medium text-zinc-500">
+                                        {timeGroup.timeLabel}
+                                      </h5>
+                                      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                                        {timeGroup.slots.map((slot) => (
+                                          <div
+                                            key={slot.id}
+                                            id={`slot-${slot.id}`}
+                                          >
+                                            <CoachingSlotCard
+                                              slot={slot}
+                                              course={mockCourses.find(
+                                                (c) => c.id === slot.courseId
+                                              )}
+                                              isProfessor={false}
+                                              onBook={handleBookSlot}
+                                              onCancelBooking={
+                                                handleCancelBooking
+                                              }
+                                              onDelete={handleDeleteSlot}
+                                            />
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </>
                     </div>
                   )}
 
                   {activeStudentTab === "available" && (
                     <div className="space-y-6">
-                      {availableSlots.length === 0 &&
-                      pastSlotsByDay.length === 0 ? (
+                      {isLoading ? (
+                        <LoadingSkeletonCoachingCards />
+                      ) : availableSlots.length === 0 &&
+                        pastSlotsByDay.length === 0 ? (
                         <div className="p-6 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/60">
                           <p className="text-sm text-zinc-600 mb-1">
                             Für die aktuelle Auswahl wurden keine Coaching-Slots
