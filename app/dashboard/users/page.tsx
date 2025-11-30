@@ -4,8 +4,6 @@ import { useMemo, useState } from "react";
 import { type User, type Program, currentUser } from "@/data/mockData";
 import { redirect } from "next/navigation";
 import { useUsers } from "@/hooks/useUsers";
-import { useDashboardTabs } from "@/hooks/useDashboardTabs";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { UsersTab } from "@/components/dashboard/UsersTab";
 import {
   CreateStudentDialog,
@@ -90,26 +88,22 @@ export default function UsersPage() {
     }
   };
 
-  const dashboardTabs = useDashboardTabs();
-
   return (
     <>
-      <DashboardLayout activeTab="users" tabs={dashboardTabs}>
-        <UsersTab
-          users={users}
-          filteredUsers={users}
-          programFilter={programFilter}
-          userSearch={userSearch}
-          onProgramFilterChange={setProgramFilter}
-          onUserSearchChange={setUserSearch}
-          onEdit={handleOpenEditStudent}
-          onDelete={setStudentToDelete}
-          onCreate={() => {
-            setEditingStudent(null);
-            setIsCreateStudentOpen(true);
-          }}
-        />
-      </DashboardLayout>
+      <UsersTab
+        users={users}
+        filteredUsers={users}
+        programFilter={programFilter}
+        userSearch={userSearch}
+        onProgramFilterChange={setProgramFilter}
+        onUserSearchChange={setUserSearch}
+        onEdit={handleOpenEditStudent}
+        onDelete={setStudentToDelete}
+        onCreate={() => {
+          setEditingStudent(null);
+          setIsCreateStudentOpen(true);
+        }}
+      />
 
       <CreateStudentDialog
         isOpen={isCreateStudentOpen}

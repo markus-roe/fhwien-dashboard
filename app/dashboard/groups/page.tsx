@@ -6,8 +6,6 @@ import { redirect } from "next/navigation";
 import { useGroups } from "@/hooks/useGroups";
 import { useUsers } from "@/hooks/useUsers";
 import { useCourses } from "@/hooks/useCourses";
-import { useDashboardTabs } from "@/hooks/useDashboardTabs";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { GroupsTab } from "@/components/dashboard/GroupsTab";
 import {
   CreateGroupDialog,
@@ -124,30 +122,26 @@ export default function GroupsPage() {
     }
   };
 
-  const dashboardTabs = useDashboardTabs();
-
   return (
     <>
-      <DashboardLayout activeTab="groups" tabs={dashboardTabs}>
-        <GroupsTab
-          groups={groups}
-          courses={mockCourses}
-          users={users}
-          selectedCourseId={selectedCourseId}
-          onCourseChange={setSelectedCourseId}
-          onDelete={(groupId) => {
-            const group = allGroups.find((g) => g.id === groupId);
-            if (group) {
-              setGroupToDelete(group);
-            }
-          }}
-          onAssignUser={handleAssignUserToGroup}
-          onRemoveUser={handleRemoveUserFromGroup}
-          onCreate={() => setIsCreateGroupOpen(true)}
-          search={groupSearch}
-          onSearchChange={setGroupSearch}
-        />
-      </DashboardLayout>
+      <GroupsTab
+        groups={groups}
+        courses={mockCourses}
+        users={users}
+        selectedCourseId={selectedCourseId}
+        onCourseChange={setSelectedCourseId}
+        onDelete={(groupId) => {
+          const group = allGroups.find((g) => g.id === groupId);
+          if (group) {
+            setGroupToDelete(group);
+          }
+        }}
+        onAssignUser={handleAssignUserToGroup}
+        onRemoveUser={handleRemoveUserFromGroup}
+        onCreate={() => setIsCreateGroupOpen(true)}
+        search={groupSearch}
+        onSearchChange={setGroupSearch}
+      />
 
       <CreateGroupDialog
         isOpen={isCreateGroupOpen}

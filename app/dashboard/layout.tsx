@@ -1,33 +1,31 @@
 "use client";
 
-import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { useRouter } from "next/navigation";
+import { useDashboardTabs } from "@/hooks/useDashboardTabs";
 
 const VALID_TABS = ["lvs", "coachings", "groups", "users"] as const;
-
 type TabValue = (typeof VALID_TABS)[number];
 
-interface DashboardTab {
-  value: TabValue;
-  label: string;
-  badge?: number;
-}
-
-interface DashboardLayoutProps {
-  activeTab: TabValue;
-  tabs: DashboardTab[];
-  children: ReactNode;
-}
-
-export function DashboardLayout({
-  activeTab,
-  tabs,
+export default function DashboardLayout({
   children,
-}: DashboardLayoutProps) {
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
+  const pathname = usePathname();
+  const tabs = useDashboardTabs();
+
+  // Extract active tab from pathname
+  const activeTab = (pathname.split("/").pop() || "lvs") as TabValue;
+
+  const handleTabChange = (value: string) => {
+    const newTab = value as TabValue;
+    router.replace(`/dashboard/${newTab}`, { scroll: false });
+  };
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -50,10 +48,7 @@ export function DashboardLayout({
               </div>
               <SegmentedTabs
                 value={activeTab}
-                onChange={(value) => {
-                  const newTab = value as TabValue;
-                  router.replace(`/dashboard/${newTab}`, { scroll: false });
-                }}
+                onChange={handleTabChange}
                 options={tabs}
                 className="mb-4"
               />

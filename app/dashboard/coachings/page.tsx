@@ -6,8 +6,6 @@ import { redirect } from "next/navigation";
 import { useCoachingSlots } from "@/hooks/useCoachingSlots";
 import { useUsers } from "@/hooks/useUsers";
 import { useCourses } from "@/hooks/useCourses";
-import { useDashboardTabs } from "@/hooks/useDashboardTabs";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { CoachingSlotsTab } from "@/components/dashboard/CoachingSlotsTab";
 import { CreateCoachingSlotDialog } from "@/components/coaching/CreateCoachingSlotDialog";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
@@ -133,26 +131,22 @@ export default function CoachingsPage() {
     }
   };
 
-  const dashboardTabs = useDashboardTabs();
-
   return (
     <>
-      <DashboardLayout activeTab="coachings" tabs={dashboardTabs}>
-        <CoachingSlotsTab
-          slots={coachingSlots}
-          courses={mockCourses}
-          selectedCourseId={selectedCourseId}
-          onCourseChange={setSelectedCourseId}
-          onEdit={handleOpenEditCoaching}
-          onDelete={setCoachingSlotToDelete}
-          onCreate={() => {
-            setEditingCoachingSlot(null);
-            setIsCreateCoachingOpen(true);
-          }}
-          search={coachingSlotSearch}
-          onSearchChange={setCoachingSlotSearch}
-        />
-      </DashboardLayout>
+      <CoachingSlotsTab
+        slots={coachingSlots}
+        courses={mockCourses}
+        selectedCourseId={selectedCourseId}
+        onCourseChange={setSelectedCourseId}
+        onEdit={handleOpenEditCoaching}
+        onDelete={setCoachingSlotToDelete}
+        onCreate={() => {
+          setEditingCoachingSlot(null);
+          setIsCreateCoachingOpen(true);
+        }}
+        search={coachingSlotSearch}
+        onSearchChange={setCoachingSlotSearch}
+      />
 
       <CreateCoachingSlotDialog
         isOpen={isCreateCoachingOpen}

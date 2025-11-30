@@ -5,8 +5,6 @@ import { type Session, currentUser } from "@/data/mockData";
 import { redirect } from "next/navigation";
 import { useSessions } from "@/hooks/useSessions";
 import { useCourses } from "@/hooks/useCourses";
-import { useDashboardTabs } from "@/hooks/useDashboardTabs";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { SessionsTab } from "@/components/dashboard/SessionsTab";
 import {
   EditSessionDialog,
@@ -141,23 +139,19 @@ export default function LVsPage() {
     }
   };
 
-  const dashboardTabs = useDashboardTabs();
-
   return (
     <>
-      <DashboardLayout activeTab="lvs" tabs={dashboardTabs}>
-        <SessionsTab
-          sessions={sessions}
-          courses={mockCourses}
-          selectedCourseId={selectedCourseId}
-          onCourseChange={setSelectedCourseId}
-          onEdit={handleOpenEditSession}
-          onDelete={setSessionToDelete}
-          onCreate={handleOpenCreateSession}
-          search={sessionSearch}
-          onSearchChange={setSessionSearch}
-        />
-      </DashboardLayout>
+      <SessionsTab
+        sessions={sessions}
+        courses={mockCourses}
+        selectedCourseId={selectedCourseId}
+        onCourseChange={setSelectedCourseId}
+        onEdit={handleOpenEditSession}
+        onDelete={setSessionToDelete}
+        onCreate={handleOpenCreateSession}
+        search={sessionSearch}
+        onSearchChange={setSessionSearch}
+      />
 
       {editFormState && (
         <EditSessionDialog
