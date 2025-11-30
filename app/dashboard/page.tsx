@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import {
   type Session,
   type CoachingSlot,
@@ -41,11 +41,7 @@ import { UsersTab } from "@/components/dashboard/UsersTab";
 
 const VALID_TABS = ["lvs", "coachings", "groups", "users"] as const;
 
-export default function DashboardPage() {
-  if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
-    redirect("/schedule");
-  }
-
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -800,5 +796,45 @@ export default function DashboardPage() {
         }
       />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
+    redirect("/schedule");
+  }
+
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col h-full min-h-0">
+          <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+            <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 lg:overflow-y-scroll">
+              <Sidebar
+                showCalendar={true}
+                showNextUpCard={false}
+                emptyMessage="Keine anstehenden Termine."
+              />
+            </aside>
+            <div className="flex-1 min-w-0 space-y-3">
+              <Card>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="mb-4">
+                    <h1 className="text-xl sm:text-2xl font-bold text-zinc-900">
+                      Dashboard
+                    </h1>
+                  </div>
+                  <div className="flex items-center justify-center py-8">
+                    <p className="text-zinc-500">Laden...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }
