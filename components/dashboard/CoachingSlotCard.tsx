@@ -51,11 +51,27 @@ export function CoachingSlotCard({
               {course.title}
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-[10px] text-zinc-600 mb-1">
-            <Users className="w-3 h-3 text-zinc-400 shrink-0" />
-            <span>
-              {slot.participants.length}/{slot.maxParticipants} Teilnehmer
-            </span>
+          <div className="text-[10px] text-zinc-600 mb-1">
+            {slot.participants.length > 0 ? (
+              <div className="flex flex-wrap gap-1 items-center">
+                {slot.participants.map((participant) => (
+                  <span
+                    key={participant}
+                    className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-700"
+                  >
+                    {participant}
+                  </span>
+                ))}
+                <span className="text-[10px] text-zinc-500 ml-1">
+                  ({slot.participants.length}/{slot.maxParticipants})
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <Users className="w-3 h-3 text-zinc-400 shrink-0" />
+                <span className="text-zinc-400">0/{slot.maxParticipants}</span>
+              </div>
+            )}
           </div>
           {slot.description && (
             <p className="text-[10px] text-zinc-600 leading-relaxed">
