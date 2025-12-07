@@ -25,6 +25,7 @@ export async function GET(
     query.search = search;
   }
 
+  //gefilterte User
   let filteredUsers = users;
 
   if (query.program && query.program !== "all") {
