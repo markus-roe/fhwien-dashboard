@@ -43,7 +43,7 @@ export async function GET(
 
   return NextResponse.json<UsersResponse>(filteredUsers);
 }
-
+// create new user
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<UserResponse | ApiError>> {
