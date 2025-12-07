@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  mockUsers,
-  type User,
-  type Program,
-} from "@/data/mockData";
+import { mockUsers, type User, type Program } from "@/data/mockData";
 import type {
   UpdateUserRequest,
   UserResponse,
@@ -13,6 +9,7 @@ import type {
 
 let users: User[] = [...mockUsers];
 
+// Get a user by id
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -84,4 +81,3 @@ export async function DELETE(
 
   return NextResponse.json<ApiSuccess>({ success: true });
 }
-
