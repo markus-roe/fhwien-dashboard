@@ -1,4 +1,10 @@
-import { useMemo, useState, useCallback, type MouseEvent } from "react";
+import {
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  type MouseEvent,
+} from "react";
 import type { Session } from "@/data/mockData";
 import { SmallCalendar } from "@/components/groups/SmallCalendar";
 import { NextUpList } from "@/components/schedule/NextUpList";
@@ -12,24 +18,18 @@ import { useCoachingSlots } from "@/hooks/useCoachingSlots";
 import { useCourses } from "@/hooks/useCourses";
 import { LoadingSkeletonSmallCalendar } from "@/components/ui/LoadingSkeleton";
 
+const STORAGE_KEY = "schedule-visible-course-ids";
+
 type SidebarProps = {
-  showCalendar?: boolean;
-  showNextUpCard?: boolean;
   onSessionClick?: (session: Session) => void;
   emptyMessage?: string;
-  visibleCourseIds?: Set<string>;
-  onCourseVisibilityChange?: (courseId: string, visible: boolean) => void;
-  loading?: boolean;
+  onVisibleCourseIdsChange?: (visibleCourseIds: Set<string>) => void;
 };
 
 export function Sidebar({
-  showCalendar = true,
-  showNextUpCard = false,
   onSessionClick,
   emptyMessage,
-  visibleCourseIds,
-  onCourseVisibilityChange,
-  loading = false,
+  onVisibleCourseIdsChange,
 }: SidebarProps) {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDayEvents, setSelectedDayEvents] = useState<
@@ -46,8 +46,120 @@ export function Sidebar({
   const { slots: coachingSlots, loading: slotsLoading } = useCoachingSlots();
   const { courses: mockCourses, loading: coursesLoading } = useCourses();
 
-  const isLoading =
-    loading || sessionsLoading || slotsLoading || coursesLoading;
+  const isLoading = sessionsLoading || slotsLoading || coursesLoading;
+
+  // Get all course IDs for current user's program
+  const allCourseIds = useMemo(() => {
+    return mockCourses
+      .filter((course) => course.program.includes(currentUser.program))
+      .map((course) => course.id);
+  }, [mockCourses]);
+
+  // Initialize visibleCourseIds from localStorage or default to all courses
+  const [visibleCourseIds, setVisibleCourseIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as string[];
+        return new Set(parsed);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load visible course IDs from localStorage:",
+        error
+      );
+    }
+
+    return new Set();
+  });
+
+  // Update visibleCourseIds when courses are loaded
+  useEffect(() => {
+    if (allCourseIds.length > 0 && !coursesLoading) {
+      setVisibleCourseIds((prev) => {
+        // If visibleCourseIds is empty, initialize with all course IDs
+        if (prev.size === 0) {
+          const newSet = new Set(allCourseIds);
+          // Save to localStorage
+          try {
+            localStorage.setItem(
+              STORAGE_KEY,
+              JSON.stringify(Array.from(newSet))
+            );
+          } catch (error) {
+            console.error(
+              "Failed to save visible course IDs to localStorage:",
+              error
+            );
+          }
+          return newSet;
+        } else {
+          // Merge with new course IDs (in case new courses were added)
+          const newSet = new Set(prev);
+          let hasChanges = false;
+          allCourseIds.forEach((id) => {
+            if (!newSet.has(id)) {
+              newSet.add(id);
+              hasChanges = true;
+            }
+          });
+          // Remove course IDs that no longer exist
+          Array.from(newSet).forEach((id) => {
+            if (!allCourseIds.includes(id)) {
+              newSet.delete(id);
+              hasChanges = true;
+            }
+          });
+          if (hasChanges) {
+            try {
+              localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(Array.from(newSet))
+              );
+            } catch (error) {
+              console.error(
+                "Failed to save visible course IDs to localStorage:",
+                error
+              );
+            }
+            return newSet;
+          }
+          return prev;
+        }
+      });
+    }
+  }, [allCourseIds, coursesLoading]);
+
+  // Notify parent when visibleCourseIds changes
+  useEffect(() => {
+    onVisibleCourseIdsChange?.(visibleCourseIds);
+  }, [visibleCourseIds, onVisibleCourseIdsChange]);
+
+  const handleCourseVisibilityChange = useCallback(
+    (courseId: string, visible: boolean) => {
+      setVisibleCourseIds((prev) => {
+        const next = new Set(prev);
+        if (visible) {
+          next.add(courseId);
+        } else {
+          next.delete(courseId);
+        }
+        // Save to localStorage
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
+        } catch (error) {
+          console.error(
+            "Failed to save visible course IDs to localStorage:",
+            error
+          );
+        }
+        return next;
+      });
+    },
+    []
+  );
 
   // Convert coaching slots to sessions for calendar
   const slotSessions: Session[] = useMemo(() => {
@@ -88,99 +200,12 @@ export function Sidebar({
   }, [mockCourses]);
 
   // Combine all sessions (mock sessions + coaching slots + additional sessions)
-  // Filter by visible courses if filter is provided
+  // Filter by visible courses
   const combinedSessions = useMemo(() => {
-    // Filter by visible courses if filter is provided
-    if (visibleCourseIds !== undefined) {
-      return allSessionsUnfiltered.filter(
-        (session) => !session.courseId || visibleCourseIds.has(session.courseId)
-      );
-    }
-    return allSessionsUnfiltered;
+    return allSessionsUnfiltered.filter(
+      (session) => !session.courseId || visibleCourseIds.has(session.courseId)
+    );
   }, [allSessionsUnfiltered, visibleCourseIds]);
-
-  // Get next up session for NextUpCard
-  const nextUpSession = useMemo(() => {
-    if (!showNextUpCard) return null;
-
-    const now = new Date();
-    const sevenDaysFromNow = new Date(now);
-    sevenDaysFromNow.setDate(now.getDate() + 7);
-    sevenDaysFromNow.setHours(23, 59, 59, 999);
-
-    const upcoming = combinedSessions
-      .filter((session) => {
-        const sessionDate = new Date(session.date);
-        const sessionDateOnly = new Date(
-          sessionDate.getFullYear(),
-          sessionDate.getMonth(),
-          sessionDate.getDate()
-        );
-        const nowDateOnly = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate()
-        );
-        const sevenDaysDateOnly = new Date(
-          sevenDaysFromNow.getFullYear(),
-          sevenDaysFromNow.getMonth(),
-          sevenDaysFromNow.getDate()
-        );
-
-        if (
-          sessionDateOnly < nowDateOnly ||
-          sessionDateOnly > sevenDaysDateOnly
-        ) {
-          return false;
-        }
-
-        if (sessionDateOnly.getTime() === nowDateOnly.getTime()) {
-          const sessionEndTime = new Date(session.date);
-          const [endHours, endMinutes] = session.endTime.split(":").map(Number);
-          sessionEndTime.setHours(endHours, endMinutes, 0, 0);
-          return sessionEndTime > now;
-        }
-
-        return true;
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        const [aHours, aMinutes] = a.time.split(":").map(Number);
-        const [bHours, bMinutes] = b.time.split(":").map(Number);
-        dateA.setHours(aHours, aMinutes, 0, 0);
-        dateB.setHours(bHours, bMinutes, 0, 0);
-        return dateA.getTime() - dateB.getTime();
-      });
-
-    if (upcoming.length === 0) return null;
-
-    const session = upcoming[0];
-    const sessionStartTime = new Date(session.date);
-    const sessionEndTime = new Date(session.date);
-    const [startHours, startMinutes] = session.time.split(":").map(Number);
-    const [endHours, endMinutes] = session.endTime.split(":").map(Number);
-    sessionStartTime.setHours(startHours, startMinutes, 0, 0);
-    sessionEndTime.setHours(endHours, endMinutes, 0, 0);
-
-    return {
-      id: session.id,
-      time: session.time,
-      title: session.title,
-      date: session.date,
-      endTime: session.endTime,
-      locationType: session.locationType,
-      type:
-        session.type === "lecture"
-          ? "Vorlesung"
-          : session.type === "workshop"
-          ? "Workshop"
-          : "Coaching",
-      location: session.locationType === "online" ? "Online" : session.location,
-      isLive: sessionStartTime <= now && sessionEndTime >= now,
-      isPast: sessionEndTime < now,
-    };
-  }, [combinedSessions, showNextUpCard]);
 
   const handleClosePopover = useCallback(() => {
     setShowEventPopover(false);
@@ -249,32 +274,14 @@ export function Sidebar({
     [combinedSessions, onSessionClick]
   );
 
-  const handleNextUpCardClick = useCallback(() => {
-    if (nextUpSession) {
-      const session = combinedSessions.find((s) => s.id === nextUpSession.id);
-      if (session) {
-        onSessionClick?.(session);
-      }
-    }
-  }, [nextUpSession, combinedSessions, onSessionClick]);
-
   return (
     <>
       <div className="flex-shrink-0 space-y-4">
         <div className="flex flex-col gap-3">
-          {/* {showNextUpCard && nextUpSession && (
-            <NextUpCard
-              session={nextUpSession}
-              onOpenPanel={handleNextUpCardClick}
-            />
-          )} */}
-          {/* {showCalendar && ( */}
           <div className="w-full">
             {isLoading ? (
               <LoadingSkeletonSmallCalendar
-                showCourseFilterButtons={
-                  visibleCourseIds !== undefined && availableCourses.length > 0
-                }
+                showCourseFilterButtons={availableCourses.length > 0}
               />
             ) : (
               <SmallCalendar
@@ -283,7 +290,6 @@ export function Sidebar({
                 date={calendarDate}
                 onDateChange={handleDateChange}
                 footerContent={
-                  visibleCourseIds !== undefined &&
                   availableCourses.length > 0 ? (
                     <div className="space-y-1.5">
                       {availableCourses.map((course) => {
@@ -299,7 +305,7 @@ export function Sidebar({
                                 type="checkbox"
                                 checked={isVisible}
                                 onChange={(e) => {
-                                  onCourseVisibilityChange?.(
+                                  handleCourseVisibilityChange(
                                     course.id,
                                     e.target.checked
                                   );
@@ -346,7 +352,6 @@ export function Sidebar({
               />
             )}
           </div>
-          {/* )} */}
 
           <div className="flex-1 min-w-0">
             <NextUpList
