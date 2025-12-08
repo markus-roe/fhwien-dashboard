@@ -24,12 +24,14 @@ type SidebarProps = {
   onSessionClick?: (session: Session) => void;
   emptyMessage?: string;
   onVisibleCourseIdsChange?: (visibleCourseIds: Set<string>) => void;
+  showCourseFilterButtons?: boolean;
 };
 
 export function Sidebar({
   onSessionClick,
   emptyMessage,
   onVisibleCourseIdsChange,
+  showCourseFilterButtons = false,
 }: SidebarProps) {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDayEvents, setSelectedDayEvents] = useState<
@@ -281,7 +283,7 @@ export function Sidebar({
           <div className="w-full">
             {isLoading ? (
               <LoadingSkeletonSmallCalendar
-                showCourseFilterButtons={availableCourses.length > 0}
+                showCourseFilterButtons={showCourseFilterButtons}
               />
             ) : (
               <SmallCalendar
@@ -290,7 +292,7 @@ export function Sidebar({
                 date={calendarDate}
                 onDateChange={handleDateChange}
                 footerContent={
-                  availableCourses.length > 0 ? (
+                  showCourseFilterButtons && availableCourses.length > 0 ? (
                     <div className="space-y-1.5">
                       {availableCourses.map((course) => {
                         const isVisible = visibleCourseIds.has(course.id);

@@ -26,6 +26,7 @@ export default function SchedulePage() {
             emptyMessage="Keine anstehenden Termine."
             onSessionClick={openSessionPanel}
             onVisibleCourseIdsChange={handleVisibleCourseIdsChange}
+            showCourseFilterButtons
           />
         </aside>
 
