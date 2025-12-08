@@ -208,39 +208,44 @@ export function CreateCoachingSlotDialog({
                   className="md:hidden w-full bg-white text-zinc-900 transition-all"
                 />
               </div>
-              <label className="md:hidden block text-sm font-medium text-zinc-700 mb-1">
-                Startzeit
-              </label>
-              {/* Mobile: Native time input */}
-              <div className="md:hidden w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
-                <input
-                  type="time"
-                  value={formState.time}
-                  onChange={(e) =>
-                    setFormState((prev) => ({
-                      ...prev,
-                      time: e.target.value,
-                    }))
-                  }
-                  className="md:hidden w-full bg-white text-zinc-900 transition-all"
-                />
-              </div>
-              <label className="md:hidden block text-sm font-medium text-zinc-700 mb-1">
-                Endzeit
-              </label>
-              {/* Mobile: Native time input */}
-              <div className="md:hidden w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
-                <input
-                  type="time"
-                  value={formState.endTime}
-                  onChange={(e) =>
-                    setFormState((prev) => ({
-                      ...prev,
-                      endTime: e.target.value,
-                    }))
-                  }
-                  className="md:hidden w-full bg-white text-zinc-900 transition-all"
-                />
+              {/* Mobile: Startzeit and Endzeit in 2 columns */}
+              <div className="md:hidden grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 mb-1">
+                    Startzeit
+                  </label>
+                  <div className="w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
+                    <input
+                      type="time"
+                      value={formState.time}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          time: e.target.value,
+                        }))
+                      }
+                      className="w-full bg-white text-zinc-900 transition-all"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 mb-1">
+                    Endzeit
+                  </label>
+                  <div className="w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
+                    <input
+                      type="time"
+                      value={formState.endTime}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          endTime: e.target.value,
+                        }))
+                      }
+                      className="w-full bg-white text-zinc-900 transition-all"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>

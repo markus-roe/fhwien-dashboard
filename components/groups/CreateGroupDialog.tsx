@@ -42,7 +42,8 @@ export function CreateGroupDialog({
   onCoursePrefill,
   onSubmit,
 }: CreateGroupDialogProps) {
-  const [formState, setFormState] = useState<CreateGroupFormData>(initialFormState);
+  const [formState, setFormState] =
+    useState<CreateGroupFormData>(initialFormState);
 
   useEffect(() => {
     if (isOpen) {
@@ -61,11 +62,14 @@ export function CreateGroupDialog({
   };
 
   const handleSubmit = () => {
-    if (!formState.name.trim() || !(formState.courseId || defaultCourseId)) return;
+    if (!formState.name.trim() || !(formState.courseId || defaultCourseId))
+      return;
     onSubmit({
       ...formState,
       courseId: formState.courseId || defaultCourseId || "",
-      maxMembers: formState.maxMembers ? Number(formState.maxMembers) : undefined,
+      maxMembers: formState.maxMembers
+        ? Number(formState.maxMembers)
+        : undefined,
     });
     setFormState(initialFormState);
     onOpenChange(false);
@@ -91,7 +95,9 @@ export function CreateGroupDialog({
         </DialogHeader>
         <div className="p-4 sm:p-6 space-y-4 overflow-x-hidden min-w-0">
           <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">Fach</label>
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
+              Fach
+            </label>
             <Select
               options={[
                 { value: "", label: "Fach auswählen" },
@@ -112,7 +118,9 @@ export function CreateGroupDialog({
             <Input
               type="text"
               value={formState.name}
-              onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, name: e.target.value }))
+              }
               placeholder="z.B. Gruppe A"
             />
           </div>
@@ -123,7 +131,10 @@ export function CreateGroupDialog({
             <Textarea
               value={formState.description}
               onChange={(e) =>
-                setFormState((prev) => ({ ...prev, description: e.target.value }))
+                setFormState((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
               }
               placeholder="Beschreibung der Gruppe..."
               rows={3}
@@ -155,7 +166,10 @@ export function CreateGroupDialog({
                   const value = e.target.value;
                   setFormState((prev) => ({
                     ...prev,
-                    maxMembers: value === "" ? undefined : Math.max(1, parseInt(value, 10) || 1),
+                    maxMembers:
+                      value === ""
+                        ? undefined
+                        : Math.max(1, parseInt(value, 10) || 1),
                   }));
                 }}
                 min="1"
@@ -184,11 +198,18 @@ export function CreateGroupDialog({
             <Button
               onClick={handleSubmit}
               className="flex-1"
-              disabled={!formState.name.trim() || !(formState.courseId || defaultCourseId)}
+              disabled={
+                !formState.name.trim() ||
+                !(formState.courseId || defaultCourseId)
+              }
             >
               Erstellen
             </Button>
-            <Button onClick={handleCancel} variant="secondary" className="flex-1">
+            <Button
+              onClick={handleCancel}
+              variant="secondary"
+              className="flex-1"
+            >
               Abbrechen
             </Button>
           </div>
@@ -197,4 +218,3 @@ export function CreateGroupDialog({
     </Dialog>
   );
 }
-
