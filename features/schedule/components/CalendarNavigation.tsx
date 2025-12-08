@@ -6,7 +6,7 @@ import {
   ChevronRight,
   Calendar as CalendarIcon,
 } from "lucide-react";
-import type { ViewType } from "./types/calendar";
+import type { ViewType } from "@/features/schedule/types/calendar";
 
 interface CalendarNavigationProps {
   viewType: ViewType;
@@ -150,4 +150,3 @@ export function CalendarNavigation({
     </div>
   );
 }
-

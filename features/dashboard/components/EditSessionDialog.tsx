@@ -205,7 +205,7 @@ export function EditSessionDialog({
                     onChange={(value) =>
                       onFormStateChange({
                         ...formState,
-                        attendance: value as AttendanceType,
+                        attendance: value as "mandatory" | "optional",
                       })
                     }
                   />

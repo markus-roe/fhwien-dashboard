@@ -44,8 +44,6 @@ export default function ProfilPage() {
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
         <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 lg:overflow-y-scroll">
           <Sidebar
-            showCalendar={true}
-            showNextUpCard={false}
             onSessionClick={handleSessionClick}
             emptyMessage="Keine anstehenden Termine."
           />

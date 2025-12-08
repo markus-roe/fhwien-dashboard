@@ -1,8 +1,8 @@
 "use client";
 
 import { Clock, Video, ArrowRight, MapPin } from "lucide-react";
-import { Button } from "../ui/Button";
-import { Badge } from "../ui/Badge";
+import { Button } from "@/shared/components/ui/Button";
+import { Badge } from "@/shared/components/ui/Badge";
 import { LocationType } from "@/shared/data/mockData";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";

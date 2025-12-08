@@ -1,23 +1,22 @@
-'use client'
+"use client";
 
-import { Course } from '@/shared/data/mockData'
-import { Checkbox } from '../ui/Checkbox'
+import { Course } from "@/shared/data/mockData";
 
 interface Task {
-  id: string
-  title: string
-  dueDate: string
-  completed?: boolean
-  course: Course
+  id: string;
+  title: string;
+  dueDate: string;
+  completed?: boolean;
+  course: Course;
 }
 
 interface TasksWidgetProps {
-  tasks: Task[]
-  onTaskToggle?: (taskId: string) => void
+  tasks: Task[];
+  onTaskToggle?: (taskId: string) => void;
 }
 
 export const TasksWidget = ({ tasks, onTaskToggle }: TasksWidgetProps) => {
-  const pendingCount = tasks.filter((t) => !t.completed).length
+  const pendingCount = tasks.filter((t) => !t.completed).length;
 
   return (
     <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
@@ -41,15 +40,13 @@ export const TasksWidget = ({ tasks, onTaskToggle }: TasksWidgetProps) => {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-zinc-900 truncate group-hover:text-blue-600 transition-colors">
                   {task.title}
-                  </p>
+                </p>
                 {task.course && (
                   <p className="text-[10px] mt-0.5 font-medium text-zinc-500 truncate">
                     {task.course.title}
                   </p>
                 )}
-                <p
-                  className="text-[10px] mt-0.5 font-medium text-zinc-500"
-                >
+                <p className="text-[10px] mt-0.5 font-medium text-zinc-500">
                   {task.dueDate}
                 </p>
               </div>
@@ -61,6 +58,5 @@ export const TasksWidget = ({ tasks, onTaskToggle }: TasksWidgetProps) => {
         ))}
       </div>
     </div>
-  )
-}
-
+  );
+};
