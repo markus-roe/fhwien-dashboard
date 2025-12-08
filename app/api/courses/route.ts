@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockCourses } from "@/data/mockData";
+import { mockCourses } from "@/shared/data/mockData";
 import type {
   GetCoursesQuery,
   CoursesResponse,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
 export async function GET(
   request: NextRequest

@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { type User, type Program, currentUser } from "@/data/mockData";
+import { useState } from "react";
+import { type User, type Program, currentUser } from "@/shared/data/mockData";
 import { redirect } from "next/navigation";
-import { useUsers } from "@/hooks/useUsers";
-import { UsersTab } from "@/components/dashboard/UsersTab";
-import {
-  CreateStudentDialog,
-  type CreateStudentFormData,
-} from "@/components/dashboard/CreateStudentDialog";
-import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { useUsers } from "@/features/users/hooks/useUsers";
+import { useDashboardUserFilters } from "@/features/users/hooks/useDashboardUserFilters";
+import { useDashboardUserOperations } from "@/features/users/hooks/useDashboardUserOperations";
+import { UsersTab } from "@/features/dashboard/components/UsersTab";
+import { CreateStudentDialog } from "@/features/users/components/CreateStudentDialog";
+import type { CreateStudentFormData } from "@/features/users/types";
+import { DeleteConfirmationDialog } from "@/shared/components/ui/DeleteConfirmationDialog";
 
 export default function UsersPage() {
   if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
@@ -30,48 +30,30 @@ export default function UsersPage() {
   const [editingStudent, setEditingStudent] = useState<User | null>(null);
   const [studentToDelete, setStudentToDelete] = useState<User | null>(null);
 
-  const users = useMemo(() => {
-    let filtered = allUsers;
+  // Filtering logic
+  const { filteredUsers: users } = useDashboardUserFilters({
+    allUsers,
+    programFilter,
+    searchQuery: userSearch,
+  });
 
-    if (programFilter !== "all") {
-      filtered = filtered.filter((user) => user.program === programFilter);
-    }
+  // Operations
+  const { handleCreateOrEditStudent, handleDeleteStudent } =
+    useDashboardUserOperations({
+      createUser,
+      updateUser,
+      deleteUser,
+    });
 
-    if (userSearch.trim()) {
-      const query = userSearch.toLowerCase();
-      filtered = filtered.filter(
-        (user) =>
-          user.name.toLowerCase().includes(query) ||
-          user.email.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
-  }, [allUsers, programFilter, userSearch]);
-
-  const handleCreateOrEditStudent = async (data: CreateStudentFormData) => {
+  const handleCreateOrEditStudentWrapper = async (
+    data: CreateStudentFormData
+  ) => {
     try {
-      if (editingStudent) {
-        await updateUser(editingStudent.id, {
-          name: data.name,
-          email: data.email,
-          program: data.program,
-          initials: data.initials,
-          role: "student",
-        });
-        setEditingStudent(null);
-      } else {
-        await createUser({
-          name: data.name,
-          email: data.email,
-          program: data.program,
-          initials: data.initials,
-          role: "student",
-        });
-      }
+      await handleCreateOrEditStudent(editingStudent, data);
+      setEditingStudent(null);
       setIsCreateStudentOpen(false);
     } catch (error) {
-      console.error("Failed to save student:", error);
+      // Error already logged in hook
     }
   };
 
@@ -80,12 +62,12 @@ export default function UsersPage() {
     setIsCreateStudentOpen(true);
   };
 
-  const handleDeleteStudent = async (userId: string) => {
+  const handleDeleteStudentWrapper = async (userId: string) => {
     try {
-      await deleteUser(userId);
+      await handleDeleteStudent(userId);
       setStudentToDelete(null);
     } catch (error) {
-      console.error("Failed to delete student:", error);
+      // Error already logged in hook
     }
   };
 
@@ -115,7 +97,7 @@ export default function UsersPage() {
             setEditingStudent(null);
           }
         }}
-        onSubmit={handleCreateOrEditStudent}
+        onSubmit={handleCreateOrEditStudentWrapper}
         mode={editingStudent ? "edit" : "create"}
         initialData={editingStudent || undefined}
       />
@@ -125,7 +107,7 @@ export default function UsersPage() {
         onClose={() => setStudentToDelete(null)}
         onConfirm={() => {
           if (studentToDelete) {
-            handleDeleteStudent(studentToDelete.id);
+            handleDeleteStudentWrapper(studentToDelete.id);
           }
         }}
         title="Student löschen?"

@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/Card";
-import type { Session, LocationType } from "@/data/mockData";
-import { useCoachingSlots } from "@/hooks/useCoachingSlots";
-import { useCourses } from "@/hooks/useCourses";
-import { useCoachingSlotFilters } from "@/hooks/useCoachingSlotFilters";
-import { useCoachingSlotOperations } from "@/hooks/useCoachingSlotOperations";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { useSessionPanel } from "@/components/schedule/hooks/useSessionPanel";
-import { SessionPanel } from "@/components/schedule/SessionPanel";
-import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
-import { CourseFilterButtons } from "@/components/groups/CourseFilterButtons";
-import { Input } from "@/components/ui/Input";
-import { CoachingSlotsList } from "@/components/coaching/CoachingSlotsList";
-import { LoadingSkeletonCoachingCards } from "@/components/ui/LoadingSkeleton";
+import { Card, CardContent } from "@/shared/components/ui/Card";
+import type { Session, LocationType } from "@/shared/data/mockData";
+import { useCoachingSlots } from "@/features/coaching/hooks/useCoachingSlots";
+import { useCourses } from "@/shared/hooks/useCourses";
+import { useCoachingSlotFilters } from "@/features/coaching/hooks/useCoachingSlotFilters";
+import { useCoachingSlotOperations } from "@/features/coaching/hooks/useCoachingSlotOperations";
+import { Sidebar } from "@/shared/components/layout/Sidebar";
+import { useSessionPanel } from "@/features/schedule/components/hooks/useSessionPanel";
+import { SessionPanel } from "@/features/schedule/components/SessionPanel";
+import { SegmentedTabs } from "@/shared/components/ui/SegmentedTabs";
+import { CourseFilterButtons } from "@/features/groups/components/CourseFilterButtons";
+import { Input } from "@/shared/components/ui/Input";
+import { CoachingSlotsList } from "@/features/coaching/components/CoachingSlotsList";
+import { LoadingSkeletonCoachingCards } from "@/shared/components/ui/LoadingSkeleton";
 
 export default function CoachingPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =

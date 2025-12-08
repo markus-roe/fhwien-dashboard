@@ -1,24 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { SessionPanel } from "@/components/schedule/SessionPanel";
-import { useSessionPanel } from "@/components/schedule/hooks/useSessionPanel";
-import {
-  CreateGroupDialog,
-  type CreateGroupFormData,
-} from "@/components/groups/CreateGroupDialog";
-import { useGroups } from "@/hooks/useGroups";
-import { useCourses } from "@/hooks/useCourses";
-import { useGroupFilters } from "@/hooks/useGroupFilters";
-import { useGroupOperations } from "@/hooks/useGroupOperations";
-import { Card, CardContent } from "@/components/ui/Card";
-import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
-import { Input } from "@/components/ui/Input";
-import { CourseFilterButtons } from "@/components/groups/CourseFilterButtons";
-import { Button } from "@/components/ui/Button";
-import { GroupsList } from "@/components/groups/GroupsList";
-import { LoadingSkeletonGroupCards } from "@/components/ui/LoadingSkeleton";
+import { Sidebar } from "@/shared/components/layout/Sidebar";
+import { SessionPanel } from "@/features/schedule/components/SessionPanel";
+import { useSessionPanel } from "@/features/schedule/components/hooks/useSessionPanel";
+import { CreateGroupDialog } from "@/features/groups/components/CreateGroupDialog";
+import type { CreateGroupFormData } from "@/features/groups/types";
+import { useGroups } from "@/features/groups/hooks/useGroups";
+import { useCourses } from "@/shared/hooks/useCourses";
+import { useGroupFilters } from "@/features/groups/hooks/useGroupFilters";
+import { useGroupOperations } from "@/features/groups/hooks/useGroupOperations";
+import { Card, CardContent } from "@/shared/components/ui/Card";
+import { SegmentedTabs } from "@/shared/components/ui/SegmentedTabs";
+import { Input } from "@/shared/components/ui/Input";
+import { CourseFilterButtons } from "@/features/groups/components/CourseFilterButtons";
+import { Button } from "@/shared/components/ui/Button";
+import { GroupsList } from "@/features/groups/components/GroupsList";
+import { LoadingSkeletonGroupCards } from "@/shared/components/ui/LoadingSkeleton";
 
 export default function GruppenPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);

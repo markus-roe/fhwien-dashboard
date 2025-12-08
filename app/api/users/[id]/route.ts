@@ -3,13 +3,13 @@ import {
   mockUsers,
   type User,
   type Program,
-} from "@/data/mockData";
+} from "@/shared/data/mockData";
 import type {
   UpdateUserRequest,
   UserResponse,
   ApiError,
   ApiSuccess,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
 let users: User[] = [...mockUsers];
 

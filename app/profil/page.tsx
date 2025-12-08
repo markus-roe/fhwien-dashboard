@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Avatar } from "@/components/ui/Avatar";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { currentUser } from "@/data/mockData";
-import type { Session } from "@/data/mockData";
+import { Card, CardContent } from "@/shared/components/ui/Card";
+import { Avatar } from "@/shared/components/ui/Avatar";
+import { Input } from "@/shared/components/ui/Input";
+import { Button } from "@/shared/components/ui/Button";
+import { Sidebar } from "@/shared/components/layout/Sidebar";
+import { currentUser } from "@/shared/data/mockData";
+import type { Session } from "@/shared/data/mockData";
 import { User, Mail, GraduationCap, Lock } from "lucide-react";
 
 export default function ProfilPage() {

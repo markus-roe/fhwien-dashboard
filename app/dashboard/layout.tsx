@@ -1,11 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
+import { Card, CardContent } from "@/shared/components/ui/Card";
+import { Sidebar } from "@/shared/components/layout/Sidebar";
+import { SegmentedTabs } from "@/shared/components/ui/SegmentedTabs";
 import { useRouter } from "next/navigation";
-import { useDashboardTabs } from "@/hooks/useDashboardTabs";
+import { useDashboardTabs } from "@/features/dashboard/hooks/useDashboardTabs";
 
 const VALID_TABS = ["lvs", "coachings", "groups", "users"] as const;
 type TabValue = (typeof VALID_TABS)[number];
@@ -31,11 +31,7 @@ export default function DashboardLayout({
     <div className="flex flex-col h-full min-h-0">
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
         <aside className="hidden lg:flex lg:flex-col lg:w-[300px] lg:shrink-0 lg:overflow-y-scroll">
-          <Sidebar
-            showCalendar={true}
-            showNextUpCard={false}
-            emptyMessage="Keine anstehenden Termine."
-          />
+          <Sidebar emptyMessage="Keine anstehenden Termine." />
         </aside>
 
         <div className="flex-1 min-w-0 space-y-3">

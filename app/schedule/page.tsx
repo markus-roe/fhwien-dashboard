@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { SessionPanel } from "@/components/schedule/SessionPanel";
-import { useSessionPanel } from "@/components/schedule/hooks/useSessionPanel";
-import { CalendarView } from "@/components/schedule/CalendarView";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { SessionPanel } from "@/features/schedule/components/SessionPanel";
+import { useSessionPanel } from "@/features/schedule/components/hooks/useSessionPanel";
+import { CalendarView } from "@/features/schedule/components/CalendarView";
+import { Sidebar } from "@/shared/components/layout/Sidebar";
 
 export default function SchedulePage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
