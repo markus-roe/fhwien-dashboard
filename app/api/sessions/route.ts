@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockSessions, type Session } from "@/data/mockData";
-import { calculateDuration } from "@/lib/dashboardUtils";
+import { mockSessions, type Session } from "@/shared/data/mockData";
+import { calculateDuration } from "@/shared/lib/dashboardUtils";
 import type {
   CreateSessionRequest,
   GetSessionsQuery,
   SessionsResponse,
   SessionResponse,
   ApiError,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
 let sessions: Session[] = [...mockSessions];
 

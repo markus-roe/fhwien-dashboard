@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockUsers, type User, type Program } from "@/data/mockData";
+import { mockUsers, type User, type Program } from "@/shared/data/mockData";
 import type {
   UpdateUserRequest,
   UserResponse,
   ApiError,
   ApiSuccess,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
 let users: User[] = [...mockUsers];
 

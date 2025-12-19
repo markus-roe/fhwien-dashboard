@@ -3,14 +3,14 @@ import {
   mockCoachingSlots,
   mockUsers,
   type CoachingSlot,
-} from "@/data/mockData";
-import { calculateDuration } from "@/lib/dashboardUtils";
+} from "@/shared/data/mockData";
+import { calculateDuration } from "@/shared/lib/dashboardUtils";
 import type {
   UpdateCoachingSlotRequest,
   CoachingSlotResponse,
   ApiError,
   ApiSuccess,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
 let coachingSlots: CoachingSlot[] = [...mockCoachingSlots];
 

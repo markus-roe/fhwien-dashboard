@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ClientLayout } from "@/components/layout/ClientLayout";
+import { ClientLayout } from "@/shared/components/layout/ClientLayout";
 
 export const metadata: Metadata = {
   title: "FH Wien - DTI/DI",

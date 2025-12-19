@@ -3,8 +3,8 @@ import {
   mockCoachingSlots,
   currentUser,
   type CoachingSlot,
-} from "@/data/mockData";
-import type { CoachingSlotResponse, ApiError } from "@/lib/api-types";
+} from "@/shared/data/mockData";
+import type { CoachingSlotResponse, ApiError } from "@/shared/lib/api-types";
 
 let coachingSlots: CoachingSlot[] = [...mockCoachingSlots];
 

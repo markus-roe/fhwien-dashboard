@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockGroups, type Group } from "@/data/mockData";
+import { mockGroups, type Group } from "@/shared/data/mockData";
 import type {
   UpdateGroupRequest,
   GroupResponse,
   ApiError,
   ApiSuccess,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
 let groups: Group[] = [...mockGroups];
 

@@ -1,16 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { type Session, currentUser } from "@/data/mockData";
+import { useState } from "react";
+import { type Session, currentUser } from "@/shared/data/mockData";
 import { redirect } from "next/navigation";
-import { useSessions } from "@/hooks/useSessions";
-import { useCourses } from "@/hooks/useCourses";
-import { SessionsTab } from "@/components/dashboard/SessionsTab";
-import {
-  EditSessionDialog,
-  type EditSessionFormState,
-} from "@/components/dashboard/EditSessionDialog";
-import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { useSessions } from "@/features/sessions/hooks/useSessions";
+import { useCourses } from "@/shared/hooks/useCourses";
+import { useDashboardSessionFilters } from "@/features/sessions/hooks/useDashboardSessionFilters";
+import { useDashboardSessionOperations } from "@/features/sessions/hooks/useDashboardSessionOperations";
+import { SessionsTab } from "@/features/dashboard/components/SessionsTab";
+import { EditSessionDialog } from "@/features/dashboard/components/EditSessionDialog";
+import type { EditSessionFormState } from "@/features/dashboard/types";
+import { DeleteConfirmationDialog } from "@/shared/components/ui/DeleteConfirmationDialog";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -35,30 +35,21 @@ export default function LVsPage() {
     useState<EditSessionFormState | null>(null);
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
 
-  const sessions = useMemo(() => {
-    let filtered = allSessions;
+  // Filtering logic
+  const { filteredSessions: sessions } = useDashboardSessionFilters({
+    allSessions,
+    courses: mockCourses,
+    selectedCourseId,
+    searchQuery: sessionSearch,
+  });
 
-    if (selectedCourseId) {
-      filtered = filtered.filter(
-        (session) => session.courseId === selectedCourseId
-      );
-    }
-
-    if (sessionSearch.trim()) {
-      const query = sessionSearch.toLowerCase();
-      filtered = filtered.filter((session) => {
-        const course = mockCourses.find((c) => c.id === session.courseId);
-        return (
-          session.title.toLowerCase().includes(query) ||
-          session.location.toLowerCase().includes(query) ||
-          course?.title.toLowerCase().includes(query) ||
-          false
-        );
-      });
-    }
-
-    return filtered;
-  }, [allSessions, selectedCourseId, sessionSearch, mockCourses]);
+  // Operations
+  const { handleSaveSession, handleDeleteSession } =
+    useDashboardSessionOperations({
+      createSession,
+      updateSession,
+      deleteSession,
+    });
 
   const handleOpenEditSession = (session: Session) => {
     setEditingSession(session);
@@ -93,50 +84,22 @@ export default function LVsPage() {
     });
   };
 
-  const handleDeleteSession = async (sessionId: string) => {
+  const handleDeleteSessionWrapper = async (sessionId: string) => {
     try {
-      await deleteSession(sessionId);
+      await handleDeleteSession(sessionId);
       setSessionToDelete(null);
     } catch (error) {
-      console.error("Failed to delete session:", error);
+      // Error already logged in hook
     }
   };
 
-  const handleSaveSession = async () => {
-    if (!editFormState || !editFormState.courseId) return;
-
+  const handleSaveSessionWrapper = async () => {
     try {
-      if (editingSession) {
-        await updateSession(editingSession.id, {
-          courseId: editFormState.courseId,
-          title: editFormState.title,
-          date: editFormState.date,
-          time: editFormState.time,
-          endTime: editFormState.endTime,
-          location: editFormState.location,
-          locationType: editFormState.locationType,
-          attendance: editFormState.attendance,
-        });
-      } else {
-        await createSession({
-          courseId: editFormState.courseId,
-          type: "lecture",
-          title: editFormState.title,
-          date: editFormState.date,
-          time: editFormState.time,
-          endTime: editFormState.endTime,
-          location: editFormState.location,
-          locationType: editFormState.locationType,
-          attendance: editFormState.attendance,
-          objectives: [],
-          materials: [],
-        });
-      }
-
+      await handleSaveSession(editingSession, editFormState);
       setEditingSession(null);
       setEditFormState(null);
     } catch (error) {
-      console.error("Failed to save session:", error);
+      // Error already logged in hook
     }
   };
 
@@ -163,7 +126,7 @@ export default function LVsPage() {
             setEditingSession(null);
             setEditFormState(null);
           }}
-          onSave={handleSaveSession}
+          onSave={handleSaveSessionWrapper}
           mode={editingSession ? "edit" : "create"}
         />
       )}
@@ -173,7 +136,7 @@ export default function LVsPage() {
         onClose={() => setSessionToDelete(null)}
         onConfirm={() => {
           if (sessionToDelete) {
-            handleDeleteSession(sessionToDelete.id);
+            handleDeleteSessionWrapper(sessionToDelete.id);
           }
         }}
         title="LV-Termin löschen?"

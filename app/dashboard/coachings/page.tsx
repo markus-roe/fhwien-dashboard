@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { type CoachingSlot, currentUser } from "@/data/mockData";
+import { useState } from "react";
+import { type CoachingSlot, currentUser } from "@/shared/data/mockData";
 import { redirect } from "next/navigation";
-import { useCoachingSlots } from "@/hooks/useCoachingSlots";
-import { useUsers } from "@/hooks/useUsers";
-import { useCourses } from "@/hooks/useCourses";
-import { CoachingSlotsTab } from "@/components/dashboard/CoachingSlotsTab";
-import { CreateCoachingSlotDialog } from "@/components/coaching/CreateCoachingSlotDialog";
-import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { useCoachingSlots } from "@/features/coaching/hooks/useCoachingSlots";
+import { useUsers } from "@/features/users/hooks/useUsers";
+import { useCourses } from "@/shared/hooks/useCourses";
+import { useDashboardCoachingSlotFilters } from "@/features/dashboard/hooks/useDashboardCoachingSlotFilters";
+import { useDashboardCoachingSlotOperations } from "@/features/dashboard/hooks/useDashboardCoachingSlotOperations";
+import { CoachingSlotsTab } from "@/features/dashboard/components/CoachingSlotsTab";
+import { CreateCoachingSlotDialog } from "@/features/coaching/components/CreateCoachingSlotDialog";
+import { DeleteConfirmationDialog } from "@/shared/components/ui/DeleteConfirmationDialog";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -27,9 +29,7 @@ export default function CoachingsPage() {
   const { users: allUsers, loading: usersLoading } = useUsers();
   const { courses: mockCourses, loading: coursesLoading } = useCourses();
 
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(
-    null
-  );
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [coachingSlotSearch, setCoachingSlotSearch] = useState("");
   const [isCreateCoachingOpen, setIsCreateCoachingOpen] = useState(false);
   const [editingCoachingSlot, setEditingCoachingSlot] =
@@ -37,61 +37,28 @@ export default function CoachingsPage() {
   const [coachingSlotToDelete, setCoachingSlotToDelete] =
     useState<CoachingSlot | null>(null);
 
-  const coachingSlots = useMemo(() => {
-    let filtered = allCoachingSlots;
+  // Filtering logic
+  const { filteredSlots: coachingSlots } = useDashboardCoachingSlotFilters({
+    allSlots: allCoachingSlots,
+    courses: mockCourses,
+    selectedCourseId,
+    searchQuery: coachingSlotSearch,
+  });
 
-    if (selectedCourseId) {
-      filtered = filtered.filter((slot) => slot.courseId === selectedCourseId);
-    }
-
-    if (coachingSlotSearch.trim()) {
-      const query = coachingSlotSearch.toLowerCase();
-      filtered = filtered.filter((slot) => {
-        const course = mockCourses.find((c) => c.id === slot.courseId);
-        return (
-          slot.description?.toLowerCase().includes(query) ||
-          course?.title.toLowerCase().includes(query) ||
-          slot.participants.some((p) => p.toLowerCase().includes(query)) ||
-          false
-        );
-      });
-    }
-
-    return filtered;
-  }, [allCoachingSlots, selectedCourseId, coachingSlotSearch, mockCourses]);
-
-  const handleCreateCoaching = async (data: {
-    courseId: string;
-    date: Date;
-    time: string;
-    endTime: string;
-    location: string;
-    locationType: "online" | "on-campus";
-    maxParticipants: number;
-    participants: string[];
-    description?: string;
-  }) => {
-    try {
-      await createCoachingSlot({
-        courseId: data.courseId,
-        date: data.date,
-        time: data.time,
-        endTime: data.endTime,
-        maxParticipants: data.maxParticipants,
-        participants: data.participants,
-        description: data.description,
-      });
-    } catch (error) {
-      console.error("Failed to create coaching slot:", error);
-    }
-  };
+  // Operations
+  const { handleSaveCoaching, handleDeleteCoaching } =
+    useDashboardCoachingSlotOperations({
+      createSlot: createCoachingSlot,
+      updateSlot: updateCoachingSlot,
+      deleteSlot: deleteCoachingSlot,
+    });
 
   const handleOpenEditCoaching = (slot: CoachingSlot) => {
     setEditingCoachingSlot(slot);
     setIsCreateCoachingOpen(true);
   };
 
-  const handleSaveCoaching = async (data: {
+  const handleSaveCoachingWrapper = async (data: {
     courseId: string;
     date: Date;
     time: string;
@@ -103,33 +70,17 @@ export default function CoachingsPage() {
     description?: string;
   }) => {
     try {
-      if (editingCoachingSlot) {
-        await updateCoachingSlot(editingCoachingSlot.id, {
-          courseId: data.courseId,
-          date: data.date,
-          time: data.time,
-          endTime: data.endTime,
-          maxParticipants: data.maxParticipants,
-          participants: data.participants,
-          description: data.description,
-        });
-        setEditingCoachingSlot(null);
-      } else {
-        await handleCreateCoaching(data);
-      }
+      await handleSaveCoaching(editingCoachingSlot, data);
+      setEditingCoachingSlot(null);
       setIsCreateCoachingOpen(false);
-    } catch (error) {
-      console.error("Failed to save coaching slot:", error);
-    }
+    } catch (error) {}
   };
 
-  const handleDeleteCoaching = async (slotId: string) => {
+  const handleDeleteCoachingWrapper = async (slotId: string) => {
     try {
-      await deleteCoachingSlot(slotId);
+      await handleDeleteCoaching(slotId);
       setCoachingSlotToDelete(null);
-    } catch (error) {
-      console.error("Failed to delete coaching slot:", error);
-    }
+    } catch (error) {}
   };
 
   return (
@@ -140,7 +91,9 @@ export default function CoachingsPage() {
         selectedCourseId={selectedCourseId}
         onCourseChange={setSelectedCourseId}
         onEdit={handleOpenEditCoaching}
-        onDelete={setCoachingSlotToDelete}
+        onDelete={(slot) => {
+          setCoachingSlotToDelete(slot);
+        }}
         onCreate={() => {
           setEditingCoachingSlot(null);
           setIsCreateCoachingOpen(true);
@@ -160,7 +113,7 @@ export default function CoachingsPage() {
         }}
         courses={mockCourses}
         users={allUsers}
-        onSubmit={handleSaveCoaching}
+        onSubmit={handleSaveCoachingWrapper}
         mode={editingCoachingSlot ? "edit" : "create"}
         initialData={editingCoachingSlot || undefined}
       />
@@ -170,7 +123,7 @@ export default function CoachingsPage() {
         onClose={() => setCoachingSlotToDelete(null)}
         onConfirm={() => {
           if (coachingSlotToDelete) {
-            handleDeleteCoaching(coachingSlotToDelete.id);
+            handleDeleteCoachingWrapper(coachingSlotToDelete.id);
           }
         }}
         title="Coaching-Slot löschen?"
@@ -194,4 +147,3 @@ export default function CoachingsPage() {
     </>
   );
 }
-
