@@ -7,6 +7,33 @@ import type {
 
 let groups: Group[] = [...mockGroups];
 
+/**
+ * @swagger
+ * /api/groups/{id}/leave:
+ *   post:
+ *     summary: Leave a group
+ *     tags: [Groups]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Group ID
+ *     responses:
+ *       200:
+ *         description: Successfully left the group
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GroupResponse'
+ *       404:
+ *         description: Group not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }

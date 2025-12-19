@@ -5,6 +5,28 @@ import type {
   CoursesResponse,
 } from "@/shared/lib/api-types";
 
+/**
+ * @swagger
+ * /api/courses:
+ *   get:
+ *     summary: Get all courses
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: program
+ *         schema:
+ *           type: string
+ *         description: Filter courses by program
+ *     responses:
+ *       200:
+ *         description: List of courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CourseResponse'
+ */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<CoursesResponse>> {

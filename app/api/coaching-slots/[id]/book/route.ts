@@ -8,6 +8,39 @@ import type { CoachingSlotResponse, ApiError } from "@/shared/lib/api-types";
 
 let coachingSlots: CoachingSlot[] = [...mockCoachingSlots];
 
+/**
+ * @swagger
+ * /api/coaching-slots/{id}/book:
+ *   post:
+ *     summary: Book a coaching slot
+ *     tags: [Coaching Slots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Coaching slot ID
+ *     responses:
+ *       200:
+ *         description: Successfully booked the coaching slot
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CoachingSlotResponse'
+ *       400:
+ *         description: Bad request - slot is full or already booked
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       404:
+ *         description: Coaching slot not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }

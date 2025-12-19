@@ -15,6 +15,28 @@ import type {
 
 let coachingSlots: CoachingSlot[] = [...mockCoachingSlots];
 
+/**
+ * @swagger
+ * /api/coaching-slots:
+ *   get:
+ *     summary: Get all coaching slots
+ *     tags: [Coaching Slots]
+ *     parameters:
+ *       - in: query
+ *         name: courseId
+ *         schema:
+ *           type: string
+ *         description: Filter coaching slots by course ID
+ *     responses:
+ *       200:
+ *         description: List of coaching slots
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CoachingSlotResponse'
+ */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<CoachingSlotsResponse | ApiError>> {
@@ -35,6 +57,32 @@ export async function GET(
   return NextResponse.json(filteredSlots);
 }
 
+/**
+ * @swagger
+ * /api/coaching-slots:
+ *   post:
+ *     summary: Create a new coaching slot
+ *     tags: [Coaching Slots]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateCoachingSlotRequest'
+ *     responses:
+ *       201:
+ *         description: Coaching slot created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CoachingSlotResponse'
+ *       400:
+ *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<CoachingSlotResponse | ApiError>> {

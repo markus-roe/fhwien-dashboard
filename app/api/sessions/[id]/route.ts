@@ -10,6 +10,33 @@ import type {
 
 let sessions: Session[] = [...mockSessions];
 
+/**
+ * @swagger
+ * /api/sessions/{id}:
+ *   get:
+ *     summary: Get a session by ID
+ *     tags: [Sessions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Session ID
+ *     responses:
+ *       200:
+ *         description: Session details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SessionResponse'
+ *       404:
+ *         description: Session not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -26,6 +53,45 @@ export async function GET(
   return NextResponse.json<SessionResponse>(session);
 }
 
+/**
+ * @swagger
+ * /api/sessions/{id}:
+ *   put:
+ *     summary: Update a session
+ *     tags: [Sessions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Session ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateSessionRequest'
+ *     responses:
+ *       200:
+ *         description: Session updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SessionResponse'
+ *       400:
+ *         description: Bad request - invalid request body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       404:
+ *         description: Session not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -94,6 +160,33 @@ export async function PUT(
   }
 }
 
+/**
+ * @swagger
+ * /api/sessions/{id}:
+ *   delete:
+ *     summary: Delete a session
+ *     tags: [Sessions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Session ID
+ *     responses:
+ *       200:
+ *         description: Session deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiSuccess'
+ *       404:
+ *         description: Session not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

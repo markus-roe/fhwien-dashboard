@@ -11,6 +11,33 @@ import type {
 
 let coachingSlots: CoachingSlot[] = [...mockCoachingSlots];
 
+/**
+ * @swagger
+ * /api/coaching-slots/{id}/cancel:
+ *   post:
+ *     summary: Cancel a coaching slot booking
+ *     tags: [Coaching Slots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Coaching slot ID
+ *     responses:
+ *       200:
+ *         description: Successfully cancelled the booking
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CoachingSlotResponse'
+ *       404:
+ *         description: Coaching slot not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }

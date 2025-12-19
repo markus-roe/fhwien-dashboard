@@ -10,6 +10,28 @@ import type {
 
 let groups: Group[] = [...mockGroups];
 
+/**
+ * @swagger
+ * /api/groups:
+ *   get:
+ *     summary: Get all groups
+ *     tags: [Groups]
+ *     parameters:
+ *       - in: query
+ *         name: courseId
+ *         schema:
+ *           type: string
+ *         description: Filter groups by course ID
+ *     responses:
+ *       200:
+ *         description: List of groups
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/GroupResponse'
+ */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<GroupsResponse | ApiError>> {
@@ -30,6 +52,32 @@ export async function GET(
   return NextResponse.json<GroupsResponse>(filteredGroups);
 }
 
+/**
+ * @swagger
+ * /api/groups:
+ *   post:
+ *     summary: Create a new group
+ *     tags: [Groups]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateGroupRequest'
+ *     responses:
+ *       201:
+ *         description: Group created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GroupResponse'
+ *       400:
+ *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<GroupResponse | ApiError>> {

@@ -11,6 +11,28 @@ import type {
 
 let sessions: Session[] = [...mockSessions];
 
+/**
+ * @swagger
+ * /api/sessions:
+ *   get:
+ *     summary: Get all sessions
+ *     tags: [Sessions]
+ *     parameters:
+ *       - in: query
+ *         name: courseId
+ *         schema:
+ *           type: string
+ *         description: Filter sessions by course ID
+ *     responses:
+ *       200:
+ *         description: List of sessions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/SessionResponse'
+ */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<SessionsResponse | ApiError>> {
@@ -31,6 +53,32 @@ export async function GET(
   return NextResponse.json(filteredSessions);
 }
 
+/**
+ * @swagger
+ * /api/sessions:
+ *   post:
+ *     summary: Create a new session
+ *     tags: [Sessions]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateSessionRequest'
+ *     responses:
+ *       201:
+ *         description: Session created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SessionResponse'
+ *       400:
+ *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<SessionResponse | ApiError>> {
