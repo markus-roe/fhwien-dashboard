@@ -62,7 +62,7 @@ export default function UsersPage() {
     setIsCreateStudentOpen(true);
   };
 
-  const handleDeleteStudentWrapper = async (userId: string) => {
+  const handleDeleteStudentWrapper = async (userId: number) => {
     try {
       await handleDeleteStudent(userId);
       setStudentToDelete(null);

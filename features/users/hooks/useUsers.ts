@@ -27,7 +27,7 @@ export function useUsers(params?: { program?: Program | "all"; search?: string }
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof usersApi.update>[1] }) =>
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof usersApi.update>[1] }) =>
       usersApi.update(id, data),
     onSuccess: (updatedUser) => {
       queryClient.setQueryData<User[]>(queryKey, (old = []) =>
@@ -43,7 +43,7 @@ export function useUsers(params?: { program?: Program | "all"; search?: string }
     },
   });
 
-  const deleteUser = async (id: string) => {
+  const deleteUser = async (id: number) => {
     await deleteMutation.mutateAsync(id);
     queryClient.setQueryData<User[]>(queryKey, (old = []) =>
       old.filter((u) => u.id !== id)
@@ -55,7 +55,7 @@ export function useUsers(params?: { program?: Program | "all"; search?: string }
     loading,
     error: error instanceof Error ? error.message : error ? String(error) : null,
     createUser: createMutation.mutateAsync,
-    updateUser: (id: string, userData: Parameters<typeof usersApi.update>[1]) =>
+    updateUser: (id: number, userData: Parameters<typeof usersApi.update>[1]) =>
       updateMutation.mutateAsync({ id, data: userData }),
     deleteUser,
     refetch,
