@@ -1,8 +1,24 @@
-import { PrismaClient, Program, UserRole } from './generated';
+import { config } from "dotenv";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "./generated/client.js";
+// import { Pool } from "pg";
+
+// Load environment variables
+config();
+
+const connectionString = process.env.DATABASE_URL!;
+
+if (!connectionString) {
+    throw new Error("DATABASE_URL environment variable is not set");
+}
+
+// const pool = new Pool({ connectionString });
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
+
+import { Program, UserRole } from "./generated/client.js";
 import fs from 'fs';
 import path from 'path';
-
-const prisma = new PrismaClient();
 
 async function main() {
     const csvPath = path.join(process.cwd(), 'shared/data/Users.csv');
