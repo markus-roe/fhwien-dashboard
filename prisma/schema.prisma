@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+// prisma/schema.prisma -> Provided by Neon Console
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums based on mockData.ts
+enum UserRole {
+  student
+  professor
+}
+
+enum Program {
+  DTI
+  DI
+}
+
+enum SessionType {
+  lecture
+  workshop
+  coaching
+}
+
+enum LocationType {
+  online
+  on_campus
+}
+
+enum Attendance {
+  mandatory
+  optional
+}
+
+enum MaterialType {
+  pdf
+  presentation
+  other
+}
+
+// Models
+
+model User {
+  id       String    @id @default(uuid())
+  name     String
+  initials String
+  email    String    @unique
+  program  Program?
+  // Professors might not have a program in the same way, or it can be optional
+  role     UserRole? @default(student)
+
+  // Relations
+  groups         Group[]        @relation("GroupMembers")
+  coachingSlots  CoachingSlot[] @relation("CoachingParticipants")
+  sessionsTaught Session[]      @relation("SessionLecturer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Course {
+  id       String    @id // e.g. "ds", "hti" - using custom string ID from mock
+  title    String
+  programs Program[] // Prisma supports arrays for Enums in Postgres
+
+  // Relations
+  sessions      Session[]
+  tasks         Task[]
+  groups        Group[]
+  coachingSlots CoachingSlot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Session {
+  id       String      @id @default(uuid())
+  courseId String
+  course   Course      @relation(fields: [courseId], references: [id])
+  type     SessionType
+  title    String
+
+  // Combined Date and Time from mock data (date + time / endTime)
+  startDateTime DateTime
+  endDateTime   DateTime
+
+  location     String
+  locationType LocationType
+
+  lecturerId String?
+  lecturer   User?   @relation("SessionLecturer", fields: [lecturerId], references: [id])
+
+  attendance Attendance
+  objectives String[] // Simple string array
+  isLive     Boolean?   @default(false)
+  groupId    String? // Optional: if a session is for a specific group
+
+  materials Material[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Material {
+  id        String  @id @default(uuid())
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  name String
+  size String
+  type MaterialType
+
+  addedAt DateTime @default(now())
+}
+
+model Task {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  title     String
+  dueDate   DateTime
+  completed Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Group {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  name        String
+  description String?
+  maxMembers  Int?
+
+  members User[] @relation("GroupMembers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CoachingSlot {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  startDateTime DateTime
+  endDateTime   DateTime
+
+  maxParticipants Int
+  description     String?
+
+  participants User[] @relation("CoachingParticipants")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
