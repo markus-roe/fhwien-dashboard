@@ -20,40 +20,56 @@ export type SessionModel = runtime.Types.Result.DefaultSelection<Prisma.$Session
 
 export type AggregateSession = {
   _count: SessionCountAggregateOutputType | null
+  _avg: SessionAvgAggregateOutputType | null
+  _sum: SessionSumAggregateOutputType | null
   _min: SessionMinAggregateOutputType | null
   _max: SessionMaxAggregateOutputType | null
 }
 
+export type SessionAvgAggregateOutputType = {
+  id: number | null
+  courseId: number | null
+  lecturerId: number | null
+  groupId: number | null
+}
+
+export type SessionSumAggregateOutputType = {
+  id: number | null
+  courseId: number | null
+  lecturerId: number | null
+  groupId: number | null
+}
+
 export type SessionMinAggregateOutputType = {
-  id: string | null
-  courseId: string | null
+  id: number | null
+  courseId: number | null
   type: $Enums.SessionType | null
   title: string | null
   startDateTime: Date | null
   endDateTime: Date | null
   location: string | null
   locationType: $Enums.LocationType | null
-  lecturerId: string | null
+  lecturerId: number | null
   attendance: $Enums.Attendance | null
   isLive: boolean | null
-  groupId: string | null
+  groupId: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type SessionMaxAggregateOutputType = {
-  id: string | null
-  courseId: string | null
+  id: number | null
+  courseId: number | null
   type: $Enums.SessionType | null
   title: string | null
   startDateTime: Date | null
   endDateTime: Date | null
   location: string | null
   locationType: $Enums.LocationType | null
-  lecturerId: string | null
+  lecturerId: number | null
   attendance: $Enums.Attendance | null
   isLive: boolean | null
-  groupId: string | null
+  groupId: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -77,6 +93,20 @@ export type SessionCountAggregateOutputType = {
   _all: number
 }
 
+
+export type SessionAvgAggregateInputType = {
+  id?: true
+  courseId?: true
+  lecturerId?: true
+  groupId?: true
+}
+
+export type SessionSumAggregateInputType = {
+  id?: true
+  courseId?: true
+  lecturerId?: true
+  groupId?: true
+}
 
 export type SessionMinAggregateInputType = {
   id?: true
@@ -169,6 +199,18 @@ export type SessionAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: SessionAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: SessionSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: SessionMinAggregateInputType
@@ -199,27 +241,31 @@ export type SessionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: SessionCountAggregateInputType | true
+  _avg?: SessionAvgAggregateInputType
+  _sum?: SessionSumAggregateInputType
   _min?: SessionMinAggregateInputType
   _max?: SessionMaxAggregateInputType
 }
 
 export type SessionGroupByOutputType = {
-  id: string
-  courseId: string
+  id: number
+  courseId: number
   type: $Enums.SessionType
   title: string
   startDateTime: Date
   endDateTime: Date
   location: string
   locationType: $Enums.LocationType
-  lecturerId: string | null
+  lecturerId: number | null
   attendance: $Enums.Attendance
   objectives: string[]
   isLive: boolean | null
-  groupId: string | null
+  groupId: number | null
   createdAt: Date
   updatedAt: Date
   _count: SessionCountAggregateOutputType | null
+  _avg: SessionAvgAggregateOutputType | null
+  _sum: SessionSumAggregateOutputType | null
   _min: SessionMinAggregateOutputType | null
   _max: SessionMaxAggregateOutputType | null
 }
@@ -243,19 +289,19 @@ export type SessionWhereInput = {
   AND?: Prisma.SessionWhereInput | Prisma.SessionWhereInput[]
   OR?: Prisma.SessionWhereInput[]
   NOT?: Prisma.SessionWhereInput | Prisma.SessionWhereInput[]
-  id?: Prisma.StringFilter<"Session"> | string
-  courseId?: Prisma.StringFilter<"Session"> | string
+  id?: Prisma.IntFilter<"Session"> | number
+  courseId?: Prisma.IntFilter<"Session"> | number
   type?: Prisma.EnumSessionTypeFilter<"Session"> | $Enums.SessionType
   title?: Prisma.StringFilter<"Session"> | string
   startDateTime?: Prisma.DateTimeFilter<"Session"> | Date | string
   endDateTime?: Prisma.DateTimeFilter<"Session"> | Date | string
   location?: Prisma.StringFilter<"Session"> | string
   locationType?: Prisma.EnumLocationTypeFilter<"Session"> | $Enums.LocationType
-  lecturerId?: Prisma.StringNullableFilter<"Session"> | string | null
+  lecturerId?: Prisma.IntNullableFilter<"Session"> | number | null
   attendance?: Prisma.EnumAttendanceFilter<"Session"> | $Enums.Attendance
   objectives?: Prisma.StringNullableListFilter<"Session">
   isLive?: Prisma.BoolNullableFilter<"Session"> | boolean | null
-  groupId?: Prisma.StringNullableFilter<"Session"> | string | null
+  groupId?: Prisma.IntNullableFilter<"Session"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
@@ -283,22 +329,22 @@ export type SessionOrderByWithRelationInput = {
 }
 
 export type SessionWhereUniqueInput = Prisma.AtLeast<{
-  id?: string
+  id?: number
   AND?: Prisma.SessionWhereInput | Prisma.SessionWhereInput[]
   OR?: Prisma.SessionWhereInput[]
   NOT?: Prisma.SessionWhereInput | Prisma.SessionWhereInput[]
-  courseId?: Prisma.StringFilter<"Session"> | string
+  courseId?: Prisma.IntFilter<"Session"> | number
   type?: Prisma.EnumSessionTypeFilter<"Session"> | $Enums.SessionType
   title?: Prisma.StringFilter<"Session"> | string
   startDateTime?: Prisma.DateTimeFilter<"Session"> | Date | string
   endDateTime?: Prisma.DateTimeFilter<"Session"> | Date | string
   location?: Prisma.StringFilter<"Session"> | string
   locationType?: Prisma.EnumLocationTypeFilter<"Session"> | $Enums.LocationType
-  lecturerId?: Prisma.StringNullableFilter<"Session"> | string | null
+  lecturerId?: Prisma.IntNullableFilter<"Session"> | number | null
   attendance?: Prisma.EnumAttendanceFilter<"Session"> | $Enums.Attendance
   objectives?: Prisma.StringNullableListFilter<"Session">
   isLive?: Prisma.BoolNullableFilter<"Session"> | boolean | null
-  groupId?: Prisma.StringNullableFilter<"Session"> | string | null
+  groupId?: Prisma.IntNullableFilter<"Session"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
@@ -322,33 +368,34 @@ export type SessionOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SessionCountOrderByAggregateInput
+  _avg?: Prisma.SessionAvgOrderByAggregateInput
   _max?: Prisma.SessionMaxOrderByAggregateInput
   _min?: Prisma.SessionMinOrderByAggregateInput
+  _sum?: Prisma.SessionSumOrderByAggregateInput
 }
 
 export type SessionScalarWhereWithAggregatesInput = {
   AND?: Prisma.SessionScalarWhereWithAggregatesInput | Prisma.SessionScalarWhereWithAggregatesInput[]
   OR?: Prisma.SessionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.SessionScalarWhereWithAggregatesInput | Prisma.SessionScalarWhereWithAggregatesInput[]
-  id?: Prisma.StringWithAggregatesFilter<"Session"> | string
-  courseId?: Prisma.StringWithAggregatesFilter<"Session"> | string
+  id?: Prisma.IntWithAggregatesFilter<"Session"> | number
+  courseId?: Prisma.IntWithAggregatesFilter<"Session"> | number
   type?: Prisma.EnumSessionTypeWithAggregatesFilter<"Session"> | $Enums.SessionType
   title?: Prisma.StringWithAggregatesFilter<"Session"> | string
   startDateTime?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
   endDateTime?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
   location?: Prisma.StringWithAggregatesFilter<"Session"> | string
   locationType?: Prisma.EnumLocationTypeWithAggregatesFilter<"Session"> | $Enums.LocationType
-  lecturerId?: Prisma.StringNullableWithAggregatesFilter<"Session"> | string | null
+  lecturerId?: Prisma.IntNullableWithAggregatesFilter<"Session"> | number | null
   attendance?: Prisma.EnumAttendanceWithAggregatesFilter<"Session"> | $Enums.Attendance
   objectives?: Prisma.StringNullableListFilter<"Session">
   isLive?: Prisma.BoolNullableWithAggregatesFilter<"Session"> | boolean | null
-  groupId?: Prisma.StringNullableWithAggregatesFilter<"Session"> | string | null
+  groupId?: Prisma.IntNullableWithAggregatesFilter<"Session"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
 }
 
 export type SessionCreateInput = {
-  id?: string
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
@@ -358,7 +405,7 @@ export type SessionCreateInput = {
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   course: Prisma.CourseCreateNestedOneWithoutSessionsInput
@@ -366,25 +413,24 @@ export type SessionCreateInput = {
 }
 
 export type SessionUncheckedCreateInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
   endDateTime: Date | string
   location: string
   locationType: $Enums.LocationType
-  lecturerId?: string | null
+  lecturerId?: number | null
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type SessionUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -394,7 +440,7 @@ export type SessionUpdateInput = {
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   course?: Prisma.CourseUpdateOneRequiredWithoutSessionsNestedInput
@@ -402,43 +448,42 @@ export type SessionUpdateInput = {
 }
 
 export type SessionUncheckedUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   locationType?: Prisma.EnumLocationTypeFieldUpdateOperationsInput | $Enums.LocationType
-  lecturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lecturerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SessionCreateManyInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
   endDateTime: Date | string
   location: string
   locationType: $Enums.LocationType
-  lecturerId?: string | null
+  lecturerId?: number | null
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type SessionUpdateManyMutationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -448,25 +493,25 @@ export type SessionUpdateManyMutationInput = {
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SessionUncheckedUpdateManyInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   locationType?: Prisma.EnumLocationTypeFieldUpdateOperationsInput | $Enums.LocationType
-  lecturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lecturerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -507,6 +552,13 @@ export type SessionCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type SessionAvgOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+  courseId?: Prisma.SortOrder
+  lecturerId?: Prisma.SortOrder
+  groupId?: Prisma.SortOrder
+}
+
 export type SessionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
@@ -539,6 +591,13 @@ export type SessionMinOrderByAggregateInput = {
   groupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type SessionSumOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+  courseId?: Prisma.SortOrder
+  lecturerId?: Prisma.SortOrder
+  groupId?: Prisma.SortOrder
 }
 
 export type SessionCreateNestedManyWithoutLecturerInput = {
@@ -650,12 +709,15 @@ export type NullableBoolFieldUpdateOperationsInput = {
   set?: boolean | null
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type SessionCreateWithoutLecturerInput = {
-  id?: string
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
@@ -665,15 +727,15 @@ export type SessionCreateWithoutLecturerInput = {
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   course: Prisma.CourseCreateNestedOneWithoutSessionsInput
 }
 
 export type SessionUncheckedCreateWithoutLecturerInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
@@ -683,7 +745,7 @@ export type SessionUncheckedCreateWithoutLecturerInput = {
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -718,25 +780,24 @@ export type SessionScalarWhereInput = {
   AND?: Prisma.SessionScalarWhereInput | Prisma.SessionScalarWhereInput[]
   OR?: Prisma.SessionScalarWhereInput[]
   NOT?: Prisma.SessionScalarWhereInput | Prisma.SessionScalarWhereInput[]
-  id?: Prisma.StringFilter<"Session"> | string
-  courseId?: Prisma.StringFilter<"Session"> | string
+  id?: Prisma.IntFilter<"Session"> | number
+  courseId?: Prisma.IntFilter<"Session"> | number
   type?: Prisma.EnumSessionTypeFilter<"Session"> | $Enums.SessionType
   title?: Prisma.StringFilter<"Session"> | string
   startDateTime?: Prisma.DateTimeFilter<"Session"> | Date | string
   endDateTime?: Prisma.DateTimeFilter<"Session"> | Date | string
   location?: Prisma.StringFilter<"Session"> | string
   locationType?: Prisma.EnumLocationTypeFilter<"Session"> | $Enums.LocationType
-  lecturerId?: Prisma.StringNullableFilter<"Session"> | string | null
+  lecturerId?: Prisma.IntNullableFilter<"Session"> | number | null
   attendance?: Prisma.EnumAttendanceFilter<"Session"> | $Enums.Attendance
   objectives?: Prisma.StringNullableListFilter<"Session">
   isLive?: Prisma.BoolNullableFilter<"Session"> | boolean | null
-  groupId?: Prisma.StringNullableFilter<"Session"> | string | null
+  groupId?: Prisma.IntNullableFilter<"Session"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Session"> | Date | string
 }
 
 export type SessionCreateWithoutCourseInput = {
-  id?: string
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
@@ -746,25 +807,25 @@ export type SessionCreateWithoutCourseInput = {
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   lecturer?: Prisma.UserCreateNestedOneWithoutSessionsTaughtInput
 }
 
 export type SessionUncheckedCreateWithoutCourseInput = {
-  id?: string
+  id?: number
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
   endDateTime: Date | string
   location: string
   locationType: $Enums.LocationType
-  lecturerId?: string | null
+  lecturerId?: number | null
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -796,8 +857,8 @@ export type SessionUpdateManyWithWhereWithoutCourseInput = {
 }
 
 export type SessionCreateManyLecturerInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
@@ -807,13 +868,12 @@ export type SessionCreateManyLecturerInput = {
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type SessionUpdateWithoutLecturerInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -823,15 +883,15 @@ export type SessionUpdateWithoutLecturerInput = {
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   course?: Prisma.CourseUpdateOneRequiredWithoutSessionsNestedInput
 }
 
 export type SessionUncheckedUpdateWithoutLecturerInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -841,14 +901,14 @@ export type SessionUncheckedUpdateWithoutLecturerInput = {
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SessionUncheckedUpdateManyWithoutLecturerInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -858,30 +918,29 @@ export type SessionUncheckedUpdateManyWithoutLecturerInput = {
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SessionCreateManyCourseInput = {
-  id?: string
+  id?: number
   type: $Enums.SessionType
   title: string
   startDateTime: Date | string
   endDateTime: Date | string
   location: string
   locationType: $Enums.LocationType
-  lecturerId?: string | null
+  lecturerId?: number | null
   attendance: $Enums.Attendance
   objectives?: Prisma.SessionCreateobjectivesInput | string[]
   isLive?: boolean | null
-  groupId?: string | null
+  groupId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type SessionUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -891,42 +950,42 @@ export type SessionUpdateWithoutCourseInput = {
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lecturer?: Prisma.UserUpdateOneWithoutSessionsTaughtNestedInput
 }
 
 export type SessionUncheckedUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   locationType?: Prisma.EnumLocationTypeFieldUpdateOperationsInput | $Enums.LocationType
-  lecturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lecturerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SessionUncheckedUpdateManyWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumSessionTypeFieldUpdateOperationsInput | $Enums.SessionType
   title?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   locationType?: Prisma.EnumLocationTypeFieldUpdateOperationsInput | $Enums.LocationType
-  lecturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lecturerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   attendance?: Prisma.EnumAttendanceFieldUpdateOperationsInput | $Enums.Attendance
   objectives?: Prisma.SessionUpdateobjectivesInput | string[]
   isLive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1032,19 +1091,19 @@ export type $SessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     lecturer: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: string
-    courseId: string
+    id: number
+    courseId: number
     type: $Enums.SessionType
     title: string
     startDateTime: Date
     endDateTime: Date
     location: string
     locationType: $Enums.LocationType
-    lecturerId: string | null
+    lecturerId: number | null
     attendance: $Enums.Attendance
     objectives: string[]
     isLive: boolean | null
-    groupId: string | null
+    groupId: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["session"]>
@@ -1472,19 +1531,19 @@ export interface Prisma__SessionClient<T, Null = never, ExtArgs extends runtime.
  * Fields of the Session model
  */
 export interface SessionFieldRefs {
-  readonly id: Prisma.FieldRef<"Session", 'String'>
-  readonly courseId: Prisma.FieldRef<"Session", 'String'>
+  readonly id: Prisma.FieldRef<"Session", 'Int'>
+  readonly courseId: Prisma.FieldRef<"Session", 'Int'>
   readonly type: Prisma.FieldRef<"Session", 'SessionType'>
   readonly title: Prisma.FieldRef<"Session", 'String'>
   readonly startDateTime: Prisma.FieldRef<"Session", 'DateTime'>
   readonly endDateTime: Prisma.FieldRef<"Session", 'DateTime'>
   readonly location: Prisma.FieldRef<"Session", 'String'>
   readonly locationType: Prisma.FieldRef<"Session", 'LocationType'>
-  readonly lecturerId: Prisma.FieldRef<"Session", 'String'>
+  readonly lecturerId: Prisma.FieldRef<"Session", 'Int'>
   readonly attendance: Prisma.FieldRef<"Session", 'Attendance'>
   readonly objectives: Prisma.FieldRef<"Session", 'String[]'>
   readonly isLive: Prisma.FieldRef<"Session", 'Boolean'>
-  readonly groupId: Prisma.FieldRef<"Session", 'String'>
+  readonly groupId: Prisma.FieldRef<"Session", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Session", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Session", 'DateTime'>
 }

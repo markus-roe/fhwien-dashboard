@@ -1,7 +1,12 @@
 import { config } from "dotenv";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/client.js";
-// import { Pool } from "pg";
+
+// Import all seed functions
+//import { seedStudents } from "./seeds/seedStudents.js";
+//import { seedProfessors } from "./seeds/seedProfessors.js";
+//import { seedCourses } from "./seeds/seedCourses.js";
+import { seedSessions } from "./seeds/seedSessions.js";
 
 // Load environment variables
 config();
@@ -12,63 +17,25 @@ if (!connectionString) {
     throw new Error("DATABASE_URL environment variable is not set");
 }
 
-// const pool = new Pool({ connectionString });
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
-import { Program, UserRole } from "./generated/client.js";
-import fs from 'fs';
-import path from 'path';
-
 async function main() {
-    const csvPath = path.join(process.cwd(), 'shared/data/Users.csv');
-    console.log(`Reading users from ${csvPath}...`);
+    console.log('🌱 Starting database seeding...\n');
 
-    const fileContent = fs.readFileSync(csvPath, 'utf-8');
-    const lines = fileContent.split('\n');
+    // Seed in correct order (respecting foreign key constraints)
 
-    // Skip header (line 0)
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
+    // 1. First seed courses (sessions depend on them)
+    //await seedCourses(prisma);
 
-        const [familienname, vorname, programStr, email] = line.split(';');
+    // 2. Seed users (students and professors)
+    //await seedStudents(prisma);
+    //await seedProfessors(prisma);
 
-        if (!email || !vorname || !familienname) {
-            console.warn(`Skipping invalid line ${i + 1}: ${line}`);
-            continue;
-        }
+    // 3. Seed sessions (depend on courses)
+    await seedSessions(prisma);
 
-        const name = `${vorname} ${familienname}`;
-        // Initials: First letter of Firstname + First letter of Lastname
-        const initials = (vorname[0] + familienname[0]).toUpperCase();
-
-        // Map program string to Enum
-        let program: Program | null = null;
-        if (programStr === 'DTI') program = Program.DTI;
-        if (programStr === 'DI') program = Program.DI;
-
-        console.log(`Upserting user: ${name} (${email})`);
-
-        await prisma.user.upsert({
-            where: { email },
-            update: {
-                name,
-                initials,
-                program,
-                role: UserRole.student,
-            },
-            create: {
-                name,
-                initials,
-                email,
-                program,
-                role: UserRole.student,
-            },
-        });
-    }
-
-    console.log('Seeding finished.');
+    console.log('\n✨ Seeding finished successfully!');
 }
 
 main()
@@ -76,7 +43,7 @@ main()
         await prisma.$disconnect();
     })
     .catch(async (e) => {
-        console.error(e);
+        console.error('❌ Seeding failed:', e);
         await prisma.$disconnect();
         process.exit(1);
     });

@@ -20,13 +20,25 @@ export type TaskModel = runtime.Types.Result.DefaultSelection<Prisma.$TaskPayloa
 
 export type AggregateTask = {
   _count: TaskCountAggregateOutputType | null
+  _avg: TaskAvgAggregateOutputType | null
+  _sum: TaskSumAggregateOutputType | null
   _min: TaskMinAggregateOutputType | null
   _max: TaskMaxAggregateOutputType | null
 }
 
+export type TaskAvgAggregateOutputType = {
+  id: number | null
+  courseId: number | null
+}
+
+export type TaskSumAggregateOutputType = {
+  id: number | null
+  courseId: number | null
+}
+
 export type TaskMinAggregateOutputType = {
-  id: string | null
-  courseId: string | null
+  id: number | null
+  courseId: number | null
   title: string | null
   dueDate: Date | null
   completed: boolean | null
@@ -35,8 +47,8 @@ export type TaskMinAggregateOutputType = {
 }
 
 export type TaskMaxAggregateOutputType = {
-  id: string | null
-  courseId: string | null
+  id: number | null
+  courseId: number | null
   title: string | null
   dueDate: Date | null
   completed: boolean | null
@@ -55,6 +67,16 @@ export type TaskCountAggregateOutputType = {
   _all: number
 }
 
+
+export type TaskAvgAggregateInputType = {
+  id?: true
+  courseId?: true
+}
+
+export type TaskSumAggregateInputType = {
+  id?: true
+  courseId?: true
+}
 
 export type TaskMinAggregateInputType = {
   id?: true
@@ -125,6 +147,18 @@ export type TaskAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: TaskAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: TaskSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: TaskMinAggregateInputType
@@ -155,19 +189,23 @@ export type TaskGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: TaskCountAggregateInputType | true
+  _avg?: TaskAvgAggregateInputType
+  _sum?: TaskSumAggregateInputType
   _min?: TaskMinAggregateInputType
   _max?: TaskMaxAggregateInputType
 }
 
 export type TaskGroupByOutputType = {
-  id: string
-  courseId: string
+  id: number
+  courseId: number
   title: string
   dueDate: Date
   completed: boolean
   createdAt: Date
   updatedAt: Date
   _count: TaskCountAggregateOutputType | null
+  _avg: TaskAvgAggregateOutputType | null
+  _sum: TaskSumAggregateOutputType | null
   _min: TaskMinAggregateOutputType | null
   _max: TaskMaxAggregateOutputType | null
 }
@@ -191,8 +229,8 @@ export type TaskWhereInput = {
   AND?: Prisma.TaskWhereInput | Prisma.TaskWhereInput[]
   OR?: Prisma.TaskWhereInput[]
   NOT?: Prisma.TaskWhereInput | Prisma.TaskWhereInput[]
-  id?: Prisma.StringFilter<"Task"> | string
-  courseId?: Prisma.StringFilter<"Task"> | string
+  id?: Prisma.IntFilter<"Task"> | number
+  courseId?: Prisma.IntFilter<"Task"> | number
   title?: Prisma.StringFilter<"Task"> | string
   dueDate?: Prisma.DateTimeFilter<"Task"> | Date | string
   completed?: Prisma.BoolFilter<"Task"> | boolean
@@ -213,11 +251,11 @@ export type TaskOrderByWithRelationInput = {
 }
 
 export type TaskWhereUniqueInput = Prisma.AtLeast<{
-  id?: string
+  id?: number
   AND?: Prisma.TaskWhereInput | Prisma.TaskWhereInput[]
   OR?: Prisma.TaskWhereInput[]
   NOT?: Prisma.TaskWhereInput | Prisma.TaskWhereInput[]
-  courseId?: Prisma.StringFilter<"Task"> | string
+  courseId?: Prisma.IntFilter<"Task"> | number
   title?: Prisma.StringFilter<"Task"> | string
   dueDate?: Prisma.DateTimeFilter<"Task"> | Date | string
   completed?: Prisma.BoolFilter<"Task"> | boolean
@@ -235,16 +273,18 @@ export type TaskOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TaskCountOrderByAggregateInput
+  _avg?: Prisma.TaskAvgOrderByAggregateInput
   _max?: Prisma.TaskMaxOrderByAggregateInput
   _min?: Prisma.TaskMinOrderByAggregateInput
+  _sum?: Prisma.TaskSumOrderByAggregateInput
 }
 
 export type TaskScalarWhereWithAggregatesInput = {
   AND?: Prisma.TaskScalarWhereWithAggregatesInput | Prisma.TaskScalarWhereWithAggregatesInput[]
   OR?: Prisma.TaskScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TaskScalarWhereWithAggregatesInput | Prisma.TaskScalarWhereWithAggregatesInput[]
-  id?: Prisma.StringWithAggregatesFilter<"Task"> | string
-  courseId?: Prisma.StringWithAggregatesFilter<"Task"> | string
+  id?: Prisma.IntWithAggregatesFilter<"Task"> | number
+  courseId?: Prisma.IntWithAggregatesFilter<"Task"> | number
   title?: Prisma.StringWithAggregatesFilter<"Task"> | string
   dueDate?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
   completed?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
@@ -253,7 +293,6 @@ export type TaskScalarWhereWithAggregatesInput = {
 }
 
 export type TaskCreateInput = {
-  id?: string
   title: string
   dueDate: Date | string
   completed?: boolean
@@ -263,8 +302,8 @@ export type TaskCreateInput = {
 }
 
 export type TaskUncheckedCreateInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   title: string
   dueDate: Date | string
   completed?: boolean
@@ -273,7 +312,6 @@ export type TaskUncheckedCreateInput = {
 }
 
 export type TaskUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -283,8 +321,8 @@ export type TaskUpdateInput = {
 }
 
 export type TaskUncheckedUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -293,8 +331,8 @@ export type TaskUncheckedUpdateInput = {
 }
 
 export type TaskCreateManyInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   title: string
   dueDate: Date | string
   completed?: boolean
@@ -303,7 +341,6 @@ export type TaskCreateManyInput = {
 }
 
 export type TaskUpdateManyMutationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -312,8 +349,8 @@ export type TaskUpdateManyMutationInput = {
 }
 
 export type TaskUncheckedUpdateManyInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -341,6 +378,11 @@ export type TaskCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type TaskAvgOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+  courseId?: Prisma.SortOrder
+}
+
 export type TaskMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
@@ -359,6 +401,11 @@ export type TaskMinOrderByAggregateInput = {
   completed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type TaskSumOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+  courseId?: Prisma.SortOrder
 }
 
 export type TaskCreateNestedManyWithoutCourseInput = {
@@ -408,7 +455,6 @@ export type BoolFieldUpdateOperationsInput = {
 }
 
 export type TaskCreateWithoutCourseInput = {
-  id?: string
   title: string
   dueDate: Date | string
   completed?: boolean
@@ -417,7 +463,7 @@ export type TaskCreateWithoutCourseInput = {
 }
 
 export type TaskUncheckedCreateWithoutCourseInput = {
-  id?: string
+  id?: number
   title: string
   dueDate: Date | string
   completed?: boolean
@@ -455,8 +501,8 @@ export type TaskScalarWhereInput = {
   AND?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
   OR?: Prisma.TaskScalarWhereInput[]
   NOT?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
-  id?: Prisma.StringFilter<"Task"> | string
-  courseId?: Prisma.StringFilter<"Task"> | string
+  id?: Prisma.IntFilter<"Task"> | number
+  courseId?: Prisma.IntFilter<"Task"> | number
   title?: Prisma.StringFilter<"Task"> | string
   dueDate?: Prisma.DateTimeFilter<"Task"> | Date | string
   completed?: Prisma.BoolFilter<"Task"> | boolean
@@ -465,7 +511,7 @@ export type TaskScalarWhereInput = {
 }
 
 export type TaskCreateManyCourseInput = {
-  id?: string
+  id?: number
   title: string
   dueDate: Date | string
   completed?: boolean
@@ -474,7 +520,6 @@ export type TaskCreateManyCourseInput = {
 }
 
 export type TaskUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -483,7 +528,7 @@ export type TaskUpdateWithoutCourseInput = {
 }
 
 export type TaskUncheckedUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -492,7 +537,7 @@ export type TaskUncheckedUpdateWithoutCourseInput = {
 }
 
 export type TaskUncheckedUpdateManyWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -562,8 +607,8 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     course: Prisma.$CoursePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: string
-    courseId: string
+    id: number
+    courseId: number
     title: string
     dueDate: Date
     completed: boolean
@@ -993,8 +1038,8 @@ export interface Prisma__TaskClient<T, Null = never, ExtArgs extends runtime.Typ
  * Fields of the Task model
  */
 export interface TaskFieldRefs {
-  readonly id: Prisma.FieldRef<"Task", 'String'>
-  readonly courseId: Prisma.FieldRef<"Task", 'String'>
+  readonly id: Prisma.FieldRef<"Task", 'Int'>
+  readonly courseId: Prisma.FieldRef<"Task", 'Int'>
   readonly title: Prisma.FieldRef<"Task", 'String'>
   readonly dueDate: Prisma.FieldRef<"Task", 'DateTime'>
   readonly completed: Prisma.FieldRef<"Task", 'Boolean'>

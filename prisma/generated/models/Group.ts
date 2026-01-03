@@ -27,16 +27,20 @@ export type AggregateGroup = {
 }
 
 export type GroupAvgAggregateOutputType = {
+  id: number | null
+  courseId: number | null
   maxMembers: number | null
 }
 
 export type GroupSumAggregateOutputType = {
+  id: number | null
+  courseId: number | null
   maxMembers: number | null
 }
 
 export type GroupMinAggregateOutputType = {
-  id: string | null
-  courseId: string | null
+  id: number | null
+  courseId: number | null
   name: string | null
   description: string | null
   maxMembers: number | null
@@ -45,8 +49,8 @@ export type GroupMinAggregateOutputType = {
 }
 
 export type GroupMaxAggregateOutputType = {
-  id: string | null
-  courseId: string | null
+  id: number | null
+  courseId: number | null
   name: string | null
   description: string | null
   maxMembers: number | null
@@ -67,10 +71,14 @@ export type GroupCountAggregateOutputType = {
 
 
 export type GroupAvgAggregateInputType = {
+  id?: true
+  courseId?: true
   maxMembers?: true
 }
 
 export type GroupSumAggregateInputType = {
+  id?: true
+  courseId?: true
   maxMembers?: true
 }
 
@@ -192,8 +200,8 @@ export type GroupGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 }
 
 export type GroupGroupByOutputType = {
-  id: string
-  courseId: string
+  id: number
+  courseId: number
   name: string
   description: string | null
   maxMembers: number | null
@@ -225,8 +233,8 @@ export type GroupWhereInput = {
   AND?: Prisma.GroupWhereInput | Prisma.GroupWhereInput[]
   OR?: Prisma.GroupWhereInput[]
   NOT?: Prisma.GroupWhereInput | Prisma.GroupWhereInput[]
-  id?: Prisma.StringFilter<"Group"> | string
-  courseId?: Prisma.StringFilter<"Group"> | string
+  id?: Prisma.IntFilter<"Group"> | number
+  courseId?: Prisma.IntFilter<"Group"> | number
   name?: Prisma.StringFilter<"Group"> | string
   description?: Prisma.StringNullableFilter<"Group"> | string | null
   maxMembers?: Prisma.IntNullableFilter<"Group"> | number | null
@@ -249,11 +257,11 @@ export type GroupOrderByWithRelationInput = {
 }
 
 export type GroupWhereUniqueInput = Prisma.AtLeast<{
-  id?: string
+  id?: number
   AND?: Prisma.GroupWhereInput | Prisma.GroupWhereInput[]
   OR?: Prisma.GroupWhereInput[]
   NOT?: Prisma.GroupWhereInput | Prisma.GroupWhereInput[]
-  courseId?: Prisma.StringFilter<"Group"> | string
+  courseId?: Prisma.IntFilter<"Group"> | number
   name?: Prisma.StringFilter<"Group"> | string
   description?: Prisma.StringNullableFilter<"Group"> | string | null
   maxMembers?: Prisma.IntNullableFilter<"Group"> | number | null
@@ -282,8 +290,8 @@ export type GroupScalarWhereWithAggregatesInput = {
   AND?: Prisma.GroupScalarWhereWithAggregatesInput | Prisma.GroupScalarWhereWithAggregatesInput[]
   OR?: Prisma.GroupScalarWhereWithAggregatesInput[]
   NOT?: Prisma.GroupScalarWhereWithAggregatesInput | Prisma.GroupScalarWhereWithAggregatesInput[]
-  id?: Prisma.StringWithAggregatesFilter<"Group"> | string
-  courseId?: Prisma.StringWithAggregatesFilter<"Group"> | string
+  id?: Prisma.IntWithAggregatesFilter<"Group"> | number
+  courseId?: Prisma.IntWithAggregatesFilter<"Group"> | number
   name?: Prisma.StringWithAggregatesFilter<"Group"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Group"> | string | null
   maxMembers?: Prisma.IntNullableWithAggregatesFilter<"Group"> | number | null
@@ -292,7 +300,6 @@ export type GroupScalarWhereWithAggregatesInput = {
 }
 
 export type GroupCreateInput = {
-  id?: string
   name: string
   description?: string | null
   maxMembers?: number | null
@@ -303,8 +310,8 @@ export type GroupCreateInput = {
 }
 
 export type GroupUncheckedCreateInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   name: string
   description?: string | null
   maxMembers?: number | null
@@ -314,7 +321,6 @@ export type GroupUncheckedCreateInput = {
 }
 
 export type GroupUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -325,8 +331,8 @@ export type GroupUpdateInput = {
 }
 
 export type GroupUncheckedUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -336,8 +342,8 @@ export type GroupUncheckedUpdateInput = {
 }
 
 export type GroupCreateManyInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   name: string
   description?: string | null
   maxMembers?: number | null
@@ -346,7 +352,6 @@ export type GroupCreateManyInput = {
 }
 
 export type GroupUpdateManyMutationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -355,8 +360,8 @@ export type GroupUpdateManyMutationInput = {
 }
 
 export type GroupUncheckedUpdateManyInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -385,6 +390,8 @@ export type GroupCountOrderByAggregateInput = {
 }
 
 export type GroupAvgOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+  courseId?: Prisma.SortOrder
   maxMembers?: Prisma.SortOrder
 }
 
@@ -409,6 +416,8 @@ export type GroupMinOrderByAggregateInput = {
 }
 
 export type GroupSumOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+  courseId?: Prisma.SortOrder
   maxMembers?: Prisma.SortOrder
 }
 
@@ -492,16 +501,11 @@ export type GroupUncheckedUpdateManyWithoutCourseNestedInput = {
   deleteMany?: Prisma.GroupScalarWhereInput | Prisma.GroupScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type GroupCreateWithoutMembersInput = {
-  id?: string
   name: string
   description?: string | null
   maxMembers?: number | null
@@ -511,8 +515,8 @@ export type GroupCreateWithoutMembersInput = {
 }
 
 export type GroupUncheckedCreateWithoutMembersInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   name: string
   description?: string | null
   maxMembers?: number | null
@@ -545,8 +549,8 @@ export type GroupScalarWhereInput = {
   AND?: Prisma.GroupScalarWhereInput | Prisma.GroupScalarWhereInput[]
   OR?: Prisma.GroupScalarWhereInput[]
   NOT?: Prisma.GroupScalarWhereInput | Prisma.GroupScalarWhereInput[]
-  id?: Prisma.StringFilter<"Group"> | string
-  courseId?: Prisma.StringFilter<"Group"> | string
+  id?: Prisma.IntFilter<"Group"> | number
+  courseId?: Prisma.IntFilter<"Group"> | number
   name?: Prisma.StringFilter<"Group"> | string
   description?: Prisma.StringNullableFilter<"Group"> | string | null
   maxMembers?: Prisma.IntNullableFilter<"Group"> | number | null
@@ -555,7 +559,6 @@ export type GroupScalarWhereInput = {
 }
 
 export type GroupCreateWithoutCourseInput = {
-  id?: string
   name: string
   description?: string | null
   maxMembers?: number | null
@@ -565,7 +568,7 @@ export type GroupCreateWithoutCourseInput = {
 }
 
 export type GroupUncheckedCreateWithoutCourseInput = {
-  id?: string
+  id?: number
   name: string
   description?: string | null
   maxMembers?: number | null
@@ -601,7 +604,6 @@ export type GroupUpdateManyWithWhereWithoutCourseInput = {
 }
 
 export type GroupUpdateWithoutMembersInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -611,8 +613,8 @@ export type GroupUpdateWithoutMembersInput = {
 }
 
 export type GroupUncheckedUpdateWithoutMembersInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -621,8 +623,8 @@ export type GroupUncheckedUpdateWithoutMembersInput = {
 }
 
 export type GroupUncheckedUpdateManyWithoutMembersInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -631,7 +633,7 @@ export type GroupUncheckedUpdateManyWithoutMembersInput = {
 }
 
 export type GroupCreateManyCourseInput = {
-  id?: string
+  id?: number
   name: string
   description?: string | null
   maxMembers?: number | null
@@ -640,7 +642,6 @@ export type GroupCreateManyCourseInput = {
 }
 
 export type GroupUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -650,7 +651,7 @@ export type GroupUpdateWithoutCourseInput = {
 }
 
 export type GroupUncheckedUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -660,7 +661,7 @@ export type GroupUncheckedUpdateWithoutCourseInput = {
 }
 
 export type GroupUncheckedUpdateManyWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maxMembers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -764,8 +765,8 @@ export type $GroupPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     members: Prisma.$UserPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: string
-    courseId: string
+    id: number
+    courseId: number
     name: string
     description: string | null
     maxMembers: number | null
@@ -1196,8 +1197,8 @@ export interface Prisma__GroupClient<T, Null = never, ExtArgs extends runtime.Ty
  * Fields of the Group model
  */
 export interface GroupFieldRefs {
-  readonly id: Prisma.FieldRef<"Group", 'String'>
-  readonly courseId: Prisma.FieldRef<"Group", 'String'>
+  readonly id: Prisma.FieldRef<"Group", 'Int'>
+  readonly courseId: Prisma.FieldRef<"Group", 'Int'>
   readonly name: Prisma.FieldRef<"Group", 'String'>
   readonly description: Prisma.FieldRef<"Group", 'String'>
   readonly maxMembers: Prisma.FieldRef<"Group", 'Int'>

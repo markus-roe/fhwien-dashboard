@@ -20,19 +20,31 @@ export type CourseModel = runtime.Types.Result.DefaultSelection<Prisma.$CoursePa
 
 export type AggregateCourse = {
   _count: CourseCountAggregateOutputType | null
+  _avg: CourseAvgAggregateOutputType | null
+  _sum: CourseSumAggregateOutputType | null
   _min: CourseMinAggregateOutputType | null
   _max: CourseMaxAggregateOutputType | null
 }
 
+export type CourseAvgAggregateOutputType = {
+  id: number | null
+}
+
+export type CourseSumAggregateOutputType = {
+  id: number | null
+}
+
 export type CourseMinAggregateOutputType = {
-  id: string | null
+  id: number | null
+  code: string | null
   title: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type CourseMaxAggregateOutputType = {
-  id: string | null
+  id: number | null
+  code: string | null
   title: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -40,6 +52,7 @@ export type CourseMaxAggregateOutputType = {
 
 export type CourseCountAggregateOutputType = {
   id: number
+  code: number
   title: number
   programs: number
   createdAt: number
@@ -48,8 +61,17 @@ export type CourseCountAggregateOutputType = {
 }
 
 
+export type CourseAvgAggregateInputType = {
+  id?: true
+}
+
+export type CourseSumAggregateInputType = {
+  id?: true
+}
+
 export type CourseMinAggregateInputType = {
   id?: true
+  code?: true
   title?: true
   createdAt?: true
   updatedAt?: true
@@ -57,6 +79,7 @@ export type CourseMinAggregateInputType = {
 
 export type CourseMaxAggregateInputType = {
   id?: true
+  code?: true
   title?: true
   createdAt?: true
   updatedAt?: true
@@ -64,6 +87,7 @@ export type CourseMaxAggregateInputType = {
 
 export type CourseCountAggregateInputType = {
   id?: true
+  code?: true
   title?: true
   programs?: true
   createdAt?: true
@@ -109,6 +133,18 @@ export type CourseAggregateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: CourseAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: CourseSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: CourseMinAggregateInputType
@@ -139,17 +175,22 @@ export type CourseGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   _count?: CourseCountAggregateInputType | true
+  _avg?: CourseAvgAggregateInputType
+  _sum?: CourseSumAggregateInputType
   _min?: CourseMinAggregateInputType
   _max?: CourseMaxAggregateInputType
 }
 
 export type CourseGroupByOutputType = {
-  id: string
+  id: number
+  code: string
   title: string
   programs: $Enums.Program[]
   createdAt: Date
   updatedAt: Date
   _count: CourseCountAggregateOutputType | null
+  _avg: CourseAvgAggregateOutputType | null
+  _sum: CourseSumAggregateOutputType | null
   _min: CourseMinAggregateOutputType | null
   _max: CourseMaxAggregateOutputType | null
 }
@@ -173,7 +214,8 @@ export type CourseWhereInput = {
   AND?: Prisma.CourseWhereInput | Prisma.CourseWhereInput[]
   OR?: Prisma.CourseWhereInput[]
   NOT?: Prisma.CourseWhereInput | Prisma.CourseWhereInput[]
-  id?: Prisma.StringFilter<"Course"> | string
+  id?: Prisma.IntFilter<"Course"> | number
+  code?: Prisma.StringFilter<"Course"> | string
   title?: Prisma.StringFilter<"Course"> | string
   programs?: Prisma.EnumProgramNullableListFilter<"Course">
   createdAt?: Prisma.DateTimeFilter<"Course"> | Date | string
@@ -186,6 +228,7 @@ export type CourseWhereInput = {
 
 export type CourseOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   programs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -197,7 +240,8 @@ export type CourseOrderByWithRelationInput = {
 }
 
 export type CourseWhereUniqueInput = Prisma.AtLeast<{
-  id?: string
+  id?: number
+  code?: string
   AND?: Prisma.CourseWhereInput | Prisma.CourseWhereInput[]
   OR?: Prisma.CourseWhereInput[]
   NOT?: Prisma.CourseWhereInput | Prisma.CourseWhereInput[]
@@ -209,24 +253,28 @@ export type CourseWhereUniqueInput = Prisma.AtLeast<{
   tasks?: Prisma.TaskListRelationFilter
   groups?: Prisma.GroupListRelationFilter
   coachingSlots?: Prisma.CoachingSlotListRelationFilter
-}, "id">
+}, "id" | "code">
 
 export type CourseOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   programs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CourseCountOrderByAggregateInput
+  _avg?: Prisma.CourseAvgOrderByAggregateInput
   _max?: Prisma.CourseMaxOrderByAggregateInput
   _min?: Prisma.CourseMinOrderByAggregateInput
+  _sum?: Prisma.CourseSumOrderByAggregateInput
 }
 
 export type CourseScalarWhereWithAggregatesInput = {
   AND?: Prisma.CourseScalarWhereWithAggregatesInput | Prisma.CourseScalarWhereWithAggregatesInput[]
   OR?: Prisma.CourseScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CourseScalarWhereWithAggregatesInput | Prisma.CourseScalarWhereWithAggregatesInput[]
-  id?: Prisma.StringWithAggregatesFilter<"Course"> | string
+  id?: Prisma.IntWithAggregatesFilter<"Course"> | number
+  code?: Prisma.StringWithAggregatesFilter<"Course"> | string
   title?: Prisma.StringWithAggregatesFilter<"Course"> | string
   programs?: Prisma.EnumProgramNullableListFilter<"Course">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Course"> | Date | string
@@ -234,7 +282,7 @@ export type CourseScalarWhereWithAggregatesInput = {
 }
 
 export type CourseCreateInput = {
-  id: string
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -246,7 +294,8 @@ export type CourseCreateInput = {
 }
 
 export type CourseUncheckedCreateInput = {
-  id: string
+  id?: number
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -258,7 +307,7 @@ export type CourseUncheckedCreateInput = {
 }
 
 export type CourseUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -270,7 +319,8 @@ export type CourseUpdateInput = {
 }
 
 export type CourseUncheckedUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -282,7 +332,8 @@ export type CourseUncheckedUpdateInput = {
 }
 
 export type CourseCreateManyInput = {
-  id: string
+  id?: number
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -290,7 +341,7 @@ export type CourseCreateManyInput = {
 }
 
 export type CourseUpdateManyMutationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -298,7 +349,8 @@ export type CourseUpdateManyMutationInput = {
 }
 
 export type CourseUncheckedUpdateManyInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -315,14 +367,20 @@ export type EnumProgramNullableListFilter<$PrismaModel = never> = {
 
 export type CourseCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   programs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
+export type CourseAvgOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+}
+
 export type CourseMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -330,9 +388,14 @@ export type CourseMaxOrderByAggregateInput = {
 
 export type CourseMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type CourseSumOrderByAggregateInput = {
+  id?: Prisma.SortOrder
 }
 
 export type CourseScalarRelationFilter = {
@@ -406,7 +469,7 @@ export type CourseUpdateOneRequiredWithoutCoachingSlotsNestedInput = {
 }
 
 export type CourseCreateWithoutSessionsInput = {
-  id: string
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -417,7 +480,8 @@ export type CourseCreateWithoutSessionsInput = {
 }
 
 export type CourseUncheckedCreateWithoutSessionsInput = {
-  id: string
+  id?: number
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -444,7 +508,7 @@ export type CourseUpdateToOneWithWhereWithoutSessionsInput = {
 }
 
 export type CourseUpdateWithoutSessionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -455,7 +519,8 @@ export type CourseUpdateWithoutSessionsInput = {
 }
 
 export type CourseUncheckedUpdateWithoutSessionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -466,7 +531,7 @@ export type CourseUncheckedUpdateWithoutSessionsInput = {
 }
 
 export type CourseCreateWithoutTasksInput = {
-  id: string
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -477,7 +542,8 @@ export type CourseCreateWithoutTasksInput = {
 }
 
 export type CourseUncheckedCreateWithoutTasksInput = {
-  id: string
+  id?: number
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -504,7 +570,7 @@ export type CourseUpdateToOneWithWhereWithoutTasksInput = {
 }
 
 export type CourseUpdateWithoutTasksInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -515,7 +581,8 @@ export type CourseUpdateWithoutTasksInput = {
 }
 
 export type CourseUncheckedUpdateWithoutTasksInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -526,7 +593,7 @@ export type CourseUncheckedUpdateWithoutTasksInput = {
 }
 
 export type CourseCreateWithoutGroupsInput = {
-  id: string
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -537,7 +604,8 @@ export type CourseCreateWithoutGroupsInput = {
 }
 
 export type CourseUncheckedCreateWithoutGroupsInput = {
-  id: string
+  id?: number
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -564,7 +632,7 @@ export type CourseUpdateToOneWithWhereWithoutGroupsInput = {
 }
 
 export type CourseUpdateWithoutGroupsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -575,7 +643,8 @@ export type CourseUpdateWithoutGroupsInput = {
 }
 
 export type CourseUncheckedUpdateWithoutGroupsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -586,7 +655,7 @@ export type CourseUncheckedUpdateWithoutGroupsInput = {
 }
 
 export type CourseCreateWithoutCoachingSlotsInput = {
-  id: string
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -597,7 +666,8 @@ export type CourseCreateWithoutCoachingSlotsInput = {
 }
 
 export type CourseUncheckedCreateWithoutCoachingSlotsInput = {
-  id: string
+  id?: number
+  code: string
   title: string
   programs?: Prisma.CourseCreateprogramsInput | $Enums.Program[]
   createdAt?: Date | string
@@ -624,7 +694,7 @@ export type CourseUpdateToOneWithWhereWithoutCoachingSlotsInput = {
 }
 
 export type CourseUpdateWithoutCoachingSlotsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -635,7 +705,8 @@ export type CourseUpdateWithoutCoachingSlotsInput = {
 }
 
 export type CourseUncheckedUpdateWithoutCoachingSlotsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   programs?: Prisma.CourseUpdateprogramsInput | $Enums.Program[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -705,6 +776,7 @@ export type CourseCountOutputTypeCountCoachingSlotsArgs<ExtArgs extends runtime.
 
 export type CourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  code?: boolean
   title?: boolean
   programs?: boolean
   createdAt?: boolean
@@ -718,6 +790,7 @@ export type CourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 
 export type CourseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  code?: boolean
   title?: boolean
   programs?: boolean
   createdAt?: boolean
@@ -726,6 +799,7 @@ export type CourseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
 
 export type CourseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  code?: boolean
   title?: boolean
   programs?: boolean
   createdAt?: boolean
@@ -734,13 +808,14 @@ export type CourseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 
 export type CourseSelectScalar = {
   id?: boolean
+  code?: boolean
   title?: boolean
   programs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CourseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "programs" | "createdAt" | "updatedAt", ExtArgs["result"]["course"]>
+export type CourseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "title" | "programs" | "createdAt" | "updatedAt", ExtArgs["result"]["course"]>
 export type CourseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.Course$sessionsArgs<ExtArgs>
   tasks?: boolean | Prisma.Course$tasksArgs<ExtArgs>
@@ -760,7 +835,8 @@ export type $CoursePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     coachingSlots: Prisma.$CoachingSlotPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: string
+    id: number
+    code: string
     title: string
     programs: $Enums.Program[]
     createdAt: Date
@@ -1192,7 +1268,8 @@ export interface Prisma__CourseClient<T, Null = never, ExtArgs extends runtime.T
  * Fields of the Course model
  */
 export interface CourseFieldRefs {
-  readonly id: Prisma.FieldRef<"Course", 'String'>
+  readonly id: Prisma.FieldRef<"Course", 'Int'>
+  readonly code: Prisma.FieldRef<"Course", 'String'>
   readonly title: Prisma.FieldRef<"Course", 'String'>
   readonly programs: Prisma.FieldRef<"Course", 'Program[]'>
   readonly createdAt: Prisma.FieldRef<"Course", 'DateTime'>

@@ -27,16 +27,20 @@ export type AggregateCoachingSlot = {
 }
 
 export type CoachingSlotAvgAggregateOutputType = {
+  id: number | null
+  courseId: number | null
   maxParticipants: number | null
 }
 
 export type CoachingSlotSumAggregateOutputType = {
+  id: number | null
+  courseId: number | null
   maxParticipants: number | null
 }
 
 export type CoachingSlotMinAggregateOutputType = {
-  id: string | null
-  courseId: string | null
+  id: number | null
+  courseId: number | null
   startDateTime: Date | null
   endDateTime: Date | null
   maxParticipants: number | null
@@ -46,8 +50,8 @@ export type CoachingSlotMinAggregateOutputType = {
 }
 
 export type CoachingSlotMaxAggregateOutputType = {
-  id: string | null
-  courseId: string | null
+  id: number | null
+  courseId: number | null
   startDateTime: Date | null
   endDateTime: Date | null
   maxParticipants: number | null
@@ -70,10 +74,14 @@ export type CoachingSlotCountAggregateOutputType = {
 
 
 export type CoachingSlotAvgAggregateInputType = {
+  id?: true
+  courseId?: true
   maxParticipants?: true
 }
 
 export type CoachingSlotSumAggregateInputType = {
+  id?: true
+  courseId?: true
   maxParticipants?: true
 }
 
@@ -198,8 +206,8 @@ export type CoachingSlotGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 export type CoachingSlotGroupByOutputType = {
-  id: string
-  courseId: string
+  id: number
+  courseId: number
   startDateTime: Date
   endDateTime: Date
   maxParticipants: number
@@ -232,8 +240,8 @@ export type CoachingSlotWhereInput = {
   AND?: Prisma.CoachingSlotWhereInput | Prisma.CoachingSlotWhereInput[]
   OR?: Prisma.CoachingSlotWhereInput[]
   NOT?: Prisma.CoachingSlotWhereInput | Prisma.CoachingSlotWhereInput[]
-  id?: Prisma.StringFilter<"CoachingSlot"> | string
-  courseId?: Prisma.StringFilter<"CoachingSlot"> | string
+  id?: Prisma.IntFilter<"CoachingSlot"> | number
+  courseId?: Prisma.IntFilter<"CoachingSlot"> | number
   startDateTime?: Prisma.DateTimeFilter<"CoachingSlot"> | Date | string
   endDateTime?: Prisma.DateTimeFilter<"CoachingSlot"> | Date | string
   maxParticipants?: Prisma.IntFilter<"CoachingSlot"> | number
@@ -258,11 +266,11 @@ export type CoachingSlotOrderByWithRelationInput = {
 }
 
 export type CoachingSlotWhereUniqueInput = Prisma.AtLeast<{
-  id?: string
+  id?: number
   AND?: Prisma.CoachingSlotWhereInput | Prisma.CoachingSlotWhereInput[]
   OR?: Prisma.CoachingSlotWhereInput[]
   NOT?: Prisma.CoachingSlotWhereInput | Prisma.CoachingSlotWhereInput[]
-  courseId?: Prisma.StringFilter<"CoachingSlot"> | string
+  courseId?: Prisma.IntFilter<"CoachingSlot"> | number
   startDateTime?: Prisma.DateTimeFilter<"CoachingSlot"> | Date | string
   endDateTime?: Prisma.DateTimeFilter<"CoachingSlot"> | Date | string
   maxParticipants?: Prisma.IntFilter<"CoachingSlot"> | number
@@ -293,8 +301,8 @@ export type CoachingSlotScalarWhereWithAggregatesInput = {
   AND?: Prisma.CoachingSlotScalarWhereWithAggregatesInput | Prisma.CoachingSlotScalarWhereWithAggregatesInput[]
   OR?: Prisma.CoachingSlotScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CoachingSlotScalarWhereWithAggregatesInput | Prisma.CoachingSlotScalarWhereWithAggregatesInput[]
-  id?: Prisma.StringWithAggregatesFilter<"CoachingSlot"> | string
-  courseId?: Prisma.StringWithAggregatesFilter<"CoachingSlot"> | string
+  id?: Prisma.IntWithAggregatesFilter<"CoachingSlot"> | number
+  courseId?: Prisma.IntWithAggregatesFilter<"CoachingSlot"> | number
   startDateTime?: Prisma.DateTimeWithAggregatesFilter<"CoachingSlot"> | Date | string
   endDateTime?: Prisma.DateTimeWithAggregatesFilter<"CoachingSlot"> | Date | string
   maxParticipants?: Prisma.IntWithAggregatesFilter<"CoachingSlot"> | number
@@ -304,7 +312,6 @@ export type CoachingSlotScalarWhereWithAggregatesInput = {
 }
 
 export type CoachingSlotCreateInput = {
-  id?: string
   startDateTime: Date | string
   endDateTime: Date | string
   maxParticipants: number
@@ -316,8 +323,8 @@ export type CoachingSlotCreateInput = {
 }
 
 export type CoachingSlotUncheckedCreateInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   startDateTime: Date | string
   endDateTime: Date | string
   maxParticipants: number
@@ -328,7 +335,6 @@ export type CoachingSlotUncheckedCreateInput = {
 }
 
 export type CoachingSlotUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -340,8 +346,8 @@ export type CoachingSlotUpdateInput = {
 }
 
 export type CoachingSlotUncheckedUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -352,8 +358,8 @@ export type CoachingSlotUncheckedUpdateInput = {
 }
 
 export type CoachingSlotCreateManyInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   startDateTime: Date | string
   endDateTime: Date | string
   maxParticipants: number
@@ -363,7 +369,6 @@ export type CoachingSlotCreateManyInput = {
 }
 
 export type CoachingSlotUpdateManyMutationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -373,8 +378,8 @@ export type CoachingSlotUpdateManyMutationInput = {
 }
 
 export type CoachingSlotUncheckedUpdateManyInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -405,6 +410,8 @@ export type CoachingSlotCountOrderByAggregateInput = {
 }
 
 export type CoachingSlotAvgOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+  courseId?: Prisma.SortOrder
   maxParticipants?: Prisma.SortOrder
 }
 
@@ -431,6 +438,8 @@ export type CoachingSlotMinOrderByAggregateInput = {
 }
 
 export type CoachingSlotSumOrderByAggregateInput = {
+  id?: Prisma.SortOrder
+  courseId?: Prisma.SortOrder
   maxParticipants?: Prisma.SortOrder
 }
 
@@ -514,16 +523,7 @@ export type CoachingSlotUncheckedUpdateManyWithoutCourseNestedInput = {
   deleteMany?: Prisma.CoachingSlotScalarWhereInput | Prisma.CoachingSlotScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type CoachingSlotCreateWithoutParticipantsInput = {
-  id?: string
   startDateTime: Date | string
   endDateTime: Date | string
   maxParticipants: number
@@ -534,8 +534,8 @@ export type CoachingSlotCreateWithoutParticipantsInput = {
 }
 
 export type CoachingSlotUncheckedCreateWithoutParticipantsInput = {
-  id?: string
-  courseId: string
+  id?: number
+  courseId: number
   startDateTime: Date | string
   endDateTime: Date | string
   maxParticipants: number
@@ -569,8 +569,8 @@ export type CoachingSlotScalarWhereInput = {
   AND?: Prisma.CoachingSlotScalarWhereInput | Prisma.CoachingSlotScalarWhereInput[]
   OR?: Prisma.CoachingSlotScalarWhereInput[]
   NOT?: Prisma.CoachingSlotScalarWhereInput | Prisma.CoachingSlotScalarWhereInput[]
-  id?: Prisma.StringFilter<"CoachingSlot"> | string
-  courseId?: Prisma.StringFilter<"CoachingSlot"> | string
+  id?: Prisma.IntFilter<"CoachingSlot"> | number
+  courseId?: Prisma.IntFilter<"CoachingSlot"> | number
   startDateTime?: Prisma.DateTimeFilter<"CoachingSlot"> | Date | string
   endDateTime?: Prisma.DateTimeFilter<"CoachingSlot"> | Date | string
   maxParticipants?: Prisma.IntFilter<"CoachingSlot"> | number
@@ -580,7 +580,6 @@ export type CoachingSlotScalarWhereInput = {
 }
 
 export type CoachingSlotCreateWithoutCourseInput = {
-  id?: string
   startDateTime: Date | string
   endDateTime: Date | string
   maxParticipants: number
@@ -591,7 +590,7 @@ export type CoachingSlotCreateWithoutCourseInput = {
 }
 
 export type CoachingSlotUncheckedCreateWithoutCourseInput = {
-  id?: string
+  id?: number
   startDateTime: Date | string
   endDateTime: Date | string
   maxParticipants: number
@@ -628,7 +627,6 @@ export type CoachingSlotUpdateManyWithWhereWithoutCourseInput = {
 }
 
 export type CoachingSlotUpdateWithoutParticipantsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -639,8 +637,8 @@ export type CoachingSlotUpdateWithoutParticipantsInput = {
 }
 
 export type CoachingSlotUncheckedUpdateWithoutParticipantsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -650,8 +648,8 @@ export type CoachingSlotUncheckedUpdateWithoutParticipantsInput = {
 }
 
 export type CoachingSlotUncheckedUpdateManyWithoutParticipantsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -661,7 +659,7 @@ export type CoachingSlotUncheckedUpdateManyWithoutParticipantsInput = {
 }
 
 export type CoachingSlotCreateManyCourseInput = {
-  id?: string
+  id?: number
   startDateTime: Date | string
   endDateTime: Date | string
   maxParticipants: number
@@ -671,7 +669,6 @@ export type CoachingSlotCreateManyCourseInput = {
 }
 
 export type CoachingSlotUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -682,7 +679,7 @@ export type CoachingSlotUpdateWithoutCourseInput = {
 }
 
 export type CoachingSlotUncheckedUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -693,7 +690,7 @@ export type CoachingSlotUncheckedUpdateWithoutCourseInput = {
 }
 
 export type CoachingSlotUncheckedUpdateManyWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   startDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDateTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maxParticipants?: Prisma.IntFieldUpdateOperationsInput | number
@@ -802,8 +799,8 @@ export type $CoachingSlotPayload<ExtArgs extends runtime.Types.Extensions.Intern
     participants: Prisma.$UserPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: string
-    courseId: string
+    id: number
+    courseId: number
     startDateTime: Date
     endDateTime: Date
     maxParticipants: number
@@ -1235,8 +1232,8 @@ export interface Prisma__CoachingSlotClient<T, Null = never, ExtArgs extends run
  * Fields of the CoachingSlot model
  */
 export interface CoachingSlotFieldRefs {
-  readonly id: Prisma.FieldRef<"CoachingSlot", 'String'>
-  readonly courseId: Prisma.FieldRef<"CoachingSlot", 'String'>
+  readonly id: Prisma.FieldRef<"CoachingSlot", 'Int'>
+  readonly courseId: Prisma.FieldRef<"CoachingSlot", 'Int'>
   readonly startDateTime: Prisma.FieldRef<"CoachingSlot", 'DateTime'>
   readonly endDateTime: Prisma.FieldRef<"CoachingSlot", 'DateTime'>
   readonly maxParticipants: Prisma.FieldRef<"CoachingSlot", 'Int'>

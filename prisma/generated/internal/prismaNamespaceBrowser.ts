@@ -91,6 +91,7 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const CourseScalarFieldEnum = {
   id: 'id',
+  code: 'code',
   title: 'title',
   programs: 'programs',
   createdAt: 'createdAt',
