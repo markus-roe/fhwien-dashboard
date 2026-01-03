@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "./generated"
 }
 
 // prisma/schema.prisma -> Provided by Neon Console
@@ -46,6 +46,9 @@ enum MaterialType {
 model User {
   id       String    @id @default(uuid())
   name     String
+  // Will be used instead of name in the future
+  //firstName String
+  //lastName  String
   initials String
   email    String    @unique
   program  Program?
@@ -98,23 +101,24 @@ model Session {
   isLive     Boolean?   @default(false)
   groupId    String? // Optional: if a session is for a specific group
 
-  materials Material[]
+  // smaterials Material[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Material {
-  id        String  @id @default(uuid())
-  sessionId String
-  session   Session @relation(fields: [sessionId], references: [id])
-
-  name String
-  size String
-  type MaterialType
-
-  addedAt DateTime @default(now())
-}
+/**
+ * May be used in the future
+ * model Material {
+ * id        String  @id @default(uuid())
+ * sessionId String
+ * session   Session @relation(fields: [sessionId], references: [id])
+ * name String
+ * size String
+ * type MaterialType
+ * addedAt DateTime @default(now())
+ * }
+ */
 
 model Task {
   id       String @id @default(uuid())
