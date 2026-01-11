@@ -78,9 +78,9 @@ export async function GET(
 
     return NextResponse.json<CoachingSlotsResponse>(slots);
   } catch (error) {
-    console.error("fehler beim laden:", error);
+    console.error("Error fetching coaching slots:", error);
     return NextResponse.json<ApiError>(
-      { error: "laden fehlgeschlagen" },
+      { error: "Failed to fetch coaching slots" },
       { status: 500 }
     );
   }
@@ -106,7 +106,7 @@ export async function POST(
     // kurze überprüfung ob alles da ist
     if (!courseId || !date || !time || !endTime || !maxParticipants) {
       return NextResponse.json<ApiError>(
-        { error: "bitte alles ausfüllen" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -118,7 +118,7 @@ export async function POST(
 
     if (!course) {
       return NextResponse.json<ApiError>(
-        { error: "kurs nicht gefunden" },
+        { error: "Course not found" },
         { status: 404 }
       );
     }
@@ -165,9 +165,9 @@ export async function POST(
 
     return NextResponse.json<CoachingSlotResponse>(newSlot, { status: 201 });
   } catch (error) {
-    console.error("fehler beim erstellen:", error);
+    console.error("Error creating coaching slot:", error);
     return NextResponse.json<ApiError>(
-      { error: "erstellen hat nicht geklappt" },
+      { error: "Failed to create coaching slot" },
       { status: 500 }
     );
   }

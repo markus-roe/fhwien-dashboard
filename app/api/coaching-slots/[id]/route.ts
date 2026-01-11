@@ -45,7 +45,7 @@ export async function GET(
   try {
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
-      return NextResponse.json<ApiError>({ error: "id ist falsch" }, { status: 400 });
+      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
     // slot suchen mit id
@@ -59,16 +59,16 @@ export async function GET(
 
     if (!slot) {
       return NextResponse.json<ApiError>(
-        { error: "slot wurde nicht gefunden" },
+        { error: "Coaching slot not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json<CoachingSlotResponse>(mapDbSlotToApiSlot(slot));
   } catch (error) {
-    console.error("fehler beim laden:", error);
+    console.error("Error fetching coaching slot:", error);
     return NextResponse.json<ApiError>(
-      { error: "laden fehlgeschlagen" },
+      { error: "Failed to fetch coaching slot" },
       { status: 500 }
     );
   }
@@ -82,7 +82,7 @@ export async function PUT(
   try {
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
-      return NextResponse.json<ApiError>({ error: "id ist falsch" }, { status: 400 });
+      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
     const body = (await request.json()) as UpdateCoachingSlotRequest;
@@ -94,7 +94,7 @@ export async function PUT(
 
     if (!existingSlot) {
       return NextResponse.json<ApiError>(
-        { error: "slot nicht gefunden" },
+        { error: "Coaching slot not found" },
         { status: 404 }
       );
     }
@@ -172,9 +172,9 @@ export async function PUT(
 
     return NextResponse.json<CoachingSlotResponse>(mapDbSlotToApiSlot(updatedSlot));
   } catch (error) {
-    console.error("fehler beim update:", error);
+    console.error("Error updating coaching slot:", error);
     return NextResponse.json<ApiError>(
-      { error: "update hat nicht geklappt" },
+      { error: "Failed to update coaching slot" },
       { status: 500 }
     );
   }
@@ -188,7 +188,7 @@ export async function DELETE(
   try {
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
-      return NextResponse.json<ApiError>({ error: "id ist falsch" }, { status: 400 });
+      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
     // einfach löschen
@@ -200,13 +200,13 @@ export async function DELETE(
   } catch (error: any) {
     if (error.code === "P2025") {
       return NextResponse.json<ApiError>(
-        { error: "slot nicht gefunden" },
+        { error: "Coaching slot not found" },
         { status: 404 }
       );
     }
-    console.error("fehler beim löschen:", error);
+    console.error("Error deleting coaching slot:", error);
     return NextResponse.json<ApiError>(
-      { error: "löschen hat nicht geklappt" },
+      { error: "Failed to delete coaching slot" },
       { status: 500 }
     );
   }
