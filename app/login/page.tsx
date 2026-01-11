@@ -11,11 +11,25 @@ export default function LoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [email, setEmail] = useState("");
+  const [emailInput, setEmailInput] = useState(""); // Was der Benutzer tippt
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
   const [showEmailInput, setShowEmailInput] = useState(false);
+  
+  const DEFAULT_DOMAIN = "@edu.fh-wien.ac.at";
+
+  // Normalisiere E-Mail: füge Domain hinzu wenn kein @ vorhanden
+  const normalizeEmail = (input: string): string => {
+    if (!input) return "";
+    // Wenn bereits @ vorhanden, unverändert zurückgeben
+    if (input.includes("@")) {
+      return input;
+    }
+    // Sonst Domain hinzufügen
+    return input + DEFAULT_DOMAIN;
+  };
 
   // Lade gespeicherte E-Mail beim Mount
   useEffect(() => {
@@ -24,6 +38,9 @@ export default function LoginPage() {
       if (lastEmail) {
         setSavedEmail(lastEmail);
         setEmail(lastEmail);
+        // Extrahiere Benutzername aus gespeicherter E-Mail
+        const username = lastEmail.replace(DEFAULT_DOMAIN, "");
+        setEmailInput(username);
         setShowEmailInput(false); // Zeige zuerst die gespeicherte E-Mail
       } else {
         setShowEmailInput(true); // Keine gespeicherte E-Mail, zeige Input direkt
@@ -49,14 +66,24 @@ export default function LoginPage() {
     }
     setSavedEmail(null);
     setEmail("");
+    setEmailInput("");
     setShowEmailInput(true);
   };
 
   const handleUseSavedEmail = () => {
     if (savedEmail) {
       setEmail(savedEmail);
+      // Extrahiere Benutzername aus gespeicherter E-Mail
+      const username = savedEmail.replace(DEFAULT_DOMAIN, "");
+      setEmailInput(username);
       setShowEmailInput(true);
     }
+  };
+
+  const handleEmailInputChange = (value: string) => {
+    setEmailInput(value);
+    // Normalisiere E-Mail für Submit
+    setEmail(normalizeEmail(value));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,9 +91,12 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
+    // Stelle sicher, dass E-Mail normalisiert ist
+    const normalizedEmail = normalizeEmail(emailInput);
+
     try {
       const result = await signIn("credentials", {
-        email,
+        email: normalizedEmail,
         password,
         redirect: false,
       });
@@ -76,9 +106,9 @@ export default function LoginPage() {
         console.log("[LOGIN] Login failed:", result.error);
       } else {
         console.log("[LOGIN] Login successful, redirecting...");
-        // Speichere erfolgreiche E-Mail
+        // Speichere erfolgreiche E-Mail (vollständig)
         try {
-          localStorage.setItem("lastLoginEmail", email);
+          localStorage.setItem("lastLoginEmail", normalizedEmail);
         } catch (error) {
           console.error("[LOGIN] Failed to save email to localStorage:", error);
         }
@@ -172,7 +202,7 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* E-Mail Input */}
+            {/* E-Mail Input mit automatischer Domain-Ergänzung */}
             {showEmailInput && (
               <div>
                 <label
@@ -181,17 +211,49 @@ export default function LoginPage() {
                 >
                   E-Mail
                 </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  placeholder="ihre.email@example.com"
-                  disabled={loading}
-                  autoFocus={showEmailInput}
-                />
+                <div className="relative">
+                  {!emailInput || !emailInput.includes("@") ? (
+                    // Standard: Zeige Benutzername + Domain getrennt an
+                    <div className="flex items-center border border-zinc-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 bg-white">
+                      <input
+                        id="email"
+                        type="text"
+                        value={emailInput}
+                        onChange={(e) => handleEmailInputChange(e.target.value)}
+                        required
+                        className="flex-1 px-3 py-2 focus:outline-none text-sm bg-transparent"
+                        placeholder="benutzername"
+                        disabled={loading}
+                        autoFocus={showEmailInput}
+                        autoComplete="username"
+                      />
+                      <div className="px-3 py-2 border-l border-zinc-200 bg-zinc-50">
+                        <span className="text-sm text-zinc-600 font-medium">
+                          {DEFAULT_DOMAIN}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    // Normales Input für vollständige E-Mail (wenn @ eingegeben wurde)
+                    <input
+                      id="email"
+                      type="email"
+                      value={emailInput}
+                      onChange={(e) => handleEmailInputChange(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                      placeholder="vollständige E-Mail"
+                      disabled={loading}
+                      autoFocus={showEmailInput}
+                      autoComplete="username"
+                    />
+                  )}
+                </div>
+                {(!emailInput || !emailInput.includes("@")) && (
+                  <p className="text-xs text-zinc-500 mt-1.5">
+                    Geben Sie nur den Benutzernamen ein, die Domain wird automatisch ergänzt
+                  </p>
+                )}
               </div>
             )}
 
