@@ -11,7 +11,7 @@ type UseDashboardUserOperationsProps = {
     role: "student" | "professor";
   }) => Promise<User>;
   updateUser: (
-    id: string,
+    id: number,
     data: {
       name: string;
       email: string;
@@ -20,7 +20,7 @@ type UseDashboardUserOperationsProps = {
       role: "student" | "professor";
     }
   ) => Promise<User>;
-  deleteUser: (id: string) => Promise<void>;
+  deleteUser: (id: number) => Promise<void>;
 };
 
 export function useDashboardUserOperations({
@@ -57,7 +57,7 @@ export function useDashboardUserOperations({
   );
 
   const handleDeleteStudent = useCallback(
-    async (userId: string) => {
+    async (userId: number) => {
       try {
         await deleteUser(userId);
       } catch (error) {

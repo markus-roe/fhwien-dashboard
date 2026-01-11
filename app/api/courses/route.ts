@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockCourses } from "@/shared/data/mockData";
+import { prisma } from "@/shared/lib/prisma";
 import type {
   GetCoursesQuery,
   CoursesResponse,
+  ApiError,
 } from "@/shared/lib/api-types";
 
 /**
@@ -29,23 +30,38 @@ import type {
  */
 export async function GET(
   request: NextRequest
-): Promise<NextResponse<CoursesResponse>> {
-  const searchParams = request.nextUrl.searchParams;
-  const program = searchParams.get("program");
+): Promise<NextResponse<CoursesResponse | ApiError>> {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const program = searchParams.get("program");
 
-  const query: GetCoursesQuery = {};
-  if (program) {
-    query.program = program as GetCoursesQuery["program"];
-  }
+    const where: any = {};
 
-  let filteredCourses = mockCourses;
+    if (program) {
+      // Prisma supports checking if array contains value
+      where.programs = {
+        has: program.toUpperCase(),
+      };
+    }
 
-  if (query.program) {
-    filteredCourses = mockCourses.filter((c) =>
-      c.program.includes(query.program!)
+    const dbCourses = await prisma.course.findMany({
+      where,
+      orderBy: { title: "asc" },
+    });
+
+    const courses = dbCourses.map((c) => ({
+      id: c.code, // We use 'code' field as the ID for API compatibility (e.g. "ds", "hti")
+      title: c.title,
+      program: c.programs as any[],
+    }));
+
+    return NextResponse.json<CoursesResponse>(courses);
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    return NextResponse.json<ApiError>(
+      { error: "Failed to fetch courses" },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json<CoursesResponse>(filteredCourses);
 }
 

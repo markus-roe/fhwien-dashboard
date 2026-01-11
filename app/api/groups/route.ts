@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockGroups, currentUser, type Group } from "@/shared/data/mockData";
+import { prisma } from "@/shared/lib/prisma";
 import type {
   CreateGroupRequest,
   GetGroupsQuery,
@@ -7,8 +7,20 @@ import type {
   GroupResponse,
   ApiError,
 } from "@/shared/lib/api-types";
+import { currentUser } from "@/shared/data/mockData"; // Keep for fallback if needed, but we should try to use real user
 
-let groups: Group[] = [...mockGroups];
+// Helper
+function mapDbGroupToApiGroup(dbGroup: any): any {
+  return {
+    id: dbGroup.id.toString(),
+    courseId: dbGroup.course.code,
+    name: dbGroup.name,
+    description: dbGroup.description,
+    maxMembers: dbGroup.maxMembers,
+    members: dbGroup.members.map((m: any) => m.name), // Map User objects to names array as expected by frontend
+    createdAt: dbGroup.createdAt,
+  };
+}
 
 /**
  * @swagger
@@ -35,21 +47,41 @@ let groups: Group[] = [...mockGroups];
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<GroupsResponse | ApiError>> {
-  const searchParams = request.nextUrl.searchParams;
-  const courseId = searchParams.get("courseId");
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const courseId = searchParams.get("courseId");
 
-  const query: GetGroupsQuery = {};
-  if (courseId) {
-    query.courseId = courseId;
+    const where: any = {};
+    if (courseId) {
+      const course = await prisma.course.findUnique({
+        where: { code: courseId },
+      });
+      if (course) {
+        where.courseId = course.id;
+      } else {
+        return NextResponse.json([]);
+      }
+    }
+
+    const dbGroups = await prisma.group.findMany({
+      where,
+      include: {
+        course: true,
+        members: true,
+      },
+      orderBy: { name: "asc" },
+    });
+
+    const groups = dbGroups.map(mapDbGroupToApiGroup);
+
+    return NextResponse.json<GroupsResponse>(groups);
+  } catch (error) {
+    console.error("Error fetching groups:", error);
+    return NextResponse.json<ApiError>(
+      { error: "Failed to fetch groups" },
+      { status: 500 }
+    );
   }
-
-  let filteredGroups = groups;
-
-  if (query.courseId) {
-    filteredGroups = groups.filter((g) => g.courseId === query.courseId);
-  }
-
-  return NextResponse.json<GroupsResponse>(filteredGroups);
 }
 
 /**
@@ -92,23 +124,45 @@ export async function POST(
       );
     }
 
-    const newGroup: Group = {
-      id: `g-${Date.now()}`,
-      courseId,
-      name,
-      description,
-      maxMembers,
-      members: [currentUser.name],
-      createdAt: new Date(),
-    };
+    const course = await prisma.course.findUnique({
+      where: { code: courseId },
+    });
 
-    groups.push(newGroup);
+    if (!course) {
+      return NextResponse.json<ApiError>(
+        { error: "Course not found" },
+        { status: 404 }
+      );
+    }
+
+    // Determine current user to add to group
+    // In real app, get from session. For now, find user by email or pick first.
+    const user = await prisma.user.findUnique({ where: { email: currentUser.email } }) || await prisma.user.findFirst();
+
+    const dbGroup = await prisma.group.create({
+      data: {
+        courseId: course.id,
+        name,
+        description,
+        maxMembers,
+        members: user ? {
+          connect: { id: user.id }
+        } : undefined,
+      },
+      include: {
+        course: true,
+        members: true,
+      },
+    });
+
+    const newGroup = mapDbGroupToApiGroup(dbGroup);
 
     return NextResponse.json<GroupResponse>(newGroup, { status: 201 });
   } catch (error) {
+    console.error("Error creating group:", error);
     return NextResponse.json<ApiError>(
-      { error: "Invalid request body" },
-      { status: 400 }
+      { error: "Failed to create group" },
+      { status: 500 }
     );
   }
 }

@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+// prisma/schema.prisma -> Provided by Neon Console
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums based on mockData.ts
+enum UserRole {
+  student
+  professor
+}
+
+enum Program {
+  DTI
+  DI
+}
+
+enum SessionType {
+  lecture
+  workshop
+  coaching
+}
+
+enum LocationType {
+  online
+  on_campus
+}
+
+enum Attendance {
+  mandatory
+  optional
+}
+
+enum MaterialType {
+  pdf
+  presentation
+  other
+}
+
+// Models - Normalisiert mit Int IDs
+
+model User {
+  id       Int       @id @default(autoincrement())
+  name     String
+  initials String
+  email    String    @unique
+  program  Program?
+  role     UserRole? @default(student)
+
+  // Relations
+  groups         Group[]        @relation("GroupMembers")
+  coachingSlots  CoachingSlot[] @relation("CoachingParticipants")
+  sessionsTaught Session[]      @relation("SessionLecturer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([role])
+}
+
+model Course {
+  id       Int       @id @default(autoincrement())
+  code     String    @unique // e.g. "ds", "hti" - human-readable identifier for URLs/API
+  title    String
+  programs Program[] // Prisma supports arrays for Enums in Postgres
+
+  // Relations
+  sessions      Session[]
+  tasks         Task[]
+  groups        Group[]
+  coachingSlots CoachingSlot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+}
+
+model Session {
+  id       Int         @id @default(autoincrement())
+  courseId Int
+  course   Course      @relation(fields: [courseId], references: [id])
+  type     SessionType
+  title    String
+
+  // Combined Date and Time
+  startDateTime DateTime
+  endDateTime   DateTime
+
+  location     String
+  locationType LocationType
+
+  lecturerId Int?
+  lecturer   User? @relation("SessionLecturer", fields: [lecturerId], references: [id])
+
+  attendance Attendance
+  objectives String[] // Simple string array
+  isLive     Boolean?   @default(false)
+  groupId    Int? // Optional: if a session is for a specific group
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([startDateTime])
+  @@index([lecturerId])
+}
+
+model Task {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+
+  title     String
+  dueDate   DateTime
+  completed Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([dueDate])
+}
+
+model Group {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+
+  name        String
+  description String?
+  maxMembers  Int?
+
+  members User[] @relation("GroupMembers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model CoachingSlot {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+
+  startDateTime DateTime
+  endDateTime   DateTime
+
+  maxParticipants Int
+  description     String?
+
+  participants User[] @relation("CoachingParticipants")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([startDateTime])
+}

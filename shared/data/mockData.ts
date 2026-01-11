@@ -56,7 +56,7 @@ export interface Task {
 export type UserRole = "student" | "professor";
 
 export interface User {
-  id: string;
+  id: number;
   name: string;
   initials: string;
   email: string;
@@ -667,7 +667,7 @@ export const mockGroups: Group[] = [
 
 export const mockUsers: User[] = [
   {
-    id: "u1",
+    id: 1,
     name: "Markus",
     initials: "MR",
     email: "markus.roe@gmx.net",
@@ -675,7 +675,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u2",
+    id: 2,
     name: "Emanuel",
     initials: "EM",
     email: "emanuel@fhwien.ac.at",
@@ -683,7 +683,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u3",
+    id: 3,
     name: "Bence",
     initials: "BE",
     email: "bence@fhwien.ac.at",
@@ -691,7 +691,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u4",
+    id: 4,
     name: "Natalia",
     initials: "NA",
     email: "natalia@fhwien.ac.at",
@@ -699,7 +699,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u5",
+    id: 5,
     name: "Christoph",
     initials: "CH",
     email: "christoph@fhwien.ac.at",
@@ -707,7 +707,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u6",
+    id: 6,
     name: "Hanna",
     initials: "HA",
     email: "hanna@fhwien.ac.at",
@@ -715,7 +715,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u7",
+    id: 7,
     name: "Verena",
     initials: "VE",
     email: "verena@fhwien.ac.at",
@@ -723,7 +723,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u8",
+    id: 8,
     name: "Andreas",
     initials: "AN",
     email: "andreas@fhwien.ac.at",
@@ -731,7 +731,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u9",
+    id: 9,
     name: "Johannes",
     initials: "JO",
     email: "johannes@fhwien.ac.at",
@@ -739,7 +739,7 @@ export const mockUsers: User[] = [
     role: "student",
   },
   {
-    id: "u10",
+    id: 10,
     name: "Lisa",
     initials: "LI",
     email: "lisa@fhwien.ac.at",
@@ -749,7 +749,7 @@ export const mockUsers: User[] = [
 ];
 
 export const currentUser = {
-  id: "m1",
+  id: 1,
   name: "Markus",
   initials: "MR",
   email: "markus.roe@gmx.net",

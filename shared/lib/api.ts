@@ -199,7 +199,7 @@ export const usersApi = {
     return apiRequest<UsersResponse>(`/users${queryString}`);
   },
 
-  getById: (id: string): Promise<UserResponse> => {
+  getById: (id: number): Promise<UserResponse> => {
     return apiRequest<UserResponse>(`/users/${id}`);
   },
 
@@ -210,14 +210,14 @@ export const usersApi = {
     });
   },
 
-  update: (id: string, data: UpdateUserRequest): Promise<UserResponse> => {
+  update: (id: number, data: UpdateUserRequest): Promise<UserResponse> => {
     return apiRequest<UserResponse>(`/users/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
-  delete: (id: string): Promise<ApiSuccess> => {
+  delete: (id: number): Promise<ApiSuccess> => {
     return apiRequest<ApiSuccess>(`/users/${id}`, {
       method: "DELETE",
     });
