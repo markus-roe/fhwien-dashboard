@@ -1,12 +1,22 @@
 "use client";
 
-import { redirect } from "next/navigation";
-import { currentUser } from "@/shared/data/mockData";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 
 export default function DashboardPage() {
-  if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
-    redirect("/schedule");
-  }
+  const router = useRouter();
+  const { user: currentUser, loading: userLoading } = useCurrentUser();
 
-  redirect("/dashboard/lvs");
+  useEffect(() => {
+    if (!userLoading) {
+      if (!currentUser || currentUser.role !== "professor") {
+        router.push("/schedule");
+      } else {
+        router.push("/dashboard/lvs");
+      }
+    }
+  }, [currentUser, userLoading, router]);
+
+  return <div className="p-4">Laden...</div>;
 }

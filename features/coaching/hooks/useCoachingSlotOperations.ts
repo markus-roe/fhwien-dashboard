@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { CoachingSlot } from "@/shared/lib/api-types";
-import { currentUser } from "@/shared/data/mockData";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 
 type UseCoachingSlotOperationsProps = {
   bookSlot: (slotId: number, userId: number) => Promise<CoachingSlot>;
@@ -13,8 +13,13 @@ export function useCoachingSlotOperations({
   cancelBooking,
   deleteSlot,
 }: UseCoachingSlotOperationsProps) {
+  const { user: currentUser } = useCurrentUser();
+
   const handleBookSlot = useCallback(
     async (slotId: number) => {
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
       try {
         await bookSlot(slotId, currentUser.id);
       } catch (error) {
@@ -22,11 +27,14 @@ export function useCoachingSlotOperations({
         throw error;
       }
     },
-    [bookSlot, currentUser.id]
+    [bookSlot, currentUser]
   );
 
   const handleCancelBooking = useCallback(
     async (slotId: number) => {
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
       try {
         await cancelBooking(slotId, currentUser.id);
       } catch (error) {
@@ -34,7 +42,7 @@ export function useCoachingSlotOperations({
         throw error;
       }
     },
-    [cancelBooking, currentUser.id]
+    [cancelBooking, currentUser]
   );
 
   const handleDeleteSlot = useCallback(

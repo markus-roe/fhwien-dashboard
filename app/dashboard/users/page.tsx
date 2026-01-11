@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { currentUser } from "@/shared/data/mockData";
+import { useState, useEffect } from "react";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { type User, type Program } from "@/shared/lib/api-types";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useUsers } from "@/features/users/hooks/useUsers";
 import { useDashboardUserFilters } from "@/features/users/hooks/useDashboardUserFilters";
 import { useDashboardUserOperations } from "@/features/users/hooks/useDashboardUserOperations";
@@ -13,9 +13,19 @@ import type { CreateStudentFormData } from "@/features/users/types";
 import { DeleteConfirmationDialog } from "@/shared/components/ui/DeleteConfirmationDialog";
 
 export default function UsersPage() {
-  if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
-    redirect("/schedule");
+  const router = useRouter();
+  const { user: currentUser, loading: userLoading } = useCurrentUser();
+
+  useEffect(() => {
+    if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
+      router.push("/schedule");
+    }
+  }, [currentUser, userLoading, router]);
+
+  if (userLoading || !currentUser) {
+    return <div className="p-4">Laden...</div>;
   }
+
 
   const {
     users: allUsers,

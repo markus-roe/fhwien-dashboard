@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/shared/lib/prisma";
-import type { UserResponse, ApiError, User, UserRole } from "@/shared/lib/api-types";
+import { getCurrentUser } from "@/shared/lib/auth";
+import type { UserResponse, ApiError } from "@/shared/lib/api-types";
 
-// Helper to map DB user to API user
-function mapDbUserToApiUser(dbUser: User): UserResponse {
+// Helper to map User to API user
+function mapUserToApiUser(user: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program?: "DTI" | "DI";
+  role: "student" | "professor";
+}): UserResponse {
   return {
-    id: dbUser.id,
-    name: dbUser.name,
-    initials: dbUser.initials,
-    email: dbUser.email,
-    program: dbUser.program,
-    role: dbUser.role as UserRole,
+    id: user.id,
+    name: user.name,
+    initials: user.initials,
+    email: user.email,
+    program: user.program,
+    role: user.role,
   };
 }
 
@@ -30,18 +37,17 @@ function mapDbUserToApiUser(dbUser: User): UserResponse {
  */
 export async function GET(): Promise<NextResponse<UserResponse | ApiError>> {
   try {
-    //TODO: Get current user from session
-    const dbUser = await prisma.user.findUnique({ where: { id: 32 } }) as User | null;
+    const user = await getCurrentUser();
 
-    if (!dbUser) {
+    if (!user) {
       return NextResponse.json<ApiError>(
-        { error: "No users found" },
-        { status: 404 }
+        { error: "Unauthorized" },
+        { status: 401 }
       );
     }
 
-    const user = mapDbUserToApiUser(dbUser);
-    return NextResponse.json<UserResponse>(user);
+    const userResponse = mapUserToApiUser(user);
+    return NextResponse.json<UserResponse>(userResponse);
   } catch (error) {
     console.error("Error fetching current user:", error);
     return NextResponse.json<ApiError>(

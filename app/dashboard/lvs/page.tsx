@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { currentUser } from "@/shared/data/mockData";
+import { useState, useEffect } from "react";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { type Session } from "@/shared/lib/api-types";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSessions } from "@/features/sessions/hooks/useSessions";
 import { useCourses } from "@/shared/hooks/useCourses";
 import { useDashboardSessionFilters } from "@/features/sessions/hooks/useDashboardSessionFilters";
@@ -16,9 +16,19 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
 export default function LVsPage() {
-  if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
-    redirect("/schedule");
+  const router = useRouter();
+  const { user: currentUser, loading: userLoading } = useCurrentUser();
+
+  useEffect(() => {
+    if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
+      router.push("/schedule");
+    }
+  }, [currentUser, userLoading, router]);
+
+  if (userLoading || !currentUser) {
+    return <div className="p-4">Laden...</div>;
   }
+
 
   const {
     sessions: allSessions,

@@ -16,17 +16,25 @@ import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/Popover";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { currentUser } from "@/shared/data/mockData";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
+import { signOut } from "next-auth/react";
 
 export const TopNav = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user: currentUser, loading: userLoading } = useCurrentUser();
 
-  const canSeeDashboard =
-    currentUser.role === "professor" || currentUser.name === "Markus";
+  const canSeeDashboard = currentUser?.role === "professor" || currentUser?.role === "admin";
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push("/login");
+    router.refresh();
+  };
 
   const isActive = (path: string) => {
     if (path === "/uebersicht") {
@@ -114,7 +122,7 @@ export const TopNav = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {canSeeDashboard && (
+            {!userLoading && canSeeDashboard && (
               <Link href="/dashboard/lvs" className="hidden md:block">
                 <Button
                   variant="primary"
@@ -126,46 +134,45 @@ export const TopNav = () => {
                 </Button>
               </Link>
             )}
-            <div className="hidden md:flex items-center gap-3">
-              <div className="h-4 w-px bg-zinc-200 hidden sm:block"></div>
+            {!userLoading && currentUser && (
+              <div className="hidden md:flex items-center gap-3">
+                <div className="h-4 w-px bg-zinc-200 hidden sm:block"></div>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none">
-                    <div className="text-right hidden sm:block">
-                      <p className="text-xs font-medium text-zinc-900">
-                        {currentUser.name}
-                      </p>
-                      <p className="text-[10px] text-zinc-500">
-                        {currentUser.program} Student
-                      </p>
-                    </div>
-                    <Avatar initials={currentUser.initials} />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-56 p-1">
-                  <div className="space-y-0.5">
-                    <Link
-                      href="/profil"
-                      className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors w-full"
-                    >
-                      <User className="w-4 h-4 text-zinc-500" />
-                      <span>Profil</span>
-                    </Link>
-                    <button
-                      className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors w-full text-left"
-                      onClick={() => {
-                        // Logout functionality can be added here
-                        console.log("Logout clicked");
-                      }}
-                    >
-                      <LogOut className="w-4 h-4 text-zinc-500" />
-                      <span>Abmelden</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-xs font-medium text-zinc-900">
+                          {currentUser.name}
+                        </p>
+                        <p className="text-[10px] text-zinc-500">
+                          {currentUser.email}
+                        </p>
+                      </div>
+                      <Avatar initials={currentUser.initials} />
                     </button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-56 p-1">
+                    <div className="space-y-0.5">
+                      <Link
+                        href="/profil"
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors w-full"
+                      >
+                        <User className="w-4 h-4 text-zinc-500" />
+                        <span>Profil</span>
+                      </Link>
+                      <button
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors w-full text-left"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="w-4 h-4 text-zinc-500" />
+                        <span>Abmelden</span>
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="md:hidden p-2 -mr-2 text-zinc-600 hover:text-zinc-900 rounded-md transition-all"
@@ -279,7 +286,7 @@ export const TopNav = () => {
                   />
                   <span className="text-base">Coaching</span>
                 </Link>
-                {canSeeDashboard && (
+                {!userLoading && canSeeDashboard && (
                   <Link
                     href="/dashboard/lvs"
                     onClick={() => setMobileMenuOpen(false)}
@@ -299,29 +306,41 @@ export const TopNav = () => {
             </nav>
 
             {/* User Profile Footer */}
-            <div className="p-4 border-t border-zinc-200 bg-zinc-50/50">
-              <div className="space-y-1">
-                <Link
-                  href="/profil"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white transition-colors"
-                >
-                  <User className="w-5 h-5 text-zinc-400" />
-                  <span className="text-base text-zinc-700">Profil</span>
-                </Link>
-                <div className="flex items-center gap-3 p-3 rounded-xl">
-                  <Avatar initials={currentUser.initials} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-zinc-900 truncate">
-                      {currentUser.name}
-                    </p>
-                    <p className="text-xs text-zinc-500">
-                      {currentUser.program} Student
-                    </p>
+            {!userLoading && currentUser && (
+              <div className="p-4 border-t border-zinc-200 bg-zinc-50/50">
+                <div className="space-y-1">
+                  <Link
+                    href="/profil"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white transition-colors"
+                  >
+                    <User className="w-5 h-5 text-zinc-400" />
+                    <span className="text-base text-zinc-700">Profil</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white transition-colors w-full text-left"
+                  >
+                    <LogOut className="w-5 h-5 text-zinc-400" />
+                    <span className="text-base text-zinc-700">Abmelden</span>
+                  </button>
+                  <div className="flex items-center gap-3 p-3 rounded-xl">
+                    <Avatar initials={currentUser.initials} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-zinc-900 truncate">
+                        {currentUser.name}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {currentUser.program || ""} {currentUser.role === "professor" ? "Professor" : "Student"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

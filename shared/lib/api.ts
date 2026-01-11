@@ -231,4 +231,14 @@ export const currentUserApi = {
   get: (): Promise<UserResponse> => {
     return apiRequest<UserResponse>("/current-user");
   },
+
+  changePassword: (data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<ApiSuccess> => {
+    return apiRequest<ApiSuccess>("/change-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
 };
