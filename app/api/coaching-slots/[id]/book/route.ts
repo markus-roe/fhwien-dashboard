@@ -44,7 +44,7 @@ export async function POST(
     // checken ob id eine echte zahl ist
     if (isNaN(slotId)) {
       return NextResponse.json<ApiError>(
-        { error: "id ist falsch" },
+        { error: "id is wrong" },
         { status: 400 }
       );
     }
@@ -59,7 +59,7 @@ export async function POST(
     // wenn slot nicht gefunden wurde
     if (!slot) {
       return NextResponse.json<ApiError>(
-        { error: "slot gibts nicht" },
+        { error: "coaching not found" },
         { status: 404 }
       );
     }
@@ -71,7 +71,7 @@ export async function POST(
 
     if (!dbUser) {
       return NextResponse.json<ApiError>(
-        { error: "user nicht gefunden" },
+        { error: "user not found" },
         { status: 404 }
       );
     }
@@ -80,7 +80,7 @@ export async function POST(
     // wir gehen durch alle teilnehmer und vergleichen die ids
     if (slot.participants.some((p) => p.id === dbUser.id)) {
       return NextResponse.json<ApiError>(
-        { error: "du bist schon angemeldet" },
+        { error: "user is already registered" },
         { status: 400 }
       );
     }
@@ -88,7 +88,7 @@ export async function POST(
     // schauen ob noch platz ist
     if (slot.participants.length >= slot.maxParticipants) {
       return NextResponse.json<ApiError>(
-        { error: "leider schon voll" },
+        { error: "coaching is full" },
         { status: 400 }
       );
     }
@@ -114,7 +114,7 @@ export async function POST(
     // falls was kaputt geht
     console.error("fehler:", error);
     return NextResponse.json<ApiError>(
-      { error: "hat nicht geklappt" },
+      { error: "booking failed" },
       { status: 500 }
     );
   }
