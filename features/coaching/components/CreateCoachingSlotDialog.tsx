@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { X, Minus, Plus } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { X, Minus, Plus, Search } from "lucide-react";
 import type { Course, User, CoachingSlot, LocationType } from "@/shared/lib/api-types";
 import { Button } from "@/shared/components/ui/Button";
 import { Select } from "@/shared/components/ui/Select";
@@ -10,6 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/Dialog";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/shared/components/ui/Popover";
 import { DateTimePickerSection } from "@/shared/components/ui/DateTimePickerSection";
 import { Badge } from "@/shared/components/ui/Badge";
 import { format } from "date-fns";
@@ -49,6 +54,9 @@ export function CreateCoachingSlotDialog({
   const [formState, setFormState] =
     useState<CreateCoachingSlotFormData>(initialFormState);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [participantSearch, setParticipantSearch] = useState("");
+  const [isParticipantPopoverOpen, setIsParticipantPopoverOpen] = useState(false);
+  const participantInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -101,13 +109,15 @@ export function CreateCoachingSlotDialog({
     onOpenChange(false);
   };
 
-  const handleAddParticipant = () => {
-    if (selectedUser && !formState.participantIds.includes(selectedUser.id)) {
+  const handleAddParticipant = (user?: User) => {
+    const userToAdd = user || selectedUser;
+    if (userToAdd && !formState.participantIds.includes(userToAdd.id)) {
       setFormState((prev) => ({
         ...prev,
-        participantIds: [...prev.participantIds, selectedUser.id],
+        participantIds: [...prev.participantIds, userToAdd.id],
       }));
       setSelectedUser(null);
+      setParticipantSearch("");
     }
   };
 
@@ -121,6 +131,36 @@ export function CreateCoachingSlotDialog({
   const availableUsers = users.filter(
     (user) => !formState.participantIds.includes(user.id)
   );
+
+  // Filter users by search query
+  const filteredAvailableUsers = availableUsers
+  .filter((user) => user.role === "student" || user.role === "admin")
+  .filter((user) => {
+    if (!participantSearch.trim()) return true;
+    const searchLower = participantSearch.toLowerCase();
+    return (
+      user.name.toLowerCase().includes(searchLower) ||
+      user.program?.toLowerCase().includes(searchLower) ||
+      user.email?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Focus input when popover opens
+  useEffect(() => {
+    if (isParticipantPopoverOpen && participantInputRef.current) {
+      setTimeout(() => {
+        participantInputRef.current?.focus();
+      }, 100);
+    }
+  }, [isParticipantPopoverOpen]);
+
+  // Reset search when popover closes
+  useEffect(() => {
+    if (!isParticipantPopoverOpen) {
+      setParticipantSearch("");
+      setSelectedUser(null);
+    }
+  }, [isParticipantPopoverOpen]);
 
   const isFormValid =
     formState.courseId &&
@@ -329,29 +369,63 @@ export function CreateCoachingSlotDialog({
                   Teilnehmer
                 </label>
                 <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Select
-                      options={[
-                        { value: "", label: "Teilnehmer auswählen" },
-                        ...availableUsers.map((user) => ({
-                          value: user.id.toString(),
-                          label: user.name,
-                        })),
-                      ]}
-                      value={selectedUser?.id.toString() || ""}
-                      onChange={(value) => setSelectedUser(users.find((u) => u.id.toString() === value) || null)}
-                      placeholder="Teilnehmer auswählen"
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleAddParticipant}
-                      disabled={!selectedUser}
-                      className="shrink-0"
+                  <Popover open={isParticipantPopoverOpen} onOpenChange={setIsParticipantPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="w-full justify-start"
+                        icon={Plus}
+                        iconPosition="left"
+                      >
+                        Teilnehmer hinzufügen
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      className="w-[calc(100vw-2rem)] sm:w-80 max-w-sm p-0" 
+                      align="start"
                     >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
+                      <div className="p-2 sm:p-2 border-b border-zinc-200">
+                        <Input
+                          ref={participantInputRef}
+                          type="text"
+                          placeholder="Teilnehmer suchen..."
+                          value={participantSearch}
+                          onChange={(e) => setParticipantSearch(e.target.value)}
+                          icon={Search}
+                          className="text-sm sm:text-sm py-2.5 sm:py-2"
+                        />
+                      </div>
+                      <div className="max-h-[50vh] sm:max-h-[300px] overflow-auto space-y-0.5 p-1 sm:p-1">
+                        {filteredAvailableUsers.length > 0 ? (
+                          filteredAvailableUsers.map((user) => (
+                            <button
+                              key={user.id}
+                              type="button"
+                              onClick={() => {
+                                handleAddParticipant(user);
+                                setIsParticipantPopoverOpen(false);
+                              }}
+                              className="w-full px-3 sm:px-3 py-3 sm:py-2 text-sm text-left rounded-lg hover:bg-zinc-100 active:bg-zinc-200 transition-colors text-zinc-700 touch-manipulation"
+                            >
+                              <div className="font-medium">{user.name}</div>
+                              {user.program && (
+                                <div className="text-xs text-zinc-500">
+                                  {user.program}
+                                </div>
+                              )}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-3 sm:py-2 text-xs text-zinc-500 text-center">
+                            {availableUsers.length === 0
+                              ? "Keine verfügbaren Teilnehmer"
+                              : "Keine Ergebnisse"}
+                          </div>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                   {formState.participantIds.length > 0 && (
                     <div className="flex flex-wrap gap-2 p-2 border border-zinc-200 rounded-lg bg-zinc-50 min-h-[60px]">
                       {formState.participantIds.map((id) => {
