@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import type { CoachingSlotResponse, ApiError } from "@/shared/lib/api-types";
-import { currentUser } from "@/shared/data/mockData"; // Wir nutzen vorerst noch den Mock-User als "aktuellen User"
+import { currentUser } from "@/shared/data/mockData"; // nehmen wir für den eingeloggten user
 
-// Helper Funktion, um das Datenbank-Format in das API-Format umzuwandeln
+// funktion damit die daten so aussehen wie das frontend sie braucht
 function mapDbSlotToApiSlot(dbSlot: any): any {
-  // Zeit-Formatierung (z.B. "15:30")
+  // zeit schön machen (hh:mm)
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
@@ -18,14 +18,13 @@ function mapDbSlotToApiSlot(dbSlot: any): any {
     minute: "2-digit",
   });
 
-  // Rückgabe des transformierten Objekts
+  // hier bauen wir das objekt zusammen was zurück kommt
   return {
     id: dbSlot.id.toString(),
     courseId: dbSlot.course.code,
     date: start,
     time: time,
     endTime: endTime,
-    // duration wird hier vereinfacht weggelassen oder müsste berechnet werden
     maxParticipants: dbSlot.maxParticipants,
     participants: dbSlot.participants.map((p: any) => p.name),
     description: dbSlot.description,
@@ -33,95 +32,90 @@ function mapDbSlotToApiSlot(dbSlot: any): any {
   };
 }
 
-// POST-Methode: Wird aufgerufen, wenn jemand diesen Endpunkt anspricht
+// hier kommt der post request an (wenn man auf buchen klickt)
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } } // Die ID kommt aus der URL (.../coaching-slots/[id]/book)
+  { params }: { params: { id: string } } // id aus der url
 ): Promise<NextResponse<CoachingSlotResponse | ApiError>> {
   try {
-    // 1. ID aus der URL lesen und in eine Zahl umwandeln (Datenbank nutzt Zahlen als IDs)
+    // id muss eine zahl sein für prisma
     const slotId = parseInt(params.id, 10);
 
-    // Prüfen, ob die ID gültig ist
+    // checken ob id eine echte zahl ist
     if (isNaN(slotId)) {
       return NextResponse.json<ApiError>(
-        { error: "Ungültige Slot-ID" },
-        { status: 400 } // 400 = Bad Request
+        { error: "id ist falsch" },
+        { status: 400 }
       );
     }
 
-    // 2. Den Coaching-Slot aus der Datenbank laden
-    // Wir laden auch die Teilnehmer (members) mit, um zu prüfen, wie voll der Slot ist
+    // slot aus der datenbank holen
+    // holen auch die teilnehmer dazu damit wir wissen ob voll ist
     const slot = await prisma.coachingSlot.findUnique({
       where: { id: slotId },
       include: { participants: true, course: true },
     });
 
-    // Prüfen, ob der Slot überhaupt existiert
+    // wenn slot nicht gefunden wurde
     if (!slot) {
       return NextResponse.json<ApiError>(
-        { error: "Coaching-Slot nicht gefunden" },
-        { status: 404 } // 404 = Not Found
+        { error: "slot gibts nicht" },
+        { status: 404 }
       );
     }
 
-    // 3. Den aktuellen Benutzer laden (wer führt die Buchung durch?)
-    // In einer echten App würde man die Session prüfen. Hier nehmen wir den User aus den Mock-Daten.
+    // current user finden (in echt wäre das über session)
     const dbUser = await prisma.user.findUnique({
       where: { email: currentUser.email },
     }) || await prisma.user.findFirst();
 
     if (!dbUser) {
       return NextResponse.json<ApiError>(
-        { error: "Benutzer nicht gefunden" },
+        { error: "user nicht gefunden" },
         { status: 404 }
       );
     }
 
-    // 4. Logik-Prüfungen durchführen
-
-    // Prüfung A: Ist der Benutzer schon angemeldet?
-    // Wir schauen, ob die User-ID in der Liste der Teilnehmer enthalten ist
+    // schauen ob user schon dabei ist
+    // wir gehen durch alle teilnehmer und vergleichen die ids
     if (slot.participants.some((p) => p.id === dbUser.id)) {
       return NextResponse.json<ApiError>(
-        { error: "Du bist bereits für diesen Slot gebucht" },
+        { error: "du bist schon angemeldet" },
         { status: 400 }
       );
     }
 
-    // Prüfung B: Ist der Slot schon voll?
+    // schauen ob noch platz ist
     if (slot.participants.length >= slot.maxParticipants) {
       return NextResponse.json<ApiError>(
-        { error: "Dieser Slot ist leider schon voll" },
+        { error: "leider schon voll" },
         { status: 400 }
       );
     }
 
-    // 5. Buchung durchführen: Benutzer zur Teilnehmer-Liste hinzufügen
-    // Wir nutzen "update", um die Beziehung (Relation) zwischen Slot und User herzustellen
+    // jetzt update machen und user hinzufügen
     const updatedSlot = await prisma.coachingSlot.update({
       where: { id: slotId },
       data: {
         participants: {
-          connect: { id: dbUser.id }, // "connect" verbindet den existierenden User mit diesem Slot
+          connect: { id: dbUser.id }, // connect verbindet user mit slot
         },
       },
       include: {
         course: true,
-        participants: true, // Wir brauchen die aktualisierte Liste für die Antwort
+        participants: true, // brauchen wir für das update im frontend
       },
     });
 
-    // 6. Erfolgreiche Antwort zurücksenden
-    // Die Daten werden vorher in das richtige Format für das Frontend umgewandelt
+    // erfolg zurückmelden und daten umwandeln
     return NextResponse.json<CoachingSlotResponse>(mapDbSlotToApiSlot(updatedSlot));
 
   } catch (error) {
-    // Fehlerbehandlung: Falls irgendwas schiefgeht (z.B. Datenbank nicht erreichbar)
-    console.error("Fehler beim Buchen des Slots:", error);
+    // falls was kaputt geht
+    console.error("fehler:", error);
     return NextResponse.json<ApiError>(
-      { error: "Buchung fehlgeschlagen" },
-      { status: 500 } // 500 = Internal Server Error
+      { error: "hat nicht geklappt" },
+      { status: 500 }
     );
   }
 }
