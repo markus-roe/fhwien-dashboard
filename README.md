@@ -97,7 +97,7 @@ Die OpenAPI-Spezifikation kann unter `/api/openapi` im JSON-Format abgerufen wer
 
 ## Voraussetzungen
 
-Bevor Sie das Projekt lokal einrichten können, benötigen Sie:
+Für die lokale Einrichtung des Projekts werden benötigt:
 
 - **Node.js** (Version 18 oder höher)
 - **pnpm** oder **npm** als Package Manager
@@ -106,7 +106,7 @@ Bevor Sie das Projekt lokal einrichten können, benötigen Sie:
 
 ## Umgebungsvariablen
 
-Erstellen Sie eine `.env` Datei im Root-Verzeichnis des Projekts mit folgenden Variablen:
+Eine `.env` Datei wird im Root-Verzeichnis des Projekts mit folgenden Variablen erstellt:
 
 ```env
 # Datenbank
@@ -118,9 +118,9 @@ NEXTAUTH_URL="http://localhost:3000"
 ```
 
 **Wichtig:**
-- `DATABASE_URL`: PostgreSQL-Verbindungsstring für Ihre Datenbank
+- `DATABASE_URL`: PostgreSQL-Verbindungsstring für die Datenbank
 - `NEXTAUTH_SECRET`: Ein zufälliger, sicherer String für die Session-Verschlüsselung (kann mit `openssl rand -base64 32` generiert werden)
-- `NEXTAUTH_URL`: Die Basis-URL Ihrer Anwendung (für lokale Entwicklung: `http://localhost:3000`)
+- `NEXTAUTH_URL`: Die Basis-URL der Anwendung (für lokale Entwicklung: `http://localhost:3000`)
 
 ## Installation & Setup
 
@@ -138,8 +138,8 @@ NEXTAUTH_URL="http://localhost:3000"
    ```
 
 3. **Umgebungsvariablen konfigurieren**
-   - Erstellen Sie eine `.env` Datei (siehe Abschnitt "Umgebungsvariablen")
-   - Füllen Sie alle erforderlichen Variablen aus
+   - Eine `.env` Datei wird erstellt (siehe Abschnitt "Umgebungsvariablen")
+   - Alle erforderlichen Variablen werden ausgefüllt
 
 4. **Datenbank einrichten**
    ```bash
@@ -163,7 +163,7 @@ NEXTAUTH_URL="http://localhost:3000"
    ```
 
 6. **Anwendung öffnen**
-   - Öffnen Sie [http://localhost:3000](http://localhost:3000) im Browser
+   - Die Anwendung wird unter [http://localhost:3000](http://localhost:3000) im Browser geöffnet
 
 ### Verfügbare Scripts
 
