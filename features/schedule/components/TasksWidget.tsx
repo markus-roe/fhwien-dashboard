@@ -1,6 +1,6 @@
 "use client";
 
-import { Course } from "@/shared/data/mockData";
+import { Course } from "@/shared/lib/api-types";
 
 interface Task {
   id: string;

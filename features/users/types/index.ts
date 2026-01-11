@@ -1,4 +1,4 @@
-import type { Program, UserRole } from "@/shared/data/mockData";
+import type { Program, UserRole } from "@/shared/lib/api-types";
 
 /**
  * Form data for creating or editing a student/user

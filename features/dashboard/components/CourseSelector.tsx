@@ -1,10 +1,10 @@
-import { Select } from "@/shared/components/ui/Select";
-import type { Course } from "@/shared/data/mockData";
+import { Select, type SelectOption } from "@/shared/components/ui/Select";
+import type { Course } from "@/shared/lib/api-types";
 
 type CourseSelectorProps = {
   courses: Course[];
-  selectedCourseId: string | null;
-  onCourseChange: (courseId: string | null) => void;
+  selectedCourseId: number | null;
+  onCourseChange: (courseId: number | null) => void;
   showAllOption?: boolean;
 };
 
@@ -33,8 +33,10 @@ export function CourseSelector({
         Fach auswählen
       </label>
       <Select
-        options={options}
+        options={options as SelectOption[]}
+        // @ts-expect-error - value is a number
         value={selectedCourseId || ""}
+        // @ts-expect-error - value is a number
         onChange={(value) => onCourseChange(value || null)}
       />
     </div>

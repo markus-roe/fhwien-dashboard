@@ -1,6 +1,6 @@
 import { Calendar, Users, Edit3, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/Button";
-import type { CoachingSlot, Course } from "@/shared/data/mockData";
+import type { CoachingSlot, Course } from "@/shared/lib/api-types";
 import {
   getDateLabel,
   getDateClasses,
@@ -56,10 +56,10 @@ export function CoachingSlotCard({
               <div className="flex flex-wrap gap-1 items-center">
                 {slot.participants.map((participant) => (
                   <span
-                    key={participant}
+                    key={participant.id}
                     className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-700"
                   >
-                    {participant}
+                    {participant.name}
                   </span>
                 ))}
                 <span className="text-[10px] text-zinc-500 ml-1">

@@ -19,7 +19,7 @@ import { GroupsList } from "@/features/groups/components/GroupsList";
 import { LoadingSkeletonGroupCards } from "@/shared/components/ui/LoadingSkeleton";
 
 export default function GruppenPage() {
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"myGroups" | "allGroups">(
@@ -37,7 +37,7 @@ export default function GruppenPage() {
     leaveGroup,
   } = useGroups();
 
-  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const { courses, loading: coursesLoading } = useCourses();
   const isLoading = groupsLoading || coursesLoading;
 
   // Filtering logic
@@ -49,7 +49,7 @@ export default function GruppenPage() {
     totalMyGroupsCount,
   } = useGroupFilters({
     allGroups,
-    courses: mockCourses,
+    courses,
     selectedCourseId,
     searchQuery,
   });
@@ -69,7 +69,7 @@ export default function GruppenPage() {
 
   const handleCreateGroup = async (data: CreateGroupFormData) => {
     await handleCreateGroupBase({
-      courseId: data.courseId || selectedCourseId || undefined,
+      courseId: data.courseId ? parseInt(data.courseId) : selectedCourseId || undefined,
       name: data.name,
       description: data.description,
       maxMembers: data.maxMembers,
@@ -78,7 +78,7 @@ export default function GruppenPage() {
 
   const handleCoursePrefill = (courseId: string | null) => {
     if (!selectedCourseId) {
-      setSelectedCourseId(courseId);
+      setSelectedCourseId(courseId ? parseInt(courseId) : null);
     }
   };
 
@@ -141,7 +141,7 @@ export default function GruppenPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="sm:w-[200px] shrink-0 space-y-3">
                   <CourseFilterButtons
-                    courses={mockCourses}
+                    courses={courses}
                     selectedCourseId={selectedCourseId}
                     onSelectCourse={setSelectedCourseId}
                     totalGroupCount={totalGroupCount}
@@ -169,11 +169,11 @@ export default function GruppenPage() {
                       ) : (
                         <GroupsList
                           groups={myGroups}
-                          courses={mockCourses}
+                          courses={courses}
                           isUserInGroup={isUserInGroup}
                           isGroupFull={isGroupFull}
-                          onJoinGroup={handleJoinGroup}
-                          onLeaveGroup={handleLeaveGroup}
+                          onJoinGroup={(groupId) => handleJoinGroup(groupId)}
+                          onLeaveGroup={(groupId) => handleLeaveGroup(groupId)}
                         />
                       )}
                     </div>
@@ -195,11 +195,11 @@ export default function GruppenPage() {
                       ) : (
                         <GroupsList
                           groups={filteredGroups}
-                          courses={mockCourses}
+                          courses={courses}
                           isUserInGroup={isUserInGroup}
                           isGroupFull={isGroupFull}
-                          onJoinGroup={handleJoinGroup}
-                          onLeaveGroup={handleLeaveGroup}
+                          onJoinGroup={(groupId) => handleJoinGroup(groupId)}
+                          onLeaveGroup={(groupId) => handleLeaveGroup(groupId)}
                         />
                       )}
                     </div>
@@ -214,8 +214,8 @@ export default function GruppenPage() {
       <CreateGroupDialog
         isOpen={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
-        courses={mockCourses}
-        defaultCourseId={selectedCourseId}
+        courses={courses}
+        defaultCourseId={selectedCourseId?.toString() || null}
         onCoursePrefill={handleCoursePrefill}
         onSubmit={handleCreateGroup}
       />

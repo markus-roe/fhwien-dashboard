@@ -1,16 +1,16 @@
-import type { LocationType } from "@/shared/data/mockData";
+import type { LocationType, User } from "@/shared/lib/api-types";
 
 /**
  * Form data for creating or editing a coaching slot
  */
 export type CreateCoachingSlotFormData = {
-  courseId: string;
+  courseId: number;
   date: Date;
   time: string;
   endTime: string;
   location: string;
   locationType: LocationType;
   maxParticipants: number;
-  participants: string[];
+  participantIds: number[];
   description?: string;
 };

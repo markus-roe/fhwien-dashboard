@@ -1,6 +1,6 @@
 import { Edit3, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/Button";
-import type { User } from "@/shared/data/mockData";
+import type { User } from "@/shared/lib/api-types";
 
 type UserCardProps = {
   user: User;

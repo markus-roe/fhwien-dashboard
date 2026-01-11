@@ -1,6 +1,6 @@
 import { format, isPast, isToday } from "date-fns";
 import { de } from "date-fns/locale";
-import type { Session, CoachingSlot } from "@/shared/data/mockData";
+import type { Session, CoachingSlot } from "@/shared/lib/api-types";
 
 /**
  * Calculates the duration between two time strings

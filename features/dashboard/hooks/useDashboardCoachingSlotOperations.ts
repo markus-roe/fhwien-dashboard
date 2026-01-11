@@ -1,29 +1,11 @@
 import { useCallback } from "react";
-import type { CoachingSlot } from "@/shared/data/mockData";
+import type { CoachingSlot, CreateCoachingSlotRequest, UpdateCoachingSlotRequest } from "@/shared/lib/api-types";
+import type { CreateCoachingSlotFormData } from "@/features/coaching/types";
 
 type UseDashboardCoachingSlotOperationsProps = {
-  createSlot: (data: {
-    courseId: string;
-    date: Date;
-    time: string;
-    endTime: string;
-    maxParticipants: number;
-    participants: string[];
-    description?: string;
-  }) => Promise<CoachingSlot>;
-  updateSlot: (
-    id: string,
-    data: {
-      courseId: string;
-      date: Date;
-      time: string;
-      endTime: string;
-      maxParticipants: number;
-      participants: string[];
-      description?: string;
-    }
-  ) => Promise<CoachingSlot>;
-  deleteSlot: (id: string) => Promise<void>;
+  createSlot: (data: CreateCoachingSlotRequest) => Promise<CoachingSlot>;
+  updateSlot: (id: number, data: UpdateCoachingSlotRequest) => Promise<CoachingSlot>;
+  deleteSlot: (id: number) => Promise<void>;
 };
 
 export function useDashboardCoachingSlotOperations({
@@ -32,26 +14,16 @@ export function useDashboardCoachingSlotOperations({
   deleteSlot,
 }: UseDashboardCoachingSlotOperationsProps) {
   const handleCreateCoaching = useCallback(
-    async (data: {
-      courseId: string;
-      date: Date;
-      time: string;
-      endTime: string;
-      location: string;
-      locationType: "online" | "on-campus";
-      maxParticipants: number;
-      participants: string[];
-      description?: string;
-    }) => {
+    async (data: CreateCoachingSlotRequest) => {
       try {
         await createSlot({
           courseId: data.courseId,
-          date: data.date,
+          date: data.date as Date,
           time: data.time,
           endTime: data.endTime,
-          maxParticipants: data.maxParticipants,
+          maxParticipants: data.maxParticipants as number,
           participants: data.participants,
-          description: data.description,
+          description: data.description as string,
         });
       } catch (error) {
         console.error("Failed to create coaching slot:", error);
@@ -64,17 +36,7 @@ export function useDashboardCoachingSlotOperations({
   const handleSaveCoaching = useCallback(
     async (
       editingSlot: CoachingSlot | null,
-      data: {
-        courseId: string;
-        date: Date;
-        time: string;
-        endTime: string;
-        location: string;
-        locationType: "online" | "on-campus";
-        maxParticipants: number;
-        participants: string[];
-        description?: string;
-      }
+      data: CreateCoachingSlotFormData
     ) => {
       try {
         if (editingSlot) {
@@ -84,11 +46,19 @@ export function useDashboardCoachingSlotOperations({
             time: data.time,
             endTime: data.endTime,
             maxParticipants: data.maxParticipants,
-            participants: data.participants,
+            participants: data.participantIds.map((id) => ({ id })),
             description: data.description,
           });
         } else {
-          await handleCreateCoaching(data);
+          await handleCreateCoaching({
+            courseId: data.courseId,
+            date: data.date as Date,
+            time: data.time,
+            endTime: data.endTime,
+            maxParticipants: data.maxParticipants as number,
+            participants: data.participantIds.map((id) => ({ id })),
+            description: data.description as string,
+          });
         }
       } catch (error) {
         console.error("Failed to save coaching slot:", error);
@@ -99,7 +69,7 @@ export function useDashboardCoachingSlotOperations({
   );
 
   const handleDeleteCoaching = useCallback(
-    async (slotId: string) => {
+    async (slotId: number) => {
       try {
         await deleteSlot(slotId);
       } catch (error) {

@@ -1,4 +1,4 @@
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import { Monitor, Video, MapPin } from "lucide-react";
 import { Avatar } from "@/shared/components/ui/Avatar";
 

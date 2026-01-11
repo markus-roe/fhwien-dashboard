@@ -3,10 +3,12 @@ import { prisma } from "@/shared/lib/prisma";
 import type {
   UpdateUserRequest,
   UserResponse,
+  User,
   ApiError,
   ApiSuccess,
+  Program,
+  UserRole,
 } from "@/shared/lib/api-types";
-import type { User } from "@/shared/data/mockData";
 
 // Helper function to map DB user to API user format
 function mapDbUserToApiUser(dbUser: {
@@ -146,12 +148,19 @@ export async function PUT(
     const body = (await request.json()) as UpdateUserRequest;
     const { name, email, program, initials, role } = body;
 
-    const updateData: any = {};
+    interface UpdateData {
+      name?: string;
+      email?: string;
+      program?: Program;
+      initials?: string;
+      role?: UserRole;
+    }
+    const updateData: UpdateData = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
-    if (program) updateData.program = program.toUpperCase();
+    if (program) updateData.program = program;
     if (initials) updateData.initials = initials;
-    if (role) updateData.role = role.toLowerCase();
+    if (role) updateData.role = role;
 
     const dbUser = await prisma.user.update({
       where: { id: userId },
@@ -160,8 +169,8 @@ export async function PUT(
 
     const updatedUser = mapDbUserToApiUser(dbUser);
     return NextResponse.json<UserResponse>(updatedUser);
-  } catch (error: any) {
-    if (error.code === "P2025") {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
       return NextResponse.json<ApiError>(
         { error: "User not found" },
         { status: 404 }
@@ -221,8 +230,8 @@ export async function DELETE(
     });
 
     return NextResponse.json<ApiSuccess>({ success: true });
-  } catch (error: any) {
-    if (error.code === "P2025") {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
       return NextResponse.json<ApiError>(
         { error: "User not found" },
         { status: 404 }

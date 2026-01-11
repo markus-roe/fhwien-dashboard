@@ -1,26 +1,27 @@
 import { useCallback } from "react";
-import type { Group } from "@/shared/data/mockData";
-import { currentUser } from "@/shared/data/mockData";
+import type { Group, User } from "@/shared/lib/api-types";
 
 type UseGroupOperationsProps = {
   createGroup: (data: {
-    courseId: string;
+    courseId: number;
     name: string;
     description?: string;
     maxMembers?: number;
   }) => Promise<Group>;
-  joinGroup: (groupId: string) => Promise<Group>;
-  leaveGroup: (groupId: string) => Promise<Group>;
+  joinGroup: (groupId: number, userId: number) => Promise<Group>;
+  leaveGroup: (groupId: number, userId: number) => Promise<Group>;
+  currentUser?: User;
 };
 
 export function useGroupOperations({
   createGroup,
   joinGroup,
   leaveGroup,
+  currentUser,
 }: UseGroupOperationsProps) {
   const handleCreateGroup = useCallback(
     async (data: {
-      courseId?: string;
+      courseId?: number;
       name: string;
       description?: string;
       maxMembers?: number;
@@ -29,7 +30,7 @@ export function useGroupOperations({
 
       try {
         await createGroup({
-          courseId: data.courseId,
+          courseId: data.courseId || 0,
           name: data.name,
           description: data.description,
           maxMembers: data.maxMembers,
@@ -42,32 +43,38 @@ export function useGroupOperations({
   );
 
   const handleJoinGroup = useCallback(
-    async (groupId: string) => {
+    async (groupId: number) => {
+      if (!currentUser) return;
       try {
-        await joinGroup(groupId);
+        await joinGroup(groupId, currentUser.id);
       } catch (error) {
         console.error("Failed to join group:", error);
         throw error;
       }
     },
-    [joinGroup]
+    [joinGroup, currentUser]
   );
 
   const handleLeaveGroup = useCallback(
-    async (groupId: string) => {
+    async (groupId: number) => {
+      if (!currentUser) return;
       try {
-        await leaveGroup(groupId);
+        await leaveGroup(groupId, currentUser.id);
       } catch (error) {
         console.error("Failed to leave group:", error);
         throw error;
       }
     },
-    [leaveGroup]
+    [leaveGroup, currentUser]
   );
 
-  const isUserInGroup = useCallback((group: Group) => {
-    return group.members.some((m) => m === currentUser.name);
-  }, []);
+  const isUserInGroup = useCallback(
+    (group: Group) => {
+      if (!currentUser) return false;
+      return group.members.some((m) => m.id === currentUser.id);
+    },
+    [currentUser]
+  );
 
   const isGroupFull = useCallback((group: Group) => {
     return group.maxMembers ? group.members.length >= group.maxMembers : false;

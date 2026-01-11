@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { CoachingSlot } from "@/shared/data/mockData";
+import type { CoachingSlot } from "@/shared/lib/api-types";
 import {
   sortCoachingSlotsByDateTime,
   isCoachingSlotPast,

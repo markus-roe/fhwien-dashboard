@@ -1,35 +1,35 @@
 import { useCallback } from "react";
-import type { Session, Material } from "@/shared/data/mockData";
+import type { Session, Material, LocationType, SessionType, Attendance } from "@/shared/lib/api-types";
 import type { EditSessionFormState } from "@/features/dashboard/types";
 
 type UseDashboardSessionOperationsProps = {
   createSession: (data: {
-    courseId: string;
-    type: "lecture" | "workshop" | "coaching";
+    courseId: number;
+    type: SessionType;
     title: string;
     date: Date;
     time: string;
     endTime: string;
     location: string;
-    locationType: "online" | "on-campus";
-    attendance: "mandatory" | "optional";
+    locationType: LocationType;
+    attendance: Attendance;
     objectives: string[];
     materials: Material[];
   }) => Promise<Session>;
   updateSession: (
-    id: string,
+    id: number,
     data: {
-      courseId: string;
-      title: string;
-      date: Date;
-      time: string;
-      endTime: string;
-      location: string;
-      locationType: "online" | "on-campus";
-      attendance: "mandatory" | "optional";
+      courseId?: number;
+      title?: string;
+      date?: Date;
+      time?: string;
+      endTime?: string;
+      location?: string;
+      locationType?: LocationType;
+      attendance?: Attendance;
     }
   ) => Promise<Session>;
-  deleteSession: (id: string) => Promise<void>;
+  deleteSession: (id: number) => Promise<void>;
 };
 
 export function useDashboardSessionOperations({
@@ -68,7 +68,7 @@ export function useDashboardSessionOperations({
             locationType: editFormState.locationType,
             attendance: editFormState.attendance,
             objectives: [],
-            materials: [] as Material[],
+            materials: [],
           });
         }
       } catch (error) {
@@ -80,7 +80,7 @@ export function useDashboardSessionOperations({
   );
 
   const handleDeleteSession = useCallback(
-    async (sessionId: string) => {
+    async (sessionId: number) => {
       try {
         await deleteSession(sessionId);
       } catch (error) {

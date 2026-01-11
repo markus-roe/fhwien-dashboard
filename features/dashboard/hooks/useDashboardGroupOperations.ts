@@ -1,24 +1,14 @@
 import { useCallback } from "react";
-import type { Group, User } from "@/shared/data/mockData";
+import type { CreateGroupRequest, Group, UpdateGroupRequest, User } from "@/shared/lib/api-types";
 import type { CreateGroupFormData } from "@/features/groups/types";
 
 type UseDashboardGroupOperationsProps = {
-  createGroup: (data: {
-    courseId: string;
-    name: string;
-    description?: string;
-    maxMembers?: number;
-  }) => Promise<Group>;
+  createGroup: (data: CreateGroupRequest) => Promise<Group>;
   updateGroup: (
-    id: string,
-    data: {
-      members?: string[];
-      name?: string;
-      description?: string;
-      maxMembers?: number;
-    }
+    id: number,
+    data: UpdateGroupRequest
   ) => Promise<Group>;
-  deleteGroup: (id: string) => Promise<void>;
+  deleteGroup: (id: number) => Promise<void>;
 };
 
 export function useDashboardGroupOperations({
@@ -28,8 +18,8 @@ export function useDashboardGroupOperations({
 }: UseDashboardGroupOperationsProps) {
   const handleAssignUserToGroup = useCallback(
     async (
-      groupId: string,
-      userId: string,
+      groupId: number,
+      userId: number,
       allGroups: Group[],
       allUsers: User[]
     ) => {
@@ -40,13 +30,13 @@ export function useDashboardGroupOperations({
         const user = allUsers.find((u) => u.id === userId);
         if (!group || !user) return;
 
-        const isAlreadyMember = group.members.includes(user.name);
+        const isAlreadyMember = group.members.some((m) => m.id === userId);
         const isFull =
           group.maxMembers && group.members.length >= group.maxMembers;
         if (isAlreadyMember || isFull) return;
 
         await updateGroup(groupId, {
-          members: [...group.members, user.name],
+          members: [...group.members.map((m) => m.id), userId],
         });
       } catch (error) {
         console.error("Failed to assign user to group:", error);
@@ -57,13 +47,13 @@ export function useDashboardGroupOperations({
   );
 
   const handleRemoveUserFromGroup = useCallback(
-    async (groupId: string, member: string, allGroups: Group[]) => {
+    async (groupId: number, memberId: number, allGroups: Group[]) => {
       try {
         const group = allGroups.find((g) => g.id === groupId);
         if (!group) return;
 
         await updateGroup(groupId, {
-          members: group.members.filter((existing) => existing !== member),
+          members: group.members.filter((m) => m.id !== memberId).map((m) => m.id),
         });
       } catch (error) {
         console.error("Failed to remove user from group:", error);
@@ -74,7 +64,7 @@ export function useDashboardGroupOperations({
   );
 
   const handleCreateGroup = useCallback(
-    async (data: CreateGroupFormData, selectedCourseId: string | null) => {
+    async (data: CreateGroupRequest, selectedCourseId: number | null) => {
       const courseId = data.courseId || selectedCourseId;
       if (!courseId || !data.name.trim()) return;
 
@@ -94,7 +84,7 @@ export function useDashboardGroupOperations({
   );
 
   const handleDeleteGroup = useCallback(
-    async (groupId: string) => {
+    async (groupId: number) => {
       try {
         await deleteGroup(groupId);
       } catch (error) {

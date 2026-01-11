@@ -6,9 +6,6 @@ import type {
   SessionsResponse,
   CreateCoachingSlotRequest,
   UpdateCoachingSlotRequest,
-  GetCoachingSlotsQuery,
-  CoachingSlotResponse,
-  CoachingSlotsResponse,
   CreateGroupRequest,
   UpdateGroupRequest,
   GetGroupsQuery,
@@ -22,6 +19,7 @@ import type {
   GetCoursesQuery,
   CoursesResponse,
   ApiSuccess,
+  CoachingSlot,
 } from "./api-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
@@ -51,16 +49,11 @@ async function apiRequest<T>(
 
 // Sessions API
 export const sessionsApi = {
-  getAll: (query?: GetSessionsQuery): Promise<SessionsResponse> => {
-    const searchParams = new URLSearchParams();
-    if (query?.courseId) searchParams.set("courseId", query.courseId);
-    const queryString = searchParams.toString()
-      ? `?${searchParams.toString()}`
-      : "";
-    return apiRequest<SessionsResponse>(`/sessions${queryString}`);
+  getAll: (): Promise<SessionsResponse> => {
+    return apiRequest<SessionsResponse>(`/sessions`);
   },
 
-  getById: (id: string): Promise<SessionResponse> => {
+  getById: (id: number): Promise<SessionResponse> => {
     return apiRequest<SessionResponse>(`/sessions/${id}`);
   },
 
@@ -72,7 +65,7 @@ export const sessionsApi = {
   },
 
   update: (
-    id: string,
+    id: number,
     data: UpdateSessionRequest
   ): Promise<SessionResponse> => {
     return apiRequest<SessionResponse>(`/sessions/${id}`, {
@@ -81,60 +74,55 @@ export const sessionsApi = {
     });
   },
 
-  delete: (id: string): Promise<ApiSuccess> => {
-    return apiRequest<ApiSuccess>(`/sessions/${id}`, {
-      method: "DELETE",
-    });
+  delete: (id: number): Promise<ApiSuccess> => {
+    return apiRequest<ApiSuccess>(`/sessions/${id.toString(10)}`, { method: "DELETE" });
   },
 };
 
 // Coaching Slots API
 export const coachingSlotsApi = {
-  getAll: (query?: GetCoachingSlotsQuery): Promise<CoachingSlotsResponse> => {
-    const searchParams = new URLSearchParams();
-    if (query?.courseId) searchParams.set("courseId", query.courseId);
-    const queryString = searchParams.toString()
-      ? `?${searchParams.toString()}`
-      : "";
-    return apiRequest<CoachingSlotsResponse>(`/coaching-slots${queryString}`);
+  getAll: (): Promise<CoachingSlot[]> => {
+    return apiRequest<CoachingSlot[]>(`/coaching-slots`);
   },
 
-  getById: (id: string): Promise<CoachingSlotResponse> => {
-    return apiRequest<CoachingSlotResponse>(`/coaching-slots/${id}`);
+  getById: (id: number): Promise<CoachingSlot> => {
+    return apiRequest<CoachingSlot>(`/coaching-slots/${id}`);
   },
 
-  create: (data: CreateCoachingSlotRequest): Promise<CoachingSlotResponse> => {
-    return apiRequest<CoachingSlotResponse>("/coaching-slots", {
+  create: (data: CreateCoachingSlotRequest): Promise<CoachingSlot> => {
+    return apiRequest<CoachingSlot>("/coaching-slots", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
   update: (
-    id: string,
+    id: number,
     data: UpdateCoachingSlotRequest
-  ): Promise<CoachingSlotResponse> => {
-    return apiRequest<CoachingSlotResponse>(`/coaching-slots/${id}`, {
+  ): Promise<CoachingSlot> => {
+    return apiRequest<CoachingSlot>(`/coaching-slots/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
-  delete: (id: string): Promise<ApiSuccess> => {
+  delete: (id: number): Promise<ApiSuccess> => {
     return apiRequest<ApiSuccess>(`/coaching-slots/${id}`, {
       method: "DELETE",
     });
   },
 
-  book: (id: string): Promise<CoachingSlotResponse> => {
-    return apiRequest<CoachingSlotResponse>(`/coaching-slots/${id}/book`, {
+  book: (id: number, userId: number): Promise<CoachingSlot> => {
+    return apiRequest<CoachingSlot>(`/coaching-slots/${id}/book`, {
       method: "POST",
+      body: JSON.stringify({ userId }),
     });
   },
 
-  cancel: (id: string): Promise<CoachingSlotResponse> => {
-    return apiRequest<CoachingSlotResponse>(`/coaching-slots/${id}/cancel`, {
+  cancel: (id: number, userId: number): Promise<CoachingSlot> => {
+    return apiRequest<CoachingSlot>(`/coaching-slots/${id}/cancel`, {
       method: "POST",
+      body: JSON.stringify({ userId }),
     });
   },
 };
@@ -143,14 +131,14 @@ export const coachingSlotsApi = {
 export const groupsApi = {
   getAll: (query?: GetGroupsQuery): Promise<GroupsResponse> => {
     const searchParams = new URLSearchParams();
-    if (query?.courseId) searchParams.set("courseId", query.courseId);
+    if (query?.courseId) searchParams.set("courseId", query.courseId.toString());
     const queryString = searchParams.toString()
       ? `?${searchParams.toString()}`
       : "";
     return apiRequest<GroupsResponse>(`/groups${queryString}`);
   },
 
-  getById: (id: string): Promise<GroupResponse> => {
+  getById: (id: number): Promise<GroupResponse> => {
     return apiRequest<GroupResponse>(`/groups/${id}`);
   },
 
@@ -161,28 +149,30 @@ export const groupsApi = {
     });
   },
 
-  update: (id: string, data: UpdateGroupRequest): Promise<GroupResponse> => {
+  update: (id: number, data: UpdateGroupRequest): Promise<GroupResponse> => {
     return apiRequest<GroupResponse>(`/groups/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
-  delete: (id: string): Promise<ApiSuccess> => {
+  delete: (id: number): Promise<ApiSuccess> => {
     return apiRequest<ApiSuccess>(`/groups/${id}`, {
       method: "DELETE",
     });
   },
 
-  join: (id: string): Promise<GroupResponse> => {
+  join: (id: number, userId: number): Promise<GroupResponse> => {
     return apiRequest<GroupResponse>(`/groups/${id}/join`, {
       method: "POST",
+      body: JSON.stringify({ userId }),
     });
   },
 
-  leave: (id: string): Promise<GroupResponse> => {
+  leave: (id: number, userId: number): Promise<GroupResponse> => {
     return apiRequest<GroupResponse>(`/groups/${id}/leave`, {
       method: "POST",
+      body: JSON.stringify({ userId }),
     });
   },
 };

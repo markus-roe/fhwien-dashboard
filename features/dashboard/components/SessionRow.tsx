@@ -1,6 +1,6 @@
 import { Calendar, MapPin, Video, Edit3, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/Button";
-import type { Session, Course } from "@/shared/data/mockData";
+import type { Session, Course } from "@/shared/lib/api-types";
 import {
   getDateLabel,
   getDateClasses,

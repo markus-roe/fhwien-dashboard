@@ -7,7 +7,7 @@ import { TabHeader } from "./TabHeader";
 import { DataTable } from "./DataTable";
 import { UserRow } from "./UserRow";
 import { UserCard } from "./UserCard";
-import type { User, Program } from "@/shared/data/mockData";
+import type { User, Program } from "@/shared/lib/api-types";
 
 type UsersTabProps = {
   users: User[];

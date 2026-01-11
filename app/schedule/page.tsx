@@ -10,11 +10,11 @@ export default function SchedulePage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
 
-  const [visibleCourseIds, setVisibleCourseIds] = useState<Set<string>>(
+  const [visibleCourseIds, setVisibleCourseIds] = useState<Set<number>>(
     new Set()
   );
 
-  const handleVisibleCourseIdsChange = useCallback((ids: Set<string>) => {
+  const handleVisibleCourseIdsChange = useCallback((ids: Set<number>) => {
     setVisibleCourseIds(ids);
   }, []);
 

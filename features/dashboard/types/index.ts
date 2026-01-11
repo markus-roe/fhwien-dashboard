@@ -1,16 +1,16 @@
-import type { LocationType } from "@/shared/data/mockData";
+import type { LocationType, Attendance } from "@/shared/lib/api-types";
 
 /**
  * Form data for editing a session
  */
 export type EditSessionFormState = {
-  courseId: string | null;
+  courseId: number | null;
   title: string;
   date: Date;
   time: string;
   endTime: string;
   location: string;
   locationType: LocationType;
-  attendance: "mandatory" | "optional";
+  attendance: Attendance;
   notes: string;
 };

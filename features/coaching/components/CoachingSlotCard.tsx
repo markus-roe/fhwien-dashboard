@@ -1,5 +1,5 @@
 import { Clock, Users } from "lucide-react";
-import type { CoachingSlot, Course } from "@/shared/data/mockData";
+import type { CoachingSlot, Course } from "@/shared/lib/api-types";
 import { Button } from "@/shared/components/ui/Button";
 import { Card, CardContent } from "@/shared/components/ui/Card";
 import { currentUser } from "@/shared/data/mockData";
@@ -9,9 +9,9 @@ type CoachingSlotCardProps = {
   slot: CoachingSlot;
   course?: Course;
   isProfessor: boolean;
-  onBook: (slotId: string) => void;
-  onCancelBooking: (slotId: string) => void;
-  onDelete: (slotId: string) => void;
+  onBook: (slotId: number) => void;
+  onCancelBooking: (slotId: number) => void;
+  onDelete: (slotId: number) => void;
 };
 
 export function CoachingSlotCard({
@@ -22,7 +22,7 @@ export function CoachingSlotCard({
   onCancelBooking,
   onDelete,
 }: CoachingSlotCardProps) {
-  const isBooked = slot.participants.some((p) => p === currentUser.name);
+  const isBooked = slot.participants.some((p) => p.name === currentUser.name);
   const isFull = slot.participants.length >= slot.maxParticipants;
   const canBook = !isBooked && !isFull && !isProfessor;
 
@@ -112,7 +112,7 @@ export function CoachingSlotCard({
               <div className="pt-1.5 border-t border-zinc-100">
                 <div className="flex flex-wrap gap-1">
                   {slot.participants.map((participant) => (
-                    <MemberBadge key={participant} member={participant} />
+                    <MemberBadge key={participant.id} member={participant} />
                   ))}
                 </div>
               </div>

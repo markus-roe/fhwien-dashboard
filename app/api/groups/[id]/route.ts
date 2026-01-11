@@ -3,20 +3,55 @@ import { prisma } from "@/shared/lib/prisma";
 import type {
   UpdateGroupRequest,
   GroupResponse,
+  Group,
+  User,
   ApiError,
   ApiSuccess,
 } from "@/shared/lib/api-types";
-import type { Group } from "@/shared/data/mockData";
 
-// Helper
-function mapDbGroupToApiGroup(dbGroup: any): any {
+// Helper to map DB user to API user
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
   return {
-    id: dbGroup.id.toString(),
-    courseId: dbGroup.course.code,
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
+}
+
+// Helper to map DB group to API format
+function mapDbGroupToApiGroup(dbGroup: {
+  id: number;
+  name: string;
+  description: string | null;
+  maxMembers: number | null;
+  createdAt: Date;
+  course: { id: number };
+  members: Array<{
+    id: number;
+    name: string;
+    initials: string;
+    email: string;
+    program: string | null;
+    role: string | null;
+  }>;
+}): Group {
+  return {
+    id: dbGroup.id,
+    courseId: dbGroup.course.id,
     name: dbGroup.name,
-    description: dbGroup.description,
-    maxMembers: dbGroup.maxMembers,
-    members: dbGroup.members.map((m: any) => m.name),
+    description: dbGroup.description ?? undefined,
+    maxMembers: dbGroup.maxMembers ?? undefined,
+    members: dbGroup.members.map(mapDbUserToApiUser),
     createdAt: dbGroup.createdAt,
   };
 }
@@ -133,28 +168,30 @@ export async function PUT(
     }
 
     const body = (await request.json()) as UpdateGroupRequest;
+    const { courseId, name, description, maxMembers, members } = body;
 
-    // We don't support updating members directly via PUT in this simplified API, usually done via join/leave?
-    // But usage might imply it. The type has `members?: string[]`.
-    // Mapped mock implementation did update members replacing them? 
-    // `...(members !== undefined && { members }),` in original code.
-    // If members are strings (names), we need to find users by name? That's risky.
-    // For now, let's assume Members update is not primary here, or if it is, we ignore it for safety unless critical.
-    // Actually, looking at original mock code: `if (members !== undefined) updatedGroup.members = members;`
-    // So it allows replacing members list.
-    // Given we have join/leave routes, maybe we can skip full member replacement or assume it's not used frequently.
-    // If strict, we should find users by name.
-
-    const { courseId, name, description, maxMembers } = body; // Ignoring members for now in PUT to avoid complex name matching
-
-    const data: any = {};
+    interface UpdateData {
+      name?: string;
+      description?: string;
+      maxMembers?: number;
+      courseId?: number;
+      members?: { set: Array<{ id: number }> };
+    }
+    const data: UpdateData = {};
     if (name) data.name = name;
     if (description !== undefined) data.description = description;
     if (maxMembers !== undefined) data.maxMembers = maxMembers;
 
     if (courseId) {
-      const course = await prisma.course.findUnique({ where: { code: courseId } });
-      if (course) data.courseId = course.id;
+      data.courseId = courseId;
+    }
+
+    // Handle members update if provided (array of user IDs)
+    if (members !== undefined) {
+      const matches = members
+        .filter((id) => typeof id === "number" && !isNaN(id))
+        .map((id) => ({ id }));
+      data.members = { set: matches };
     }
 
     const updatedGroup = await prisma.group.update({
@@ -218,8 +255,8 @@ export async function DELETE(
     });
 
     return NextResponse.json<ApiSuccess>({ success: true });
-  } catch (error: any) {
-    if (error.code === "P2025") {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
       return NextResponse.json<ApiError>(
         { error: "Group not found" },
         { status: 404 }
@@ -227,7 +264,7 @@ export async function DELETE(
     }
     console.error("Error deleting group:", error);
     return NextResponse.json<ApiError>(
-      { error: "Failed to delete group", },
+      { error: "Failed to delete group" },
       { status: 500 }
     );
   }

@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { groupsApi } from "@/shared/lib/api";
-import type { Group } from "@/shared/data/mockData";
+import type { Group, UpdateGroupRequest } from "@/shared/lib/api-types";
 
-export function useGroups(courseId?: string) {
+export function useGroups(courseId?: number) {
   const queryClient = useQueryClient();
   const queryKey = ["groups", courseId];
 
@@ -31,8 +31,8 @@ export function useGroups(courseId?: string) {
       id,
       data,
     }: {
-      id: string;
-      data: Parameters<typeof groupsApi.update>[1];
+      id: number;
+      data: UpdateGroupRequest;
     }) => groupsApi.update(id, data),
     onSuccess: (updatedGroup) => {
       queryClient.setQueryData<Group[]>(queryKey, (old = []) =>
@@ -48,7 +48,7 @@ export function useGroups(courseId?: string) {
     },
   });
 
-  const deleteGroup = async (id: string) => {
+  const deleteGroup = async (id: number) => {
     await deleteMutation.mutateAsync(id);
     queryClient.setQueryData<Group[]>(queryKey, (old = []) =>
       old.filter((g) => g.id !== id)
@@ -56,7 +56,8 @@ export function useGroups(courseId?: string) {
   };
 
   const joinMutation = useMutation({
-    mutationFn: groupsApi.join,
+    mutationFn: ({ groupId, userId }: { groupId: number; userId: number }) =>
+      groupsApi.join(groupId, userId),
     onSuccess: (updatedGroup) => {
       queryClient.setQueryData<Group[]>(queryKey, (old = []) =>
         old.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
@@ -65,7 +66,8 @@ export function useGroups(courseId?: string) {
   });
 
   const leaveMutation = useMutation({
-    mutationFn: groupsApi.leave,
+    mutationFn: ({ groupId, userId }: { groupId: number; userId: number }) =>
+      groupsApi.leave(groupId, userId),
     onSuccess: (updatedGroup) => {
       queryClient.setQueryData<Group[]>(queryKey, (old = []) =>
         old.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
@@ -80,12 +82,14 @@ export function useGroups(courseId?: string) {
       error instanceof Error ? error.message : error ? String(error) : null,
     createGroup: createMutation.mutateAsync,
     updateGroup: (
-      id: string,
+      id: number,
       groupData: Parameters<typeof groupsApi.update>[1]
     ) => updateMutation.mutateAsync({ id, data: groupData }),
     deleteGroup,
-    joinGroup: joinMutation.mutateAsync,
-    leaveGroup: leaveMutation.mutateAsync,
+    joinGroup: (groupId: number, userId: number) =>
+      joinMutation.mutateAsync({ groupId, userId }),
+    leaveGroup: (groupId: number, userId: number) =>
+      leaveMutation.mutateAsync({ groupId, userId }),
     refetch,
   };
 }

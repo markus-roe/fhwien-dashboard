@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import type { CoachingSlot } from "@/shared/data/mockData";
+import type { CoachingSlot } from "@/shared/lib/api-types";
 
 export type TimeGroup = {
   timeKey: string;

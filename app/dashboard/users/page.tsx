@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { type User, type Program, currentUser } from "@/shared/data/mockData";
+import { currentUser } from "@/shared/data/mockData";
+import { type User, type Program } from "@/shared/lib/api-types";
 import { redirect } from "next/navigation";
 import { useUsers } from "@/features/users/hooks/useUsers";
 import { useDashboardUserFilters } from "@/features/users/hooks/useDashboardUserFilters";

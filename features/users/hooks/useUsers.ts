@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "@/shared/lib/api";
-import type { User, Program } from "@/shared/data/mockData";
+import type { User, Program } from "@/shared/lib/api-types";
 
 export function useUsers(params?: { program?: Program | "all"; search?: string }) {
   const queryClient = useQueryClient();
@@ -61,4 +61,3 @@ export function useUsers(params?: { program?: Program | "all"; search?: string }
     refetch,
   };
 }
-

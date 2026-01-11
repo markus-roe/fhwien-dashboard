@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { type Group, currentUser } from "@/shared/data/mockData";
+import { currentUser } from "@/shared/data/mockData";
+import { type Group } from "@/shared/lib/api-types";
 import { redirect } from "next/navigation";
 import { useGroups } from "@/features/groups/hooks/useGroups";
 import { useUsers } from "@/features/users/hooks/useUsers";
@@ -26,9 +27,9 @@ export default function GroupsPage() {
     deleteGroup,
   } = useGroups();
   const { users: allUsers, loading: usersLoading } = useUsers();
-  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const { courses, loading: coursesLoading } = useCourses();
 
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [groupSearch, setGroupSearch] = useState("");
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
@@ -36,7 +37,7 @@ export default function GroupsPage() {
   // Filtering logic
   const { filteredGroups: groups } = useDashboardGroupFilters({
     allGroups,
-    courses: mockCourses,
+    courses,
     selectedCourseId,
     searchQuery: groupSearch,
   });
@@ -54,8 +55,8 @@ export default function GroupsPage() {
   });
 
   const handleAssignUserToGroupWrapper = async (
-    groupId: string,
-    userId: string
+    groupId: number,
+    userId: number
   ) => {
     try {
       await handleAssignUserToGroup(groupId, userId, allGroups, allUsers);
@@ -65,11 +66,11 @@ export default function GroupsPage() {
   };
 
   const handleRemoveUserFromGroupWrapper = async (
-    groupId: string,
-    member: string
+    groupId: number,
+    memberId: number
   ) => {
     try {
-      await handleRemoveUserFromGroup(groupId, member, allGroups);
+      await handleRemoveUserFromGroup(groupId, memberId, allGroups);
     } catch (error) {
       // Error already logged in hook
     }
@@ -77,14 +78,21 @@ export default function GroupsPage() {
 
   const handleCreateGroupWrapper = async (data: CreateGroupFormData) => {
     try {
-      await handleCreateGroup(data, selectedCourseId);
+      const courseId = data.courseId ? parseInt(data.courseId) : selectedCourseId;
+      if (!courseId) return;
+      await handleCreateGroup({
+        courseId,
+        name: data.name,
+        description: data.description,
+        maxMembers: data.maxMembers,
+      }, selectedCourseId);
       setIsCreateGroupOpen(false);
     } catch (error) {
       // Error already logged in hook
     }
   };
 
-  const handleDeleteGroupWrapper = async (groupId: string) => {
+  const handleDeleteGroupWrapper = async (groupId: number) => {
     try {
       await handleDeleteGroup(groupId);
       setGroupToDelete(null);
@@ -97,7 +105,7 @@ export default function GroupsPage() {
     <>
       <GroupsTab
         groups={groups}
-        courses={mockCourses}
+        courses={courses}
         users={allUsers}
         selectedCourseId={selectedCourseId}
         onCourseChange={setSelectedCourseId}
@@ -118,8 +126,8 @@ export default function GroupsPage() {
       <CreateGroupDialog
         isOpen={isCreateGroupOpen}
         onOpenChange={setIsCreateGroupOpen}
-        courses={mockCourses}
-        defaultCourseId={selectedCourseId}
+        courses={courses}
+        defaultCourseId={selectedCourseId?.toString() || null}
         onSubmit={handleCreateGroupWrapper}
       />
 
@@ -137,7 +145,7 @@ export default function GroupsPage() {
         itemDetails={
           groupToDelete
             ? `${
-                mockCourses.find((c) => c.id === groupToDelete.courseId)
+                courses.find((c) => c.id === groupToDelete.courseId)
                   ?.title ?? "Kurs"
               } • ${groupToDelete.members.length} Mitglieder`
             : undefined

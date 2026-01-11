@@ -2,22 +2,56 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import type {
   CreateGroupRequest,
-  GetGroupsQuery,
   GroupsResponse,
   GroupResponse,
+  Group,
+  User,
   ApiError,
 } from "@/shared/lib/api-types";
-import { currentUser } from "@/shared/data/mockData"; // Keep for fallback if needed, but we should try to use real user
 
-// Helper
-function mapDbGroupToApiGroup(dbGroup: any): any {
+// Helper to map DB user to API user
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
   return {
-    id: dbGroup.id.toString(),
-    courseId: dbGroup.course.code,
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
+}
+
+// Helper to map DB group to API format
+function mapDbGroupToApiGroup(dbGroup: {
+  id: number;
+  name: string;
+  description: string | null;
+  maxMembers: number | null;
+  createdAt: Date;
+  course: { id: number };
+  members: Array<{
+    id: number;
+    name: string;
+    initials: string;
+    email: string;
+    program: string | null;
+    role: string | null;
+  }>;
+}): Group {
+  return {
+    id: dbGroup.id,
+    courseId: dbGroup.course.id,
     name: dbGroup.name,
-    description: dbGroup.description,
-    maxMembers: dbGroup.maxMembers,
-    members: dbGroup.members.map((m: any) => m.name), // Map User objects to names array as expected by frontend
+    description: dbGroup.description ?? undefined,
+    maxMembers: dbGroup.maxMembers ?? undefined,
+    members: dbGroup.members.map(mapDbUserToApiUser),
     createdAt: dbGroup.createdAt,
   };
 }
@@ -49,18 +83,11 @@ export async function GET(
 ): Promise<NextResponse<GroupsResponse | ApiError>> {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const courseId = searchParams.get("courseId");
+    const courseId = parseInt(searchParams.get("courseId") || "0");
 
-    const where: any = {};
+    const where: { courseId?: number } = {};
     if (courseId) {
-      const course = await prisma.course.findUnique({
-        where: { code: courseId },
-      });
-      if (course) {
-        where.courseId = course.id;
-      } else {
-        return NextResponse.json([]);
-      }
+      where.courseId = courseId;
     }
 
     const dbGroups = await prisma.group.findMany({
@@ -124,30 +151,12 @@ export async function POST(
       );
     }
 
-    const course = await prisma.course.findUnique({
-      where: { code: courseId },
-    });
-
-    if (!course) {
-      return NextResponse.json<ApiError>(
-        { error: "Course not found" },
-        { status: 404 }
-      );
-    }
-
-    // Determine current user to add to group
-    // In real app, get from session. For now, find user by email or pick first.
-    const user = await prisma.user.findUnique({ where: { email: currentUser.email } }) || await prisma.user.findFirst();
-
     const dbGroup = await prisma.group.create({
       data: {
-        courseId: course.id,
+        courseId,
         name,
         description,
         maxMembers,
-        members: user ? {
-          connect: { id: user.id }
-        } : undefined,
       },
       include: {
         course: true,

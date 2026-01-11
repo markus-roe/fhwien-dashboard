@@ -5,9 +5,10 @@ import type {
   GetUsersQuery,
   UsersResponse,
   UserResponse,
+  User,
   ApiError,
+  Program,
 } from "@/shared/lib/api-types";
-import type { User } from "@/shared/data/mockData";
 
 // Helper function to map DB user to API user format
 function mapDbUserToApiUser(dbUser: {
@@ -72,10 +73,14 @@ export async function GET(
     }
 
     // Build Prisma query
-    const where: any = {};
+    interface WhereClause {
+      program?: Program;
+      OR?: Array<{ name?: { contains: string; mode: "insensitive" }; email?: { contains: string; mode: "insensitive" } }>;
+    }
+    const where: WhereClause = {};
 
     if (query.program && query.program !== "all") {
-      where.program = query.program.toUpperCase();
+      where.program = query.program;
     }
 
     if (query.search) {

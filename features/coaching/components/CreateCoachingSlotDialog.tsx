@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Minus, Plus } from "lucide-react";
-import type { Course, User, CoachingSlot } from "@/shared/data/mockData";
+import type { Course, User, CoachingSlot, LocationType } from "@/shared/lib/api-types";
 import { Button } from "@/shared/components/ui/Button";
 import { Select } from "@/shared/components/ui/Select";
 import { Input, Textarea } from "@/shared/components/ui/Input";
@@ -13,7 +13,6 @@ import {
 import { DateTimePickerSection } from "@/shared/components/ui/DateTimePickerSection";
 import { Badge } from "@/shared/components/ui/Badge";
 import { format } from "date-fns";
-import { de } from "date-fns/locale";
 import type { CreateCoachingSlotFormData } from "@/features/coaching/types";
 
 type CreateCoachingSlotDialogProps = {
@@ -27,14 +26,14 @@ type CreateCoachingSlotDialogProps = {
 };
 
 const initialFormState: CreateCoachingSlotFormData = {
-  courseId: "",
+  courseId: 0,
   date: new Date(),
   time: "",
   endTime: "",
   location: "",
-  locationType: "on-campus",
+  locationType: "on_campus",
   maxParticipants: 4,
-  participants: [],
+  participantIds: [],
   description: "",
 };
 
@@ -49,18 +48,18 @@ export function CreateCoachingSlotDialog({
 }: CreateCoachingSlotDialogProps) {
   const [formState, setFormState] =
     useState<CreateCoachingSlotFormData>(initialFormState);
-  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       if (mode === "edit" && initialData) {
         // Convert participant names to IDs
-        const participantIds = initialData.participants
-          .map((name) => {
-            const user = users.find((u) => u.name === name);
-            return user?.id;
+        const participants = initialData.participants
+          .map((participant) => {
+            const user = users.find((u) => u.id === participant.id);
+            return user;
           })
-          .filter((id): id is string => !!id);
+          .filter((user): user is User => !!user);
 
         setFormState({
           courseId: initialData.courseId,
@@ -68,9 +67,9 @@ export function CreateCoachingSlotDialog({
           time: initialData.time,
           endTime: initialData.endTime,
           location: "", // CoachingSlot doesn't have location stored
-          locationType: "on-campus",
+          locationType: "on_campus",
           maxParticipants: initialData.maxParticipants,
-          participants: participantIds,
+          participantIds: participants.map((user) => user.id),
           description: initialData.description || "",
         });
       } else {
@@ -103,24 +102,24 @@ export function CreateCoachingSlotDialog({
   };
 
   const handleAddParticipant = () => {
-    if (selectedUserId && !formState.participants.includes(selectedUserId)) {
+    if (selectedUser && !formState.participantIds.includes(selectedUser.id)) {
       setFormState((prev) => ({
         ...prev,
-        participants: [...prev.participants, selectedUserId],
+        participantIds: [...prev.participantIds, selectedUser.id],
       }));
-      setSelectedUserId("");
+      setSelectedUser(null);
     }
   };
 
-  const handleRemoveParticipant = (userId: string) => {
+  const handleRemoveParticipant = (user: User) => {
     setFormState((prev) => ({
       ...prev,
-      participants: prev.participants.filter((id) => id !== userId),
+      participantIds: prev.participantIds.filter((id) => id !== user.id),
     }));
   };
 
   const availableUsers = users.filter(
-    (user) => !formState.participants.includes(user.id)
+    (user) => !formState.participantIds.includes(user.id)
   );
 
   const isFormValid =
@@ -168,13 +167,13 @@ export function CreateCoachingSlotDialog({
                   options={[
                     { value: "", label: "Fach auswählen" },
                     ...courses.map((course) => ({
-                      value: course.id,
+                      value: course.id.toString(),
                       label: course.title,
                     })),
                   ]}
-                  value={formState.courseId}
+                  value={formState.courseId.toString()}
                   onChange={(value) =>
-                    setFormState((prev) => ({ ...prev, courseId: value }))
+                    setFormState((prev) => ({ ...prev, courseId: parseInt(value) }))
                   }
                   placeholder="Fach auswählen"
                 />
@@ -268,7 +267,7 @@ export function CreateCoachingSlotDialog({
                     onChange={(value) =>
                       setFormState((prev) => ({
                         ...prev,
-                        locationType: value as "online" | "on-campus",
+                        locationType: value as LocationType,
                       }))
                     }
                   />
@@ -335,32 +334,32 @@ export function CreateCoachingSlotDialog({
                       options={[
                         { value: "", label: "Teilnehmer auswählen" },
                         ...availableUsers.map((user) => ({
-                          value: user.id,
+                          value: user.id.toString(),
                           label: user.name,
                         })),
                       ]}
-                      value={selectedUserId}
-                      onChange={(value) => setSelectedUserId(value)}
+                      value={selectedUser?.id.toString() || ""}
+                      onChange={(value) => setSelectedUser(users.find((u) => u.id.toString() === value) || null)}
                       placeholder="Teilnehmer auswählen"
                       className="flex-1"
                     />
                     <Button
                       type="button"
                       onClick={handleAddParticipant}
-                      disabled={!selectedUserId}
+                      disabled={!selectedUser}
                       className="shrink-0"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
                   </div>
-                  {formState.participants.length > 0 && (
+                  {formState.participantIds.length > 0 && (
                     <div className="flex flex-wrap gap-2 p-2 border border-zinc-200 rounded-lg bg-zinc-50 min-h-[60px]">
-                      {formState.participants.map((userId) => {
-                        const user = users.find((u) => u.id === userId);
+                      {formState.participantIds.map((id) => {
+                        const user = users.find((u) => u.id === id);
                         if (!user) return null;
                         return (
                           <Badge
-                            key={userId}
+                            key={id}
                             variant="default"
                             size="sm"
                             className="flex items-center gap-1.5 pr-1"
@@ -368,9 +367,9 @@ export function CreateCoachingSlotDialog({
                             <span>{user.name}</span>
                             <button
                               type="button"
-                              onClick={() => handleRemoveParticipant(userId)}
+                              onClick={() => handleRemoveParticipant(user)}
                               className="ml-1 hover:bg-zinc-200 rounded-full p-0.5 transition-colors"
-                              aria-label={`${user.name} entfernen`}
+                              aria-label={`${id} entfernen`}
                             >
                               <X className="w-3 h-3" />
                             </button>

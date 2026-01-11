@@ -1,12 +1,12 @@
 import { Badge } from "@/shared/components/ui/Badge";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/Card";
-import type { Course } from "@/shared/data/mockData";
+import type { Course } from "@/shared/lib/api-types";
 
 type CourseSelectorMobileProps = {
   courses: Course[];
-  selectedCourseId: string | null;
-  onSelectCourse: (courseId: string | null) => void;
-  courseGroupCounts: Map<string, number>;
+  selectedCourseId: number | null;
+  onSelectCourse: (courseId: number | null) => void;
+  courseGroupCounts: Record<string, number>;
 };
 
 export function CourseSelectorMobile({
@@ -34,7 +34,7 @@ export function CourseSelectorMobile({
               <div className="text-sm font-semibold">Alle Fächer</div>
             </button>
             {courses.map((course) => {
-              const groupCount = courseGroupCounts.get(course.id) || 0;
+              const groupCount = courseGroupCounts[course.id.toString()] || 0;
               const isSelected = selectedCourseId === course.id;
 
               return (

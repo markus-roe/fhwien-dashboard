@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Minus, Plus } from "lucide-react";
-import type { Course } from "@/shared/data/mockData";
+import type { Course } from "@/shared/lib/api-types";
 import { Button } from "@/shared/components/ui/Button";
 import { Select } from "@/shared/components/ui/Select";
 import { Input, Textarea } from "@/shared/components/ui/Input";
@@ -97,7 +97,7 @@ export function CreateGroupDialog({
               options={[
                 { value: "", label: "Fach auswählen" },
                 ...courses.map((course) => ({
-                  value: course.id,
+                  value: course.id.toString(),
                   label: course.title,
                 })),
               ]}

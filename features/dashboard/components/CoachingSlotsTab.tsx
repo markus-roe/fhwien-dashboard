@@ -9,13 +9,13 @@ import { DataTable } from "./DataTable";
 import { CoachingSlotRow } from "./CoachingSlotRow";
 import { CoachingSlotCard } from "./CoachingSlotCard";
 import { useCoachingSlots } from "../hooks/useCoachingSlots";
-import type { CoachingSlot, Course } from "@/shared/data/mockData";
+import type { CoachingSlot, Course } from "@/shared/lib/api-types";
 
 type CoachingSlotsTabProps = {
   slots: CoachingSlot[];
   courses: Course[];
-  selectedCourseId: string | null;
-  onCourseChange: (courseId: string | null) => void;
+  selectedCourseId: number | null;
+  onCourseChange: (courseId: number | null) => void;
   onEdit: (slot: CoachingSlot) => void;
   onDelete: (slot: CoachingSlot) => void;
   onCreate: () => void;

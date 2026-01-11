@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import type { Group, Course } from "@/shared/data/mockData";
-import { currentUser } from "@/shared/data/mockData";
+import type { Group, Course, User } from "@/shared/lib/api-types";
 
 type UseGroupFiltersProps = {
   allGroups: Group[];
   courses: Course[];
-  selectedCourseId: string | null;
+  selectedCourseId: number | null;
   searchQuery: string;
+  currentUser?: User;
 };
 
 export function useGroupFilters({
@@ -14,6 +14,7 @@ export function useGroupFilters({
   courses,
   selectedCourseId,
   searchQuery,
+  currentUser,
 }: UseGroupFiltersProps) {
   const totalGroupCount = allGroups.length;
 
@@ -47,7 +48,7 @@ export function useGroupFilters({
             .find((c) => c.id === g.courseId)
             ?.title.toLowerCase()
             .includes(query) ||
-          g.members.some((m) => m.toLowerCase().includes(query))
+          g.members.some((m) => m.name.toLowerCase().includes(query))
       );
     }
 
@@ -55,16 +56,18 @@ export function useGroupFilters({
   }, [selectedCourseId, allGroups, searchQuery, courses]);
 
   const myGroups = useMemo(() => {
+    if (!currentUser) return [];
     return filteredGroups.filter((g) =>
-      g.members.some((m) => m === currentUser.name)
+      g.members.some((m) => m.id === currentUser.id)
     );
-  }, [filteredGroups]);
+  }, [filteredGroups, currentUser]);
 
   const totalMyGroupsCount = useMemo(() => {
+    if (!currentUser) return 0;
     return allGroups.filter((g) =>
-      g.members.some((m) => m === currentUser.name)
+      g.members.some((m) => m.id === currentUser.id)
     ).length;
-  }, [allGroups]);
+  }, [allGroups, currentUser]);
 
   return {
     totalGroupCount,

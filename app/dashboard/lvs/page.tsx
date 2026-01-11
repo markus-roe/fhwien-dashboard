@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { type Session, currentUser } from "@/shared/data/mockData";
+import { currentUser } from "@/shared/data/mockData";
+import { type Session } from "@/shared/lib/api-types";
 import { redirect } from "next/navigation";
 import { useSessions } from "@/features/sessions/hooks/useSessions";
 import { useCourses } from "@/shared/hooks/useCourses";
@@ -26,9 +27,9 @@ export default function LVsPage() {
     updateSession,
     deleteSession,
   } = useSessions();
-  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const { courses, loading: coursesLoading } = useCourses();
 
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [sessionSearch, setSessionSearch] = useState("");
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [editFormState, setEditFormState] =
@@ -38,7 +39,7 @@ export default function LVsPage() {
   // Filtering logic
   const { filteredSessions: sessions } = useDashboardSessionFilters({
     allSessions,
-    courses: mockCourses,
+    courses,
     selectedCourseId,
     searchQuery: sessionSearch,
   });
@@ -56,7 +57,7 @@ export default function LVsPage() {
     setEditFormState({
       courseId: session.courseId,
       title: session.title,
-      date: session.date,
+      date: new Date(session.date),
       time: session.time,
       endTime: session.endTime,
       location: session.location,
@@ -68,7 +69,7 @@ export default function LVsPage() {
 
   const handleOpenCreateSession = () => {
     const selectedCourse =
-      mockCourses.find((c) => c.id === selectedCourseId) ?? null;
+      courses.find((c) => c.id === selectedCourseId) ?? null;
 
     setEditingSession(null);
     setEditFormState({
@@ -78,13 +79,13 @@ export default function LVsPage() {
       time: "08:30",
       endTime: "10:00",
       location: "",
-      locationType: "on-campus",
+      locationType: "on_campus",
       attendance: "mandatory",
       notes: "",
     });
   };
 
-  const handleDeleteSessionWrapper = async (sessionId: string) => {
+  const handleDeleteSessionWrapper = async (sessionId: number) => {
     try {
       await handleDeleteSession(sessionId);
       setSessionToDelete(null);
@@ -107,7 +108,7 @@ export default function LVsPage() {
     <>
       <SessionsTab
         sessions={sessions}
-        courses={mockCourses}
+        courses={courses}
         selectedCourseId={selectedCourseId}
         onCourseChange={setSelectedCourseId}
         onEdit={handleOpenEditSession}
@@ -120,6 +121,7 @@ export default function LVsPage() {
 
       {editFormState && (
         <EditSessionDialog
+          courses={courses}
           formState={editFormState}
           onFormStateChange={setEditFormState}
           onClose={() => {

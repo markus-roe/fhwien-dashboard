@@ -1,4 +1,4 @@
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import type { CalendarEvent } from "../types/calendar";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";

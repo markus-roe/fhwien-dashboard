@@ -1,5 +1,5 @@
 import { Plus, Trash2, Users } from "lucide-react";
-import type { Course, Group, User } from "@/shared/data/mockData";
+import type { Course, Group, User } from "@/shared/lib/api-types";
 import { Avatar } from "@/shared/components/ui/Avatar";
 import { MemberBadge } from "@/features/dashboard/components/MemberBadge";
 import { Button } from "@/shared/components/ui/Button";
@@ -15,14 +15,14 @@ type GroupCardProps = {
   course?: Course;
   isUserInGroup?: boolean;
   isGroupFull?: boolean;
-  onJoinGroup?: (groupId: string) => void;
-  onLeaveGroup?: (groupId: string) => void;
+  onJoinGroup?: (groupId: number) => void;
+  onLeaveGroup?: (groupId: number) => void;
   // Admin props
   isAdmin?: boolean;
   users?: User[];
-  onDelete?: (groupId: string) => void;
-  onAssignUser?: (groupId: string, userId: string) => void;
-  onRemoveUser?: (groupId: string, member: string) => void;
+  onDelete?: (groupId: number) => void;
+  onAssignUser?: (groupId: number, userId: number) => void;
+  onRemoveUser?: (groupId: number, memberId: number) => void;
 };
 
 export function GroupCard({
@@ -82,11 +82,11 @@ export function GroupCard({
               )}
               {group.members.map((member) => (
                 <MemberBadge
-                  key={member}
+                  key={member.id}
                   member={member}
                   onRemove={
                     isAdmin && onRemoveUser
-                      ? (member) => onRemoveUser(group.id, member)
+                      ? (memberId: number) => onRemoveUser(group.id, memberId)
                       : undefined
                   }
                 />
@@ -110,7 +110,7 @@ export function GroupCard({
                   <PopoverContent className="w-64 p-1" align="start">
                     <div className="max-h-[200px] overflow-auto space-y-0.5">
                       {users
-                        .filter((user) => !group.members.includes(user.name))
+                        .filter((user) => !group.members.some((m) => m.id === user.id))
                         .map((user) => (
                           <button
                             key={user.id}
@@ -127,7 +127,7 @@ export function GroupCard({
                           </button>
                         ))}
                       {users.filter(
-                        (user) => !group.members.includes(user.name)
+                        (user) => !group.members.some((m) => m.id === user.id)
                       ).length === 0 && (
                         <div className="px-3 py-2 text-xs text-zinc-500 text-center">
                           Keine verfügbaren User

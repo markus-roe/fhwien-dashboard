@@ -20,7 +20,7 @@ import {
 } from "date-fns";
 import { de } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/Card";
 import { getSessionColor } from "@/features/schedule/utils/calendarHelpers";
 

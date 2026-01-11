@@ -14,7 +14,7 @@ import {
 import { de } from "date-fns/locale";
 import { getISOWeek } from "date-fns";
 import type { CalendarEvent } from "@/features/schedule/types/calendar";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import { getSessionColor } from "@/features/schedule/utils/calendarHelpers";
 
 interface MonthViewProps {

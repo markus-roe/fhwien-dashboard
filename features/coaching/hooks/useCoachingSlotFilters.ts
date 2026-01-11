@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import type { CoachingSlot, Course } from "@/shared/data/mockData";
-import { currentUser } from "@/shared/data/mockData";
+import type { CoachingSlot, Course, User } from "@/shared/lib/api-types";
 
 type UseCoachingSlotFiltersProps = {
   allSlots: CoachingSlot[];
   courses: Course[];
-  selectedCourseId: string | null;
+  selectedCourseId: number | null;
   searchQuery: string;
+  currentUser?: User;
 };
 
 export function useCoachingSlotFilters({
@@ -14,6 +14,7 @@ export function useCoachingSlotFilters({
   courses,
   selectedCourseId,
   searchQuery,
+  currentUser,
 }: UseCoachingSlotFiltersProps) {
   // Separate upcoming and past slots from ALL slots
   const { upcomingSlots: allUpcomingSlots, pastSlots: allPastSlots } =
@@ -95,7 +96,7 @@ export function useCoachingSlotFilters({
         const course = courses.find((c) => c.id === slot.courseId);
         return (
           course?.title.toLowerCase().includes(query) ||
-          slot.participants.some((p) => p.toLowerCase().includes(query))
+          slot.participants.some((p) => p.name.toLowerCase().includes(query))
         );
       });
     }
@@ -129,7 +130,7 @@ export function useCoachingSlotFilters({
         const course = courses.find((c) => c.id === slot.courseId);
         return (
           course?.title.toLowerCase().includes(query) ||
-          slot.participants.some((p) => p.toLowerCase().includes(query))
+          slot.participants.some((p) => p.name.toLowerCase().includes(query))
         );
       });
     }
@@ -148,22 +149,25 @@ export function useCoachingSlotFilters({
   }, [pastSlots, selectedCourseId, searchQuery, courses]);
 
   const myUpcomingSlots = useMemo(() => {
+    if (!currentUser) return [];
     return filteredUpcomingSlots.filter((slot) =>
-      slot.participants.some((p) => p === currentUser.name)
+      slot.participants.some((p) => p.id === currentUser.id)
     );
-  }, [filteredUpcomingSlots]);
+  }, [filteredUpcomingSlots, currentUser]);
 
   const totalMyBookingsCount = useMemo(() => {
+    if (!currentUser) return 0;
     return allUpcomingSlots.filter((slot) =>
-      slot.participants.some((p) => p === currentUser.name)
+      slot.participants.some((p) => p.id === currentUser.id)
     ).length;
-  }, [allUpcomingSlots]);
+  }, [allUpcomingSlots, currentUser]);
 
   const myPastSlots = useMemo(() => {
+    if (!currentUser) return [];
     return filteredPastSlots.filter((slot) =>
-      slot.participants.some((p) => p === currentUser.name)
+      slot.participants.some((p) => p.id === currentUser.id)
     );
-  }, [filteredPastSlots]);
+  }, [filteredPastSlots, currentUser]);
 
   const availableSlots = useMemo(() => {
     return filteredUpcomingSlots;
@@ -180,4 +184,3 @@ export function useCoachingSlotFilters({
     totalMyBookingsCount,
   };
 }
-

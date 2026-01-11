@@ -5,14 +5,13 @@ import {
   useEffect,
   type MouseEvent,
 } from "react";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import { SmallCalendar } from "@/features/groups/components/SmallCalendar";
 import { NextUpList } from "@/features/schedule/components/NextUpList";
-import { NextUpCard } from "@/features/schedule/components/NextUpCard";
 import { EventPopover } from "@/features/schedule/components/EventPopover";
 import { sessionToEvent } from "@/features/schedule/utils/calendarHelpers";
 import type { CalendarEvent } from "@/features/schedule/types/calendar";
-import { currentUser } from "@/shared/data/mockData";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { useSessions } from "@/features/sessions/hooks/useSessions";
 import { useCoachingSlots } from "@/features/coaching/hooks/useCoachingSlots";
 import { useCourses } from "@/shared/hooks/useCourses";
@@ -23,7 +22,7 @@ const STORAGE_KEY = "schedule-visible-course-ids";
 type SidebarProps = {
   onSessionClick?: (session: Session) => void;
   emptyMessage?: string;
-  onVisibleCourseIdsChange?: (visibleCourseIds: Set<string>) => void;
+  onVisibleCourseIdsChange?: (visibleCourseIds: Set<number>) => void;
   showCourseFilterButtons?: boolean;
 };
 
@@ -44,27 +43,29 @@ export function Sidebar({
   const [showEventPopover, setShowEventPopover] = useState(false);
 
   // Fetch data using hooks
-  const { sessions: mockSessions, loading: sessionsLoading } = useSessions();
+  const { user: currentUser } = useCurrentUser();
+  const { sessions, loading: sessionsLoading } = useSessions();
   const { slots: coachingSlots, loading: slotsLoading } = useCoachingSlots();
-  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const { courses, loading: coursesLoading } = useCourses();
 
   const isLoading = sessionsLoading || slotsLoading || coursesLoading;
 
   // Get all course IDs for current user's program
   const allCourseIds = useMemo(() => {
-    return mockCourses
+    if (!currentUser) return [];
+    return courses
       .filter((course) => course.program.includes(currentUser.program))
       .map((course) => course.id);
-  }, [mockCourses]);
+  }, [courses, currentUser]);
 
   // Initialize visibleCourseIds from localStorage or default to all courses
-  const [visibleCourseIds, setVisibleCourseIds] = useState<Set<string>>(() => {
+  const [visibleCourseIds, setVisibleCourseIds] = useState<Set<number>>(() => {
     if (typeof window === "undefined") return new Set();
 
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as string[];
+        const parsed = JSON.parse(stored) as number[];
         return new Set(parsed);
       }
     } catch (error) {
@@ -140,7 +141,7 @@ export function Sidebar({
   }, [visibleCourseIds, onVisibleCourseIdsChange]);
 
   const handleCourseVisibilityChange = useCallback(
-    (courseId: string, visible: boolean) => {
+    (courseId: number, visible: boolean) => {
       setVisibleCourseIds((prev) => {
         const next = new Set(prev);
         if (visible) {
@@ -165,16 +166,16 @@ export function Sidebar({
 
   // Convert coaching slots to sessions for calendar
   const slotSessions: Session[] = useMemo(() => {
+    if (!currentUser) return [];
     return coachingSlots
-      .filter((slot) => slot.participants.some((p) => p === currentUser.name))
+      .filter((slot) => slot.participants.some((p) => p.id === currentUser.id))
       .map((slot) => {
-        const course = mockCourses.find((c) => c.id === slot.courseId);
+        const course = courses.find((c) => c.id === slot.courseId);
         return {
           id: slot.id,
           courseId: slot.courseId,
           type: "coaching" as const,
           title: course ? `${course.title} Coaching` : "Coaching",
-          program: course?.program || ["DTI"],
           date: slot.date,
           time: slot.time,
           endTime: slot.endTime,
@@ -187,21 +188,22 @@ export function Sidebar({
           participants: slot.participants.length,
         };
       });
-  }, [coachingSlots, mockCourses]);
+  }, [coachingSlots, courses, currentUser]);
 
   // Get all sessions (unfiltered) for computing available courses
   const allSessionsUnfiltered = useMemo(() => {
-    return [...mockSessions, ...slotSessions];
-  }, [mockSessions, slotSessions]);
+    return [...sessions, ...slotSessions];
+  }, [sessions, slotSessions]);
 
-  // Get all courses from mockData filtered by current user's program
+  // Get all courses filtered by current user's program
   const availableCourses = useMemo(() => {
-    return mockCourses
+    if (!currentUser) return [];
+    return courses
       .filter((course) => course.program.includes(currentUser.program))
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [mockCourses]);
+  }, [courses, currentUser]);
 
-  // Combine all sessions (mock sessions + coaching slots + additional sessions)
+  // Combine all sessions (sessions + coaching slots)
   // Filter by visible courses
   const combinedSessions = useMemo(() => {
     return allSessionsUnfiltered.filter(
@@ -266,7 +268,7 @@ export function Sidebar({
   }, []);
 
   const handleSessionClick = useCallback(
-    (sessionId: string) => {
+    (sessionId: number) => {
       // Find session in combined sessions
       const session = combinedSessions.find((s) => s.id === sessionId);
       if (session) {

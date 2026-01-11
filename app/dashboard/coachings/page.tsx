@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { type CoachingSlot, currentUser } from "@/shared/data/mockData";
+import { currentUser } from "@/shared/data/mockData";
+import { type CoachingSlot, CreateCoachingSlotRequest, UpdateCoachingSlotRequest } from "@/shared/lib/api-types";
+
 import { redirect } from "next/navigation";
 import { useCoachingSlots } from "@/features/coaching/hooks/useCoachingSlots";
 import { useUsers } from "@/features/users/hooks/useUsers";
@@ -13,6 +15,7 @@ import { CreateCoachingSlotDialog } from "@/features/coaching/components/CreateC
 import { DeleteConfirmationDialog } from "@/shared/components/ui/DeleteConfirmationDialog";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { CreateCoachingSlotFormData } from "@/features/coaching/types";
 
 export default function CoachingsPage() {
   if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
@@ -27,9 +30,9 @@ export default function CoachingsPage() {
     deleteSlot: deleteCoachingSlot,
   } = useCoachingSlots();
   const { users: allUsers, loading: usersLoading } = useUsers();
-  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const { courses, loading: coursesLoading } = useCourses();
 
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [coachingSlotSearch, setCoachingSlotSearch] = useState("");
   const [isCreateCoachingOpen, setIsCreateCoachingOpen] = useState(false);
   const [editingCoachingSlot, setEditingCoachingSlot] =
@@ -40,7 +43,7 @@ export default function CoachingsPage() {
   // Filtering logic
   const { filteredSlots: coachingSlots } = useDashboardCoachingSlotFilters({
     allSlots: allCoachingSlots,
-    courses: mockCourses,
+    courses,
     selectedCourseId,
     searchQuery: coachingSlotSearch,
   });
@@ -48,9 +51,9 @@ export default function CoachingsPage() {
   // Operations
   const { handleSaveCoaching, handleDeleteCoaching } =
     useDashboardCoachingSlotOperations({
-      createSlot: createCoachingSlot,
-      updateSlot: updateCoachingSlot,
-      deleteSlot: deleteCoachingSlot,
+      createSlot: (data: CreateCoachingSlotRequest) => createCoachingSlot(data),
+      updateSlot: (id: number, data: UpdateCoachingSlotRequest) => updateCoachingSlot(id, data),
+      deleteSlot: (id: number) => deleteCoachingSlot(id),
     });
 
   const handleOpenEditCoaching = (slot: CoachingSlot) => {
@@ -58,17 +61,7 @@ export default function CoachingsPage() {
     setIsCreateCoachingOpen(true);
   };
 
-  const handleSaveCoachingWrapper = async (data: {
-    courseId: string;
-    date: Date;
-    time: string;
-    endTime: string;
-    location: string;
-    locationType: "online" | "on-campus";
-    maxParticipants: number;
-    participants: string[];
-    description?: string;
-  }) => {
+  const handleSaveCoachingWrapper = async (data: CreateCoachingSlotFormData) => {
     try {
       await handleSaveCoaching(editingCoachingSlot, data);
       setEditingCoachingSlot(null);
@@ -76,7 +69,7 @@ export default function CoachingsPage() {
     } catch (error) {}
   };
 
-  const handleDeleteCoachingWrapper = async (slotId: string) => {
+  const handleDeleteCoachingWrapper = async (slotId: number) => {
     try {
       await handleDeleteCoaching(slotId);
       setCoachingSlotToDelete(null);
@@ -87,7 +80,7 @@ export default function CoachingsPage() {
     <>
       <CoachingSlotsTab
         slots={coachingSlots}
-        courses={mockCourses}
+        courses={courses}
         selectedCourseId={selectedCourseId}
         onCourseChange={setSelectedCourseId}
         onEdit={handleOpenEditCoaching}
@@ -111,7 +104,7 @@ export default function CoachingsPage() {
             setEditingCoachingSlot(null);
           }
         }}
-        courses={mockCourses}
+        courses={courses}
         users={allUsers}
         onSubmit={handleSaveCoachingWrapper}
         mode={editingCoachingSlot ? "edit" : "create"}

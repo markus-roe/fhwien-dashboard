@@ -4,7 +4,7 @@ import { useState } from "react";
 import { format, isToday, isPast, isFuture, startOfDay } from "date-fns";
 import { de } from "date-fns/locale";
 import { Video, MapPin, Calendar, ChevronDown, ChevronUp } from "lucide-react";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 
 interface CalendarListViewProps {
   sessions: Session[];

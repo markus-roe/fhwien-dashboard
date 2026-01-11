@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import type {
-  GetCoursesQuery,
   CoursesResponse,
+  Course,
+  Program,
   ApiError,
 } from "@/shared/lib/api-types";
 
@@ -35,12 +36,11 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const program = searchParams.get("program");
 
-    const where: any = {};
+    const where: { programs?: { has: Program } } = {};
 
     if (program) {
-      // Prisma supports checking if array contains value
       where.programs = {
-        has: program.toUpperCase(),
+        has: program as Program,
       };
     }
 
@@ -49,10 +49,10 @@ export async function GET(
       orderBy: { title: "asc" },
     });
 
-    const courses = dbCourses.map((c) => ({
-      id: c.code, // We use 'code' field as the ID for API compatibility (e.g. "ds", "hti")
+    const courses: Course[] = dbCourses.map((c) => ({
+      id: c.id,
       title: c.title,
-      program: c.programs as any[],
+      program: c.programs,
     }));
 
     return NextResponse.json<CoursesResponse>(courses);
@@ -64,4 +64,3 @@ export async function GET(
     );
   }
 }
-

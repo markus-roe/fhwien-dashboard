@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import type { User, Program, UserRole } from "@/shared/data/mockData";
+import type { User, Program, UserRole } from "@/shared/lib/api-types";
 import { Button } from "@/shared/components/ui/Button";
 import { Select } from "@/shared/components/ui/Select";
 import { Input } from "@/shared/components/ui/Input";

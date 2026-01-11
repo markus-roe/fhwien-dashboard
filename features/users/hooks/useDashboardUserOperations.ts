@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { User } from "@/shared/data/mockData";
+import type { User } from "@/shared/lib/api-types";
 import type { CreateStudentFormData } from "@/features/users/types";
 
 type UseDashboardUserOperationsProps = {

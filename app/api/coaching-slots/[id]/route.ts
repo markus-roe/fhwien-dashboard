@@ -3,14 +3,49 @@ import { prisma } from "@/shared/lib/prisma";
 import { calculateDuration } from "@/shared/lib/dashboardUtils";
 import type {
   UpdateCoachingSlotRequest,
-  CoachingSlotResponse,
+  CoachingSlot,
+  User,
   ApiError,
   ApiSuccess,
 } from "@/shared/lib/api-types";
-import { mockUsers } from "@/shared/data/mockData";
 
-// Helper
-function mapDbSlotToApiSlot(dbSlot: any): any {
+// Helper to map DB user to API user
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
+  return {
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
+}
+
+// Helper to map DB coaching slot to API format
+function mapDbSlotToApiSlot(dbSlot: {
+  id: number;
+  startDateTime: Date;
+  endDateTime: Date;
+  maxParticipants: number;
+  description: string | null;
+  createdAt: Date;
+  course: { id: number };
+  participants: Array<{
+    id: number;
+    name: string;
+    initials: string;
+    email: string;
+    program: string | null;
+    role: string | null;
+  }>;
+}): CoachingSlot {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
@@ -24,15 +59,15 @@ function mapDbSlotToApiSlot(dbSlot: any): any {
   });
 
   return {
-    id: dbSlot.id.toString(),
-    courseId: dbSlot.course.code,
+    id: dbSlot.id,
+    courseId: dbSlot.course.id,
     date: start,
     time: time,
     endTime: endTime,
     duration: calculateDuration(time, endTime),
     maxParticipants: dbSlot.maxParticipants,
-    participants: dbSlot.participants.map((p: any) => p.name),
-    description: dbSlot.description,
+    participants: dbSlot.participants.map(mapDbUserToApiUser),
+    description: dbSlot.description ?? undefined,
     createdAt: dbSlot.createdAt,
   };
 }
@@ -67,7 +102,7 @@ function mapDbSlotToApiSlot(dbSlot: any): any {
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
-): Promise<NextResponse<CoachingSlotResponse | ApiError>> {
+): Promise<NextResponse<CoachingSlot | ApiError>> {
   try {
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
@@ -89,7 +124,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json<CoachingSlotResponse>(mapDbSlotToApiSlot(slot));
+    return NextResponse.json<CoachingSlot>(mapDbSlotToApiSlot(slot));
   } catch (error) {
     console.error("Error fetching coaching slot:", error);
     return NextResponse.json<ApiError>(
@@ -141,7 +176,7 @@ export async function GET(
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
-): Promise<NextResponse<CoachingSlotResponse | ApiError>> {
+): Promise<NextResponse<CoachingSlot | ApiError>> {
   try {
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
@@ -171,13 +206,20 @@ export async function PUT(
       description,
     } = body;
 
-    const data: any = {};
+    interface UpdateData {
+      maxParticipants?: number;
+      description?: string;
+      courseId?: number;
+      startDateTime?: Date;
+      endDateTime?: Date;
+      participants?: { set: Array<{ id: number }> };
+    }
+    const data: UpdateData = {};
     if (maxParticipants !== undefined) data.maxParticipants = maxParticipants;
     if (description !== undefined) data.description = description;
 
     if (courseId) {
-      const course = await prisma.course.findUnique({ where: { code: courseId } });
-      if (course) data.courseId = course.id;
+      data.courseId = courseId;
     }
 
     // Handle date/time
@@ -209,15 +251,11 @@ export async function PUT(
       data.endDateTime = newEnd;
     }
 
-    // Handle participants update if provided
+    // Handle participants update if provided (array of user IDs)
     if (participants !== undefined) {
-      const matches = [];
-      for (const pId of participants) {
-        const idVal = parseInt(pId, 10);
-        if (!isNaN(idVal)) {
-          matches.push({ id: idVal });
-        }
-      }
+      const matches = participants
+        .filter((id) => typeof id === "number" && !isNaN(id))
+        .map((id) => ({ id }));
       data.participants = { set: matches };
     }
 
@@ -230,7 +268,7 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json<CoachingSlotResponse>(mapDbSlotToApiSlot(updatedSlot));
+    return NextResponse.json<CoachingSlot>(mapDbSlotToApiSlot(updatedSlot));
   } catch (error) {
     console.error("Error updating coaching slot:", error);
     return NextResponse.json<ApiError>(
@@ -282,8 +320,8 @@ export async function DELETE(
     });
 
     return NextResponse.json<ApiSuccess>({ success: true });
-  } catch (error: any) {
-    if (error.code === "P2025") {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
       return NextResponse.json<ApiError>(
         { error: "Coaching slot not found" },
         { status: 404 }

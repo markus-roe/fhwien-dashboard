@@ -4,14 +4,34 @@ import { calculateDuration } from "@/shared/lib/dashboardUtils";
 import type {
   UpdateSessionRequest,
   SessionResponse,
+  Session,
+  UserRef,
+  LocationType,
+  SessionType,
+  Attendance,
   ApiError,
   ApiSuccess,
 } from "@/shared/lib/api-types";
-import type { Session } from "@/shared/data/mockData";
 
-// Reuse map function via copy or shared util if possible, but for now copying inline to avoid file jumps for user.
-// (Better practice: extract to shared util, but user asked for these routes specifically)
-function mapDbSessionToApiSession(dbSession: any): Session {
+// Helper to map DB session to API session
+function mapDbSessionToApiSession(dbSession: {
+  id: number;
+  type: SessionType;
+  title: string;
+  startDateTime: Date;
+  endDateTime: Date;
+  location: string;
+  locationType: LocationType;
+  attendance: Attendance;
+  objectives: string[];
+  isLive: boolean | null;
+  groupId: number | null;
+  course: { id: number };
+  lecturer: {
+    name: string;
+    initials: string;
+  } | null;
+}): Session {
   const start = new Date(dbSession.startDateTime);
   const end = new Date(dbSession.endDateTime);
 
@@ -24,9 +44,16 @@ function mapDbSessionToApiSession(dbSession: any): Session {
     minute: "2-digit",
   });
 
+  const lecturer: UserRef | undefined = dbSession.lecturer
+    ? {
+        name: dbSession.lecturer.name,
+        initials: dbSession.lecturer.initials,
+      }
+    : undefined;
+
   return {
-    id: dbSession.id.toString(),
-    courseId: dbSession.course.code,
+    id: dbSession.id,
+    courseId: dbSession.course.id,
     type: dbSession.type,
     title: dbSession.title,
     date: start,
@@ -38,13 +65,8 @@ function mapDbSessionToApiSession(dbSession: any): Session {
     attendance: dbSession.attendance,
     objectives: dbSession.objectives,
     materials: [],
-    groupId: dbSession.groupId?.toString(),
-    lecturer: dbSession.lecturer
-      ? {
-        name: dbSession.lecturer.name,
-        initials: dbSession.lecturer.initials,
-      }
-      : undefined,
+    groupId: dbSession.groupId || undefined,
+    lecturer,
     isLive: dbSession.isLive || false,
   };
 }
@@ -162,7 +184,6 @@ export async function PUT(
 
     const body = (await request.json()) as UpdateSessionRequest;
 
-    // We need current session to update times correctly if only one is provided
     const existingSession = await prisma.session.findUnique({
       where: { id: sessionId },
     });
@@ -185,28 +206,35 @@ export async function PUT(
       locationType,
       attendance,
       objectives,
-      materials,
       groupId,
     } = body;
 
-    const data: any = {};
+    interface UpdateData {
+      title?: string;
+      type?: SessionType;
+      location?: string;
+      locationType?: LocationType;
+      attendance?: Attendance;
+      objectives?: string[];
+      groupId?: number;
+      courseId?: number;
+      startDateTime?: Date;
+      endDateTime?: Date;
+    }
+    const data: UpdateData = {};
     if (title) data.title = title;
-    if (type) data.type = type;
+    if (type) data.type = type as SessionType;
     if (location) data.location = location;
-    if (locationType) data.locationType = locationType;
-    if (attendance) data.attendance = attendance;
+    if (locationType) data.locationType = locationType as LocationType;
+    if (attendance) data.attendance = attendance as Attendance;
     if (objectives) data.objectives = objectives;
-    if (groupId) data.groupId = parseInt(groupId);
+    if (groupId) data.groupId = groupId;
 
     if (courseId) {
-      const course = await prisma.course.findUnique({ where: { code: courseId } });
-      if (course) data.courseId = course.id;
+      data.courseId = courseId;
     }
 
     // Handle date/time update
-    // Logic: if date changes, update both start/end. If time changes, update start/end time components.
-    // This is complex because we split them.
-
     let newStart = new Date(existingSession.startDateTime);
     let newEnd = new Date(existingSession.endDateTime);
     let dateChanged = false;
@@ -293,8 +321,8 @@ export async function DELETE(
     });
 
     return NextResponse.json<ApiSuccess>({ success: true });
-  } catch (error: any) {
-    if (error.code === "P2025") {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
       return NextResponse.json<ApiError>(
         { error: "Session not found" },
         { status: 404 }

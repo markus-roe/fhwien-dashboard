@@ -3,7 +3,7 @@
 import { Clock, Video, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/shared/components/ui/Button";
 import { Badge } from "@/shared/components/ui/Badge";
-import { LocationType } from "@/shared/data/mockData";
+import { LocationType } from "@/shared/lib/api-types";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/Card";

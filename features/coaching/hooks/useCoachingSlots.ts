@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { coachingSlotsApi } from "@/shared/lib/api";
-import type { CoachingSlot } from "@/shared/data/mockData";
+import type { CoachingSlot } from "@/shared/lib/api-types";
 
-export function useCoachingSlots(courseId?: string) {
+export function useCoachingSlots() {
   const queryClient = useQueryClient();
-  const queryKey = ["coaching-slots", courseId];
+  const queryKey = ["coaching-slots"];
 
   const {
     data: slots = [],
@@ -13,7 +13,7 @@ export function useCoachingSlots(courseId?: string) {
     refetch,
   } = useQuery<CoachingSlot[]>({
     queryKey,
-    queryFn: () => coachingSlotsApi.getAll(courseId ? { courseId } : undefined),
+    queryFn: () => coachingSlotsApi.getAll(),
   });
 
   const createMutation = useMutation({
@@ -31,7 +31,7 @@ export function useCoachingSlots(courseId?: string) {
       id,
       data,
     }: {
-      id: string;
+      id: number;
       data: Parameters<typeof coachingSlotsApi.update>[1];
     }) => coachingSlotsApi.update(id, data),
     onSuccess: (updatedSlot) => {
@@ -48,7 +48,7 @@ export function useCoachingSlots(courseId?: string) {
     },
   });
 
-  const deleteSlot = async (id: string) => {
+  const deleteSlot = async (id: number) => {
     await deleteMutation.mutateAsync(id);
     queryClient.setQueryData<CoachingSlot[]>(queryKey, (old = []) =>
       old.filter((s) => s.id !== id)
@@ -56,7 +56,8 @@ export function useCoachingSlots(courseId?: string) {
   };
 
   const bookMutation = useMutation({
-    mutationFn: coachingSlotsApi.book,
+    mutationFn: ({ slotId, userId }: { slotId: number; userId: number }) =>
+      coachingSlotsApi.book(slotId, userId),
     onSuccess: (updatedSlot) => {
       queryClient.setQueryData<CoachingSlot[]>(queryKey, (old = []) =>
         old.map((s) => (s.id === updatedSlot.id ? updatedSlot : s))
@@ -65,7 +66,8 @@ export function useCoachingSlots(courseId?: string) {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: coachingSlotsApi.cancel,
+    mutationFn: ({ slotId, userId }: { slotId: number; userId: number }) =>
+      coachingSlotsApi.cancel(slotId, userId),
     onSuccess: (updatedSlot) => {
       queryClient.setQueryData<CoachingSlot[]>(queryKey, (old = []) =>
         old.map((s) => (s.id === updatedSlot.id ? updatedSlot : s))
@@ -80,12 +82,14 @@ export function useCoachingSlots(courseId?: string) {
       error instanceof Error ? error.message : error ? String(error) : null,
     createSlot: createMutation.mutateAsync,
     updateSlot: (
-      id: string,
+      id: number,
       slotData: Parameters<typeof coachingSlotsApi.update>[1]
     ) => updateMutation.mutateAsync({ id, data: slotData }),
     deleteSlot,
-    bookSlot: bookMutation.mutateAsync,
-    cancelBooking: cancelMutation.mutateAsync,
+    bookSlot: (slotId: number, userId: number) =>
+      bookMutation.mutateAsync({ slotId, userId }),
+    cancelBooking: (slotId: number, userId: number) =>
+      cancelMutation.mutateAsync({ slotId, userId }),
     refetch,
   };
 }

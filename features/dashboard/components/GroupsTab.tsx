@@ -9,17 +9,17 @@ import {
   LoadingSkeleton,
   LoadingSkeletonGroupCard,
 } from "@/shared/components/ui/LoadingSkeleton";
-import type { Group, Course, User } from "@/shared/data/mockData";
+import type { Group, Course, User } from "@/shared/lib/api-types";
 
 type GroupsTabProps = {
   groups: Group[];
   courses: Course[];
   users: User[];
-  selectedCourseId: string | null;
-  onCourseChange: (courseId: string | null) => void;
-  onDelete: (groupId: string) => void;
-  onAssignUser: (groupId: string, userId: string) => void;
-  onRemoveUser: (groupId: string, member: string) => void;
+  selectedCourseId: number | null;
+  onCourseChange: (courseId: number | null) => void;
+  onDelete: (groupId: number) => void;
+  onAssignUser: (groupId: number, userId: number) => void;
+  onRemoveUser: (groupId: number, memberId: number) => void;
   onCreate: () => void;
   search: string;
   onSearchChange: (search: string) => void;
@@ -42,10 +42,11 @@ export function GroupsTab({
 }: GroupsTabProps) {
   // Group groups by courseId
   const groupsByCourse = groups.reduce((acc, group) => {
-    if (!acc[group.courseId]) {
-      acc[group.courseId] = [];
+    const key = group.courseId.toString();
+    if (!acc[key]) {
+      acc[key] = [];
     }
-    acc[group.courseId].push(group);
+    acc[key].push(group);
     return acc;
   }, {} as Record<string, Group[]>);
 
@@ -54,7 +55,7 @@ export function GroupsTab({
     .map((course) => course.id)
     .filter(
       (courseId) =>
-        groupsByCourse[courseId] && groupsByCourse[courseId].length > 0
+        groupsByCourse[courseId.toString()] && groupsByCourse[courseId.toString()].length > 0
     );
 
   return (
@@ -110,7 +111,7 @@ export function GroupsTab({
             <div className="space-y-4">
               {courseIdsWithGroups.map((courseId, courseIndex) => {
                 const course = courses.find((c) => c.id === courseId);
-                const courseGroupsList = groupsByCourse[courseId];
+                const courseGroupsList = groupsByCourse[courseId.toString()];
 
                 return (
                   <div key={courseId}>

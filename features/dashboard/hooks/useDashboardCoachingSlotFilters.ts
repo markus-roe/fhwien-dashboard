@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import type { CoachingSlot, Course } from "@/shared/data/mockData";
+import type { CoachingSlot, Course } from "@/shared/lib/api-types";
 
 type UseDashboardCoachingSlotFiltersProps = {
   allSlots: CoachingSlot[];
   courses: Course[];
-  selectedCourseId: string | null;
+  selectedCourseId: number | null;
   searchQuery: string;
 };
 
@@ -28,7 +28,7 @@ export function useDashboardCoachingSlotFilters({
         return (
           slot.description?.toLowerCase().includes(query) ||
           course?.title.toLowerCase().includes(query) ||
-          slot.participants.some((p) => p.toLowerCase().includes(query)) ||
+          slot.participants.some((p) => p.name.toLowerCase().includes(query)) ||
           false
         );
       });

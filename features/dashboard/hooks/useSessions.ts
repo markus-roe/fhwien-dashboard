@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import {
   sortSessionsByDateTime,
   isSessionPast,

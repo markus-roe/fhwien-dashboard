@@ -4,17 +4,15 @@ import { useMemo } from "react";
 import { format, isToday, isTomorrow, isYesterday } from "date-fns";
 import { de } from "date-fns/locale";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/Card";
-import {
-  mockSessions,
-  mockCoachingSlots,
-  mockCourses,
-  currentUser,
-} from "@/shared/data/mockData";
-import type { Session } from "@/shared/data/mockData";
+import { useCoachingSlots } from "@/features/coaching/hooks/useCoachingSlots";
+import { useSessions } from "@/features/sessions/hooks/useSessions";
+import { useCourses } from "@/shared/hooks/useCourses";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
+import type { Session, LocationType } from "@/shared/lib/api-types";
 import { LoadingSkeletonNextUpList } from "@/shared/components/ui/LoadingSkeleton";
 
 interface NextUpListProps {
-  onSessionClick?: (sessionId: string) => void;
+  onSessionClick?: (sessionId: number) => void;
   title: string;
   emptyMessage?: string;
   loading?: boolean;
@@ -26,39 +24,44 @@ export const NextUpList = ({
   emptyMessage = "Keine Sessions geplant.",
   loading = false,
 }: NextUpListProps) => {
-  // Convert coaching slots to sessions (only if no sessions provided)
+  const { user: currentUser } = useCurrentUser();
+  const { slots: coachingSlots, loading: coachingSlotsLoading } = useCoachingSlots();
+  const { sessions, loading: sessionsLoading } = useSessions();
+  const { courses, loading: coursesLoading } = useCourses();
+
+  // Convert coaching slots to sessions
   const coachingSlotSessions: Session[] = useMemo(() => {
-    return mockCoachingSlots
-      .filter((slot) => slot.participants.includes(currentUser.name))
+    if (!currentUser) return [];
+    return coachingSlots
+      .filter((slot) => slot.participants.some((participant) => participant.id === currentUser.id))
       .map((slot) => {
-        const course = mockCourses.find((c) => c.id === slot.courseId);
+        const course = courses.find((c) => c.id === slot.courseId);
         return {
           id: slot.id,
           courseId: slot.courseId,
           type: "coaching" as const,
           title: course ? `${course.title} Coaching` : "Coaching",
-          program: course?.program || "DTI",
           date: slot.date,
           time: slot.time,
           endTime: slot.endTime,
           duration: slot.duration,
           location: "Online",
-          locationType: "online",
+          locationType: "online" as LocationType,
           attendance: "optional" as const,
           objectives: [],
           materials: [],
           participants: slot.participants.length,
         };
       });
-  }, []);
+  }, [coachingSlots, courses, currentUser]);
 
-  // Combine all sessions (mock sessions + coaching slots) - only if no sessions provided
+  // Combine all sessions (sessions + coaching slots)
   const allSessions = useMemo(() => {
-    return [...mockSessions, ...coachingSlotSessions];
-  }, [coachingSlotSessions]);
+    return [...sessions, ...coachingSlotSessions];
+  }, [sessions, coachingSlotSessions]);
 
   // Get upcoming sessions for the next 7 days
-  const sessions = useMemo(() => {
+  const upcomingSessions = useMemo(() => {
     const now = new Date();
     const sevenDaysFromNow = new Date(now);
     sevenDaysFromNow.setDate(now.getDate() + 7);
@@ -137,17 +140,17 @@ export const NextUpList = ({
       });
   }, [allSessions]);
   // Group sessions by day
-  const groupedByDay = sessions.reduce((acc, session) => {
-    const dayKey = format(session.date, "yyyy-MM-dd");
+  const groupedByDay = upcomingSessions.reduce((acc, session) => {
+    const dayKey = format(new Date(session.date), "yyyy-MM-dd");
     if (!acc[dayKey]) {
       acc[dayKey] = {
-        date: session.date,
+        date: new Date(session.date),
         sessions: [],
       };
     }
     acc[dayKey].sessions.push(session);
     return acc;
-  }, {} as Record<string, { date: Date; sessions: typeof sessions }>);
+  }, {} as Record<string, { date: Date; sessions: typeof upcomingSessions }>);
 
   // Sort days chronologically
   const sortedDays = Object.values(groupedByDay).sort(
@@ -170,7 +173,9 @@ export const NextUpList = ({
     return format(sessionDate, "EEEE, dd.MM", { locale: de });
   };
 
-  if (loading) {
+  const isLoading = loading || sessionsLoading || coachingSlotsLoading || coursesLoading;
+
+  if (isLoading) {
     return (
       <Card className="shadow-sm">
         <CardHeader className="!pb-0 !px-5">
@@ -228,7 +233,7 @@ export const NextUpList = ({
                       } ${session.isPast ? "opacity-60" : ""}`}
                     >
                       <div className="w-8 text-[10px] font-medium text-zinc-400 pt-1 text-right tabular-nums">
-                        {format(session.date, "dd.MM", { locale: de })}
+                        {format(new Date(session.date), "dd.MM", { locale: de })}
                         <br />
                         <span className="text-[9px]">{session.time}</span>
                       </div>

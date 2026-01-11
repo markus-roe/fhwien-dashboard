@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import type { CoachingSlot, Course } from "@/shared/data/mockData";
+import type { CoachingSlot, Course } from "@/shared/lib/api-types";
 import { CoachingSlotCard } from "./CoachingSlotCard";
 import { groupSlotsByDay } from "@/features/coaching/utils/coachingSlotUtils";
 
@@ -7,9 +7,9 @@ type CoachingSlotsListProps = {
   upcomingSlots: CoachingSlot[];
   pastSlots: CoachingSlot[];
   courses: Course[];
-  onBook: (slotId: string) => void;
-  onCancelBooking: (slotId: string) => void;
-  onDelete: (slotId: string) => void;
+  onBook: (slotId: number) => void;
+  onCancelBooking: (slotId: number) => void;
+  onDelete: (slotId: number) => void;
   showPastSlots?: boolean;
   onTogglePastSlots?: () => void;
   emptyMessage?: {

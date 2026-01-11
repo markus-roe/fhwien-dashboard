@@ -11,12 +11,11 @@ import {
 } from "date-fns";
 import { de } from "date-fns/locale";
 import { Video, MapPin, Calendar, ChevronDown, ChevronUp } from "lucide-react";
-import { SessionCard } from "./SessionCard";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 
 interface ListViewProps {
   sessions: Session[];
-  onSessionClick?: (sessionId: string) => void;
+  onSessionClick?: (sessionId: number) => void;
 }
 
 export const ListView = ({ sessions, onSessionClick }: ListViewProps) => {

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { currentUserApi } from "@/shared/lib/api";
-import type { User } from "@/shared/data/mockData";
+import type { User } from "@/shared/lib/api-types";
 
 export function useCurrentUser() {
     const {

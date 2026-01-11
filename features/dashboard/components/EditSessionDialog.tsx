@@ -10,9 +10,8 @@ import { Input, Textarea } from "@/shared/components/ui/Input";
 import { Select } from "@/shared/components/ui/Select";
 import { Button } from "@/shared/components/ui/Button";
 import { DateTimePickerSection } from "@/shared/components/ui/DateTimePickerSection";
-import { mockCourses, type LocationType } from "@/shared/data/mockData";
+import type { LocationType, Course } from "@/shared/lib/api-types";
 import { format } from "date-fns";
-import { de } from "date-fns/locale";
 
 import type { EditSessionFormState } from "@/features/dashboard/types";
 
@@ -22,6 +21,7 @@ type EditSessionDialogProps = {
   onSave: () => void;
   onClose: () => void;
   mode: "edit" | "create";
+  courses: Course[];
 };
 
 export function EditSessionDialog({
@@ -30,6 +30,7 @@ export function EditSessionDialog({
   onSave,
   onClose,
   mode,
+  courses,
 }: EditSessionDialogProps) {
   const isFormValid =
     formState.courseId &&
@@ -67,16 +68,16 @@ export function EditSessionDialog({
                   Lehrveranstaltung
                 </label>
                 <Select
-                  options={mockCourses.map((course) => ({
-                    value: course.id,
+                  options={courses.map((course) => ({
+                    value: course.id.toString(),
                     label: course.title,
                   }))}
-                  value={formState.courseId || ""}
+                  value={formState.courseId?.toString() || ""}
                   onChange={(value) => {
-                    const course = mockCourses.find((c) => c.id === value);
+                    const course = courses.find((c) => c.id === parseInt(value));
                     onFormStateChange({
                       ...formState,
-                      courseId: value || null,
+                      courseId: parseInt(value) || null,
                       title: course?.title
                         ? course?.title + " LV"
                         : formState.title + " LV",
@@ -180,7 +181,7 @@ export function EditSessionDialog({
                   </label>
                   <Select
                     options={[
-                      { value: "on-campus", label: "Vor Ort" },
+                      { value: "on_campus", label: "Vor Ort" },
                       { value: "online", label: "Online" },
                     ]}
                     value={formState.locationType}

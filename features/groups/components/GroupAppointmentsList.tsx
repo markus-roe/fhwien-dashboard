@@ -2,7 +2,7 @@ import { Calendar as CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { isAfter, startOfToday } from "date-fns";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import { Button } from "@/shared/components/ui/Button";
 
 type GroupAppointmentsListProps = {
@@ -40,7 +40,7 @@ export function GroupAppointmentsList({
       ) : (
         <div className="space-y-1">
           {appointments
-            .sort((a, b) => a.date.getTime() - b.date.getTime())
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
             .map((appointment) => (
               <div
                 key={appointment.id}

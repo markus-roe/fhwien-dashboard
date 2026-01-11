@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import type { Session, Course } from "@/shared/data/mockData";
+import type { Session, Course } from "@/shared/lib/api-types";
 
 type UseDashboardSessionFiltersProps = {
   allSessions: Session[];
   courses: Course[];
-  selectedCourseId: string | null;
+  selectedCourseId: number | null;
   searchQuery: string;
 };
 

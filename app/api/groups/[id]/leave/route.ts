@@ -1,17 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
-import type { GroupResponse, ApiError } from "@/shared/lib/api-types";
-import { currentUser } from "@/shared/data/mockData"; // Fallback current user
+import type {
+  GroupResponse,
+  Group,
+  User,
+  ApiError,
+} from "@/shared/lib/api-types";
 
-// Helper
-function mapDbGroupToApiGroup(dbGroup: any): any {
+// Helper to map DB user to API user
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
   return {
-    id: dbGroup.id.toString(),
-    courseId: dbGroup.course.code,
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
+}
+
+// Helper to map DB group to API format
+function mapDbGroupToApiGroup(dbGroup: {
+  id: number;
+  name: string;
+  description: string | null;
+  maxMembers: number | null;
+  createdAt: Date;
+  course: { id: number };
+  members: Array<{
+    id: number;
+    name: string;
+    initials: string;
+    email: string;
+    program: string | null;
+    role: string | null;
+  }>;
+}): Group {
+  return {
+    id: dbGroup.id,
+    courseId: dbGroup.course.id,
     name: dbGroup.name,
-    description: dbGroup.description,
-    maxMembers: dbGroup.maxMembers,
-    members: dbGroup.members.map((m: any) => m.name),
+    description: dbGroup.description ?? undefined,
+    maxMembers: dbGroup.maxMembers ?? undefined,
+    members: dbGroup.members.map(mapDbUserToApiUser),
     createdAt: dbGroup.createdAt,
   };
 }
@@ -29,6 +67,16 @@ function mapDbGroupToApiGroup(dbGroup: any): any {
  *         schema:
  *           type: string
  *         description: Group ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: number
+ *                 description: User ID to leave the group
  *     responses:
  *       200:
  *         description: Successfully left the group
@@ -53,6 +101,16 @@ export async function POST(
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
+    const body = await request.json();
+    const userId = body.userId as number;
+
+    if (!userId || isNaN(userId)) {
+      return NextResponse.json<ApiError>(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
     const group = await prisma.group.findUnique({
       where: { id: groupId },
       include: { members: true },
@@ -65,23 +123,12 @@ export async function POST(
       );
     }
 
-    // Get real current user
-    const dbUser = await prisma.user.findUnique({ where: { email: currentUser.email } }) || await prisma.user.findFirst();
-
-    if (!dbUser) {
-      return NextResponse.json<ApiError>(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-
     // Remove user from members
     const updatedGroup = await prisma.group.update({
       where: { id: groupId },
       data: {
         members: {
-          disconnect: { id: dbUser.id },
+          disconnect: { id: userId },
         },
       },
       include: {

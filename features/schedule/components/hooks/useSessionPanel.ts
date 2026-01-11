@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 
 export function useSessionPanel() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);

@@ -9,13 +9,13 @@ import { DataTable } from "./DataTable";
 import { SessionRow } from "./SessionRow";
 import { SessionCard } from "./SessionCard";
 import { useSessions } from "../hooks/useSessions";
-import type { Session, Course } from "@/shared/data/mockData";
+import type { Session, Course } from "@/shared/lib/api-types";
 
 type SessionsTabProps = {
   sessions: Session[];
   courses: Course[];
-  selectedCourseId: string | null;
-  onCourseChange: (courseId: string | null) => void;
+  selectedCourseId: number | null;
+  onCourseChange: (courseId: number | null) => void;
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
   onCreate: () => void;

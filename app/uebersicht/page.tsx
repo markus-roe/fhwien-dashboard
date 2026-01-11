@@ -27,14 +27,14 @@ export default function UebersichtPage() {
 
     // Get user's groups
     const userGroups = currentUser
-        ? groups.filter((group) => group.members.includes(currentUser.name))
+        ? groups.filter((group) => group.members.some((member) => member.id === currentUser.id))
         : [];
 
     // Get upcoming coaching slots for the current user
     const upcomingCoachings = currentUser
         ? coachingSlots
-            .filter((slot) => slot.date > now && slot.participants.includes(currentUser.name))
-            .sort((a, b) => a.date.getTime() - b.date.getTime())
+            .filter((slot) => new Date(slot.date) > now && slot.participants.some((participant) => participant.id === currentUser.id))
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         : [];
 
     const formatDate = (date: Date) => {
@@ -45,7 +45,7 @@ export default function UebersichtPage() {
         }).format(date);
     };
 
-    const getCourseById = (courseId: string) => {
+    const getCourseById = (courseId: number) => {
         return courses.find((course) => course.id === courseId);
     };
 
@@ -216,7 +216,7 @@ export default function UebersichtPage() {
                                                             <div className="flex items-center gap-1.5 text-xs text-zinc-600">
                                                                 <Clock className="w-3.5 h-3.5" />
                                                                 <span>
-                                                                    {formatDate(coaching.date)} • {coaching.time}
+                                                                    {formatDate(new Date(coaching.date))} • {coaching.time}
                                                                 </span>
                                                             </div>
                                                             {coaching.description && (

@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { sessionsApi } from "@/shared/lib/api";
-import type { Session } from "@/shared/data/mockData";
+import type { Session, UpdateSessionRequest } from "@/shared/lib/api-types";
 
-export function useSessions(courseId?: string) {
+export function useSessions() {
   const queryClient = useQueryClient();
-  const queryKey = ["sessions", courseId];
+  const queryKey = ["sessions"];
 
   const {
     data: sessions = [],
@@ -13,7 +13,7 @@ export function useSessions(courseId?: string) {
     refetch,
   } = useQuery<Session[]>({
     queryKey,
-    queryFn: () => sessionsApi.getAll(courseId ? { courseId } : undefined),
+    queryFn: () => sessionsApi.getAll(),
   });
 
   const createMutation = useMutation({
@@ -27,7 +27,7 @@ export function useSessions(courseId?: string) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof sessionsApi.update>[1] }) =>
+    mutationFn: ({ id, data }: { id: number; data: UpdateSessionRequest }) =>
       sessionsApi.update(id, data),
     onSuccess: (updatedSession) => {
       queryClient.setQueryData<Session[]>(queryKey, (old = []) =>
@@ -43,21 +43,10 @@ export function useSessions(courseId?: string) {
     },
   });
 
-  const deleteSession = async (id: string) => {
-    await deleteMutation.mutateAsync(id);
-    queryClient.setQueryData<Session[]>(queryKey, (old = []) =>
-      old.filter((s) => s.id !== id)
-    );
+  const deleteSession = async (sessionId: number) => {
+    await deleteMutation.mutateAsync(sessionId);
+    queryClient.setQueryData<Session[]>(queryKey, (old = []) => old.filter((s) => s.id !== sessionId));
   };
 
-  return {
-    sessions,
-    loading,
-    error: error instanceof Error ? error.message : error ? String(error) : null,
-    createSession: createMutation.mutateAsync,
-    updateSession: (id: string, sessionData: Parameters<typeof sessionsApi.update>[1]) =>
-      updateMutation.mutateAsync({ id, data: sessionData }),
-    deleteSession,
-    refetch,
-  };
+  return { sessions, loading, error: error instanceof Error ? error.message : error ? String(error) : null, createSession: createMutation.mutateAsync, updateSession: (id: number, sessionData: Parameters<typeof sessionsApi.update>[1]) => updateMutation.mutateAsync({ id, data: sessionData }), deleteSession, refetch };
 }

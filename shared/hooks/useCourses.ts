@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { coursesApi } from "@/shared/lib/api";
-import type { Course, Program } from "@/shared/data/mockData";
+import type { Course, Program } from "@/shared/lib/api-types";
 
 export function useCourses(program?: Program) {
   const {

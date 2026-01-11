@@ -3,13 +3,48 @@ import { prisma } from "@/shared/lib/prisma";
 import { calculateDuration } from "@/shared/lib/dashboardUtils";
 import type {
   CreateCoachingSlotRequest,
-  GetCoachingSlotsQuery,
-  CoachingSlotsResponse,
-  CoachingSlotResponse,
+  CoachingSlot,
+  User,
   ApiError,
 } from "@/shared/lib/api-types";
-// Helper
-function mapDbSlotToApiSlot(dbSlot: any): any {
+
+// Helper to map DB user to API user
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
+  return {
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
+}
+
+// Helper to map DB coaching slot to API format
+function mapDbSlotToApiSlot(dbSlot: {
+  id: number;
+  startDateTime: Date;
+  endDateTime: Date;
+  maxParticipants: number;
+  description: string | null;
+  createdAt: Date;
+  course: { id: number };
+  participants: Array<{
+    id: number;
+    name: string;
+    initials: string;
+    email: string;
+    program: string | null;
+    role: string | null;
+  }>;
+}): CoachingSlot {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
@@ -23,15 +58,15 @@ function mapDbSlotToApiSlot(dbSlot: any): any {
   });
 
   return {
-    id: dbSlot.id.toString(),
-    courseId: dbSlot.course.code,
+    id: dbSlot.id,
+    courseId: dbSlot.course.id,
     date: start,
     time: time,
     endTime: endTime,
     duration: calculateDuration(time, endTime),
     maxParticipants: dbSlot.maxParticipants,
-    participants: dbSlot.participants.map((p: any) => p.name),
-    description: dbSlot.description,
+    participants: dbSlot.participants.map(mapDbUserToApiUser),
+    description: dbSlot.description ?? undefined,
     createdAt: dbSlot.createdAt,
   };
 }
@@ -59,26 +94,9 @@ function mapDbSlotToApiSlot(dbSlot: any): any {
  *                 $ref: '#/components/schemas/CoachingSlotResponse'
  */
 export async function GET(
-  request: NextRequest
-): Promise<NextResponse<CoachingSlotsResponse | ApiError>> {
+): Promise<NextResponse<CoachingSlot[] | ApiError>> {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const courseId = searchParams.get("courseId");
-
-    const where: any = {};
-    if (courseId) {
-      const course = await prisma.course.findUnique({
-        where: { code: courseId },
-      });
-      if (course) {
-        where.courseId = course.id;
-      } else {
-        return NextResponse.json([]);
-      }
-    }
-
     const dbSlots = await prisma.coachingSlot.findMany({
-      where,
       include: {
         course: true,
         participants: true,
@@ -88,7 +106,7 @@ export async function GET(
 
     const slots = dbSlots.map(mapDbSlotToApiSlot);
 
-    return NextResponse.json<CoachingSlotsResponse>(slots);
+    return NextResponse.json<CoachingSlot[]>(slots);
   } catch (error) {
     console.error("Error fetching coaching slots:", error);
     return NextResponse.json<ApiError>(
@@ -126,7 +144,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest
-): Promise<NextResponse<CoachingSlotResponse | ApiError>> {
+): Promise<NextResponse<CoachingSlot | ApiError>> {
   try {
     const body = (await request.json()) as CreateCoachingSlotRequest;
     const {
@@ -135,11 +153,11 @@ export async function POST(
       time,
       endTime,
       maxParticipants,
-      participants = [], // Array of user IDs (strings)
+      participants = [],
       description,
     } = body;
 
-    if (!courseId || !date || !time || !endTime || !maxParticipants) {
+    if (!courseId || !date || !time || !endTime || maxParticipants === undefined) {
       return NextResponse.json<ApiError>(
         { error: "Missing required fields" },
         { status: 400 }
@@ -147,7 +165,7 @@ export async function POST(
     }
 
     const course = await prisma.course.findUnique({
-      where: { code: courseId },
+      where: { id: courseId },
     });
 
     if (!course) {
@@ -168,13 +186,10 @@ export async function POST(
     const endDateTime = new Date(dateObj);
     endDateTime.setHours(endHour, endMinute, 0, 0);
 
-    const matches = [];
-    for (const pId of participants) {
-      const idVal = parseInt(pId, 10);
-      if (!isNaN(idVal)) {
-        matches.push({ id: idVal });
-      }
-    }
+    // Build connect array for participants (expecting user IDs as numbers)
+    const connectParticipants = participants
+      .filter((id) => typeof id === "number" && !isNaN(id))
+      .map((id) => ({ id }));
 
     const dbSlot = await prisma.coachingSlot.create({
       data: {
@@ -183,9 +198,10 @@ export async function POST(
         endDateTime,
         maxParticipants,
         description,
-        participants: matches.length > 0 ? {
-          connect: matches
-        } : undefined
+        participants:
+          connectParticipants.length > 0
+            ? { connect: connectParticipants }
+            : undefined,
       },
       include: {
         course: true,
@@ -195,7 +211,7 @@ export async function POST(
 
     const newSlot = mapDbSlotToApiSlot(dbSlot);
 
-    return NextResponse.json<CoachingSlotResponse>(newSlot, { status: 201 });
+    return NextResponse.json<CoachingSlot>(newSlot, { status: 201 });
   } catch (error) {
     console.error("Error creating coaching slot:", error);
     return NextResponse.json<ApiError>(
@@ -204,4 +220,3 @@ export async function POST(
     );
   }
 }
-

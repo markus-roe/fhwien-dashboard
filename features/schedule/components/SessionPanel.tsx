@@ -1,6 +1,6 @@
 'use client'
 
-import type { Session } from '@/shared/data/mockData'
+import type { Session } from '@/shared/lib/api-types'
 import { SessionPanelHeader } from './SessionPanelHeader'
 import { SessionPanelDetails } from './SessionPanelDetails'
 

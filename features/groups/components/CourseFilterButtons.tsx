@@ -1,12 +1,12 @@
-import type { Course } from "@/shared/data/mockData";
+import type { Course } from "@/shared/lib/api-types";
 import { CourseFilterButton } from "@/features/groups/components/CourseFilterButton";
 import { Select } from "@/shared/components/ui/Select";
 import { LoadingSkeleton } from "@/shared/components/ui/LoadingSkeleton";
 
 type CourseFilterButtonsProps = {
   courses: Course[];
-  selectedCourseId: string | null;
-  onSelectCourse: (courseId: string | null) => void;
+  selectedCourseId: number | null;
+  onSelectCourse: (courseId: number | null) => void;
   totalGroupCount: number;
   courseGroupCounts: Record<string, number>;
   loading?: boolean;
@@ -23,20 +23,20 @@ export function CourseFilterButtons({
   // Prepare options for Select
   const selectOptions = [
     {
-      value: "",
+      value: "0",
       label: loading ? "Alle Fächer" : `Alle Fächer (${totalGroupCount})`,
     },
     ...courses.map((course) => {
       const courseCount = courseGroupCounts[course.id] ?? 0;
       return {
-        value: course.id,
+        value: course.id.toString(),
         label: loading ? course.title : `${course.title} (${courseCount})`,
       };
     }),
   ];
 
   const handleSelectChange = (value: string) => {
-    onSelectCourse(value === "" ? null : value);
+    onSelectCourse(value === "0" ? null : parseInt(value));
   };
 
   if (loading) {
@@ -63,7 +63,7 @@ export function CourseFilterButtons({
       <div className="lg:hidden">
         <Select
           options={selectOptions}
-          value={selectedCourseId || ""}
+          value={selectedCourseId?.toString() || "0"}
           onChange={handleSelectChange}
           placeholder="Fach auswählen"
         />

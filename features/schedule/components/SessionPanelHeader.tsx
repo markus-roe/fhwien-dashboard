@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import { Badge } from "@/shared/components/ui/Badge";
 
 interface SessionPanelHeaderProps {
@@ -27,19 +27,11 @@ export const SessionPanelHeader = ({
     return "amber";
   };
 
-  const courseLabel = session.courseId?.toUpperCase?.()
-    ? session.courseId.toUpperCase()
-    : session.courseId;
-  const metaLabel = session.courseId
-    ? `${session.courseId} • ${courseLabel}`
-    : courseLabel;
-
   return (
     <div className="px-8 py-6 border-b border-zinc-100 flex items-start justify-between bg-white sticky top-0 z-10">
       <div>
         <div className="flex items-center gap-2 mb-2.5">
           <Badge variant={getBadgeVariant()}>{typeLabels[session.type]}</Badge>
-          <span className="text-zinc-400 text-xs font-medium">{metaLabel}</span>
         </div>
         <h2 className="text-xl font-semibold text-zinc-900 leading-tight">
           {session.title}

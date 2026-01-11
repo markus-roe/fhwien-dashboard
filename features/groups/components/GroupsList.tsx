@@ -1,4 +1,4 @@
-import type { Group, Course } from "@/shared/data/mockData";
+import type { Group, Course } from "@/shared/lib/api-types";
 import { GroupCard } from "./GroupCard";
 
 type GroupsListProps = {
@@ -6,8 +6,8 @@ type GroupsListProps = {
   courses: Course[];
   isUserInGroup: (group: Group) => boolean;
   isGroupFull: (group: Group) => boolean;
-  onJoinGroup: (groupId: string) => void;
-  onLeaveGroup: (groupId: string) => void;
+  onJoinGroup: (groupId: number) => void;
+  onLeaveGroup: (groupId: number) => void;
 };
 
 export function GroupsList({

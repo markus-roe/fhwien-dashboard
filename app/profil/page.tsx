@@ -7,7 +7,7 @@ import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
 import { currentUser } from "@/shared/data/mockData";
-import type { Session } from "@/shared/data/mockData";
+import type { Session } from "@/shared/lib/api-types";
 import { User, Mail, GraduationCap, Lock } from "lucide-react";
 
 export default function ProfilPage() {

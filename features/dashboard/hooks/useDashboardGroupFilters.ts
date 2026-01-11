@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import type { Group, Course } from "@/shared/data/mockData";
+import type { Group, Course } from "@/shared/lib/api-types";
 
 type UseDashboardGroupFiltersProps = {
   allGroups: Group[];
   courses: Course[];
-  selectedCourseId: string | null;
+  selectedCourseId: number | null;
   searchQuery: string;
 };
 
@@ -31,7 +31,7 @@ export function useDashboardGroupFilters({
           group.name.toLowerCase().includes(query) ||
           group.description?.toLowerCase().includes(query) ||
           course?.title.toLowerCase().includes(query) ||
-          group.members.some((m) => m.toLowerCase().includes(query)) ||
+          group.members.some((m) => m.name.toLowerCase().includes(query)) ||
           false
         );
       });
@@ -44,4 +44,3 @@ export function useDashboardGroupFilters({
     filteredGroups,
   };
 }
-

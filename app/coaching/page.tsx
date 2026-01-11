@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/shared/components/ui/Card";
-import type { Session, LocationType } from "@/shared/data/mockData";
+import type { Session, LocationType } from "@/shared/lib/api-types";
 import { useCoachingSlots } from "@/features/coaching/hooks/useCoachingSlots";
 import { useCourses } from "@/shared/hooks/useCourses";
 import { useCoachingSlotFilters } from "@/features/coaching/hooks/useCoachingSlotFilters";
@@ -19,7 +19,7 @@ import { LoadingSkeletonCoachingCards } from "@/shared/components/ui/LoadingSkel
 export default function CoachingPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [activeStudentTab, setActiveStudentTab] = useState<
     "myBookings" | "available"
   >("available");
@@ -35,7 +35,7 @@ export default function CoachingPage() {
     deleteSlot,
   } = useCoachingSlots();
 
-  const { courses: mockCourses, loading: coursesLoading } = useCourses();
+  const { courses, loading: coursesLoading } = useCourses();
   const isLoading = slotsLoading || coursesLoading;
 
   // Filtering logic
@@ -50,7 +50,7 @@ export default function CoachingPage() {
     totalMyBookingsCount,
   } = useCoachingSlotFilters({
     allSlots,
-    courses: mockCourses,
+    courses,
     selectedCourseId,
     searchQuery,
   });
@@ -73,7 +73,7 @@ export default function CoachingPage() {
     const slot = slots.find((s) => s.id === session.id);
     if (slot) {
       // Convert coaching slot to session format
-      const course = mockCourses.find((c) => c.id === slot.courseId);
+      const course = courses.find((c) => c.id === slot.courseId);
       const sessionForPanel = {
         id: slot.id,
         courseId: slot.courseId,
@@ -154,7 +154,7 @@ export default function CoachingPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="sm:w-[200px] shrink-0 space-y-3">
                   <CourseFilterButtons
-                    courses={mockCourses}
+                    courses={courses}
                     selectedCourseId={selectedCourseId}
                     onSelectCourse={setSelectedCourseId}
                     totalGroupCount={totalSlotCount}
@@ -167,7 +167,7 @@ export default function CoachingPage() {
                     <CoachingSlotsList
                       upcomingSlots={myUpcomingSlots}
                       pastSlots={myPastSlots}
-                      courses={mockCourses}
+                      courses={courses}
                       onBook={handleBookSlot}
                       onCancelBooking={handleCancelBooking}
                       onDelete={handleDeleteSlot}
@@ -190,7 +190,7 @@ export default function CoachingPage() {
                         <CoachingSlotsList
                           upcomingSlots={availableSlots}
                           pastSlots={filteredPastSlots}
-                          courses={mockCourses}
+                          courses={courses}
                           onBook={handleBookSlot}
                           onCancelBooking={handleCancelBooking}
                           onDelete={handleDeleteSlot}
