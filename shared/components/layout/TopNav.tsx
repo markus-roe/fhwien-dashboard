@@ -31,6 +31,14 @@ export const TopNav = () => {
   const canSeeDashboard = currentUser?.role === "professor" || currentUser?.role === "admin";
 
   const handleLogout = async () => {
+    // Speichere E-Mail im localStorage vor dem Logout
+    if (currentUser?.email) {
+      try {
+        localStorage.setItem("lastLoginEmail", currentUser.email);
+      } catch (error) {
+        console.error("[LOGOUT] Failed to save email to localStorage:", error);
+      }
+    }
     await signOut({ redirect: false });
     router.push("/login");
     router.refresh();
