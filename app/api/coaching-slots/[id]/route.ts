@@ -9,7 +9,7 @@ import type {
 } from "@/shared/lib/api-types";
 import { mockUsers } from "@/shared/data/mockData";
 
-// Helper
+// hilfsfunktion (kopiert von der anderen datei)
 function mapDbSlotToApiSlot(dbSlot: any): any {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
@@ -37,6 +37,7 @@ function mapDbSlotToApiSlot(dbSlot: any): any {
   };
 }
 
+// get request: einen einzelnen slot anzeigen
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -44,9 +45,10 @@ export async function GET(
   try {
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
-      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
+      return NextResponse.json<ApiError>({ error: "id ist falsch" }, { status: 400 });
     }
 
+    // slot suchen mit id
     const slot = await prisma.coachingSlot.findUnique({
       where: { id: slotId },
       include: {
@@ -57,21 +59,22 @@ export async function GET(
 
     if (!slot) {
       return NextResponse.json<ApiError>(
-        { error: "Coaching slot not found" },
+        { error: "slot wurde nicht gefunden" },
         { status: 404 }
       );
     }
 
     return NextResponse.json<CoachingSlotResponse>(mapDbSlotToApiSlot(slot));
   } catch (error) {
-    console.error("Error fetching coaching slot:", error);
+    console.error("fehler beim laden:", error);
     return NextResponse.json<ApiError>(
-      { error: "Failed to fetch coaching slot" },
+      { error: "laden fehlgeschlagen" },
       { status: 500 }
     );
   }
 }
 
+// put request: slot bearbeiten
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -79,18 +82,19 @@ export async function PUT(
   try {
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
-      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
+      return NextResponse.json<ApiError>({ error: "id ist falsch" }, { status: 400 });
     }
 
     const body = (await request.json()) as UpdateCoachingSlotRequest;
 
+    // alten slot holen damit wir die zeiten wissen
     const existingSlot = await prisma.coachingSlot.findUnique({
       where: { id: slotId },
     });
 
     if (!existingSlot) {
       return NextResponse.json<ApiError>(
-        { error: "Coaching slot not found" },
+        { error: "slot nicht gefunden" },
         { status: 404 }
       );
     }
@@ -105,6 +109,7 @@ export async function PUT(
       description,
     } = body;
 
+    // nur die sachen updaten die auch geschickt wurden
     const data: any = {};
     if (maxParticipants !== undefined) data.maxParticipants = maxParticipants;
     if (description !== undefined) data.description = description;
@@ -114,7 +119,7 @@ export async function PUT(
       if (course) data.courseId = course.id;
     }
 
-    // Handle date/time
+    // zeit logik (kompliziert weil datum und zeit getrennt sind)
     let newStart = new Date(existingSlot.startDateTime);
     let newEnd = new Date(existingSlot.endDateTime);
     let dateChanged = false;
@@ -143,7 +148,7 @@ export async function PUT(
       data.endDateTime = newEnd;
     }
 
-    // Handle participants update if provided
+    // teilnehmer liste updaten (falls neue geschickt wurde)
     if (participants !== undefined) {
       const matches = [];
       for (const pId of participants) {
@@ -155,6 +160,7 @@ export async function PUT(
       data.participants = { set: matches };
     }
 
+    // update durchführen
     const updatedSlot = await prisma.coachingSlot.update({
       where: { id: slotId },
       data,
@@ -166,14 +172,15 @@ export async function PUT(
 
     return NextResponse.json<CoachingSlotResponse>(mapDbSlotToApiSlot(updatedSlot));
   } catch (error) {
-    console.error("Error updating coaching slot:", error);
+    console.error("fehler beim update:", error);
     return NextResponse.json<ApiError>(
-      { error: "Failed to update coaching slot" },
+      { error: "update hat nicht geklappt" },
       { status: 500 }
     );
   }
 }
 
+// delete request: slot löschen
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -181,9 +188,10 @@ export async function DELETE(
   try {
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
-      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
+      return NextResponse.json<ApiError>({ error: "id ist falsch" }, { status: 400 });
     }
 
+    // einfach löschen
     await prisma.coachingSlot.delete({
       where: { id: slotId },
     });
@@ -192,13 +200,13 @@ export async function DELETE(
   } catch (error: any) {
     if (error.code === "P2025") {
       return NextResponse.json<ApiError>(
-        { error: "Coaching slot not found" },
+        { error: "slot nicht gefunden" },
         { status: 404 }
       );
     }
-    console.error("Error deleting coaching slot:", error);
+    console.error("fehler beim löschen:", error);
     return NextResponse.json<ApiError>(
-      { error: "Failed to delete coaching slot" },
+      { error: "löschen hat nicht geklappt" },
       { status: 500 }
     );
   }

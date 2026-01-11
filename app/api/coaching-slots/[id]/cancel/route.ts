@@ -40,7 +40,7 @@ export async function POST(
     // id umwandeln
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
-      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
+      return NextResponse.json<ApiError>({ error: "id ist falsch" }, { status: 400 });
     }
 
     // slot suchen
@@ -51,7 +51,7 @@ export async function POST(
 
     if (!slot) {
       return NextResponse.json<ApiError>(
-        { error: "Coaching slot not found" },
+        { error: "slot gibts nicht" },
         { status: 404 }
       );
     }
@@ -61,7 +61,7 @@ export async function POST(
 
     if (!dbUser) {
       return NextResponse.json<ApiError>(
-        { error: "User not found" },
+        { error: "user nicht gefunden" },
         { status: 404 }
       );
     }
@@ -82,9 +82,9 @@ export async function POST(
 
     return NextResponse.json<CoachingSlotResponse>(mapDbSlotToApiSlot(updatedSlot));
   } catch (error) {
-    console.error("Error canceling booking:", error);
+    console.error("fehler beim stornieren:", error);
     return NextResponse.json<ApiError>(
-      { error: "Failed to cancel booking" },
+      { error: "stornieren hat nicht geklappt" },
       { status: 500 }
     );
   }
