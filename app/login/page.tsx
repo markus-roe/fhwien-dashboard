@@ -249,11 +249,6 @@ export default function LoginPage() {
                     />
                   )}
                 </div>
-                {(!emailInput || !emailInput.includes("@")) && (
-                  <p className="text-xs text-zinc-500 mt-1.5">
-                    Geben Sie nur den Benutzernamen ein, die Domain wird automatisch ergänzt
-                  </p>
-                )}
               </div>
             )}
 
