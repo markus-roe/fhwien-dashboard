@@ -98,26 +98,26 @@ export default function UebersichtPage() {
 
                             {/* Quick Stats */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-lg">
+                                <div className="p-4 bg-gradient-to-br from-[#012f64]/5 to-[#012f64]/10 border border-[#012f64]/20 rounded-lg">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-500 rounded-lg">
+                                        <div className="p-2 bg-[#012f64] rounded-lg">
                                             <Users className="w-5 h-5 text-white" />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-blue-700 font-medium">Meine Gruppen</p>
-                                            <p className="text-xl font-bold text-blue-900">{userGroups.length}</p>
+                                            <p className="text-xs text-[#012f64] font-medium">Meine Gruppen</p>
+                                            <p className="text-xl font-bold text-[#012f64]">{userGroups.length}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-lg">
+                                <div className="p-4 bg-gradient-to-br from-[#012f64]/5 to-[#012f64]/10 border border-[#012f64]/20 rounded-lg">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-500 rounded-lg">
+                                        <div className="p-2 bg-[#012f64] rounded-lg">
                                             <MessageSquare className="w-5 h-5 text-white" />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-blue-700 font-medium">Coaching Termine</p>
-                                            <p className="text-xl font-bold text-blue-900">{upcomingCoachings.length}</p>
+                                            <p className="text-xs text-[#012f64] font-medium">Coaching Termine</p>
+                                            <p className="text-xl font-bold text-[#012f64]">{upcomingCoachings.length}</p>
                                         </div>
                                     </div>
                                 </div>
