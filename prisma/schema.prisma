@@ -3,15 +3,14 @@ generator client {
   output   = "./generated"
 }
 
-// prisma/schema.prisma -> Provided by Neon Console
 datasource db {
   provider = "postgresql"
 }
 
-// Enums based on mockData.ts
 enum UserRole {
   student
   professor
+  admin
 }
 
 enum Program {
@@ -48,6 +47,7 @@ model User {
   name     String
   initials String
   email    String    @unique
+  password String?   // Hashed password for authentication
   program  Program?
   role     UserRole? @default(student)
 

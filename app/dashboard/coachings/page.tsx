@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { currentUser } from "@/shared/data/mockData";
+import { useState, useEffect } from "react";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { type CoachingSlot, CreateCoachingSlotRequest, UpdateCoachingSlotRequest } from "@/shared/lib/api-types";
-
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCoachingSlots } from "@/features/coaching/hooks/useCoachingSlots";
 import { useUsers } from "@/features/users/hooks/useUsers";
 import { useCourses } from "@/shared/hooks/useCourses";
@@ -18,10 +17,10 @@ import { de } from "date-fns/locale";
 import { CreateCoachingSlotFormData } from "@/features/coaching/types";
 
 export default function CoachingsPage() {
-  if (currentUser.role !== "professor" && currentUser.name !== "Markus") {
-    redirect("/schedule");
-  }
+  const router = useRouter();
+  const { user: currentUser, loading: userLoading } = useCurrentUser();
 
+  // All hooks must be called before any conditional returns
   const {
     slots: allCoachingSlots,
     loading: slotsLoading,
@@ -55,6 +54,16 @@ export default function CoachingsPage() {
       updateSlot: (id: number, data: UpdateCoachingSlotRequest) => updateCoachingSlot(id, data),
       deleteSlot: (id: number) => deleteCoachingSlot(id),
     });
+
+    useEffect(() => {
+      if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
+        router.push("/schedule");
+      }
+    }, [currentUser, userLoading, router]);
+  
+    if (userLoading || !currentUser) {
+      return <div className="p-4">Laden...</div>;
+    }
 
   const handleOpenEditCoaching = (slot: CoachingSlot) => {
     setEditingCoachingSlot(slot);

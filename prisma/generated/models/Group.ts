@@ -501,10 +501,6 @@ export type GroupUncheckedUpdateManyWithoutCourseNestedInput = {
   deleteMany?: Prisma.GroupScalarWhereInput | Prisma.GroupScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type GroupCreateWithoutMembersInput = {
   name: string
   description?: string | null

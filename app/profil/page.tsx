@@ -1,37 +1,89 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/shared/components/ui/Card";
 import { Avatar } from "@/shared/components/ui/Avatar";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
-import { currentUser } from "@/shared/data/mockData";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import type { Session } from "@/shared/lib/api-types";
+import { currentUserApi } from "@/shared/lib/api";
 import { User, Mail, GraduationCap, Lock } from "lucide-react";
 
 export default function ProfilPage() {
-  const [name, setName] = useState(currentUser.name);
-  const [email, setEmail] = useState(currentUser.email || "");
+  const { user: currentUser, loading: userLoading } = useCurrentUser();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.name);
+      setEmail(currentUser.email || "");
+    }
+  }, [currentUser]);
+
+  if (userLoading || !currentUser) {
+    return <div className="p-4">Laden...</div>;
+  }
 
   const handleSaveProfile = () => {
     // Profile save logic would go here
     console.log("Profile saved", { name, email });
   };
 
-  const handleChangePassword = () => {
-    // Password change logic would go here
-    if (newPassword !== confirmPassword) {
-      alert("Passwörter stimmen nicht überein");
+  const handleChangePassword = async () => {
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("Bitte füllen Sie alle Felder aus");
       return;
     }
-    console.log("Password changed");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwörter stimmen nicht überein");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("Das neue Passwort muss mindestens 6 Zeichen lang sein");
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    try {
+      await currentUserApi.changePassword({
+        currentPassword,
+        newPassword,
+      });
+
+      setPasswordSuccess("Passwort erfolgreich geändert");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Fehler beim Ändern des Passworts";
+      setPasswordError(
+        errorMessage.includes("incorrect")
+          ? "Aktuelles Passwort ist falsch"
+          : errorMessage
+      );
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const handleSessionClick = (session: Session) => {
@@ -105,7 +157,7 @@ export default function ProfilPage() {
                       </label>
                       <Input
                         type="text"
-                        value={currentUser.program}
+                        value={currentUser.program || ""}
                         readOnly
                         className="bg-zinc-50"
                       />
@@ -141,7 +193,11 @@ export default function ProfilPage() {
                       <Input
                         type="password"
                         value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        onChange={(e) => {
+                          setCurrentPassword(e.target.value);
+                          setPasswordError("");
+                          setPasswordSuccess("");
+                        }}
                         placeholder="Aktuelles Passwort eingeben"
                       />
                     </div>
@@ -153,7 +209,11 @@ export default function ProfilPage() {
                       <Input
                         type="password"
                         value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value);
+                          setPasswordError("");
+                          setPasswordSuccess("");
+                        }}
                         placeholder="Neues Passwort eingeben"
                       />
                     </div>
@@ -165,10 +225,24 @@ export default function ProfilPage() {
                       <Input
                         type="password"
                         value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                          setPasswordError("");
+                          setPasswordSuccess("");
+                        }}
                         placeholder="Neues Passwort bestätigen"
                       />
                     </div>
+
+                    {passwordError && (
+                      <div className="text-sm text-red-600">{passwordError}</div>
+                    )}
+
+                    {passwordSuccess && (
+                      <div className="text-sm text-green-600">
+                        {passwordSuccess}
+                      </div>
+                    )}
 
                     <div className="pt-2">
                       <Button
@@ -176,8 +250,11 @@ export default function ProfilPage() {
                         size="sm"
                         className="w-full sm:w-auto"
                         onClick={handleChangePassword}
+                        disabled={isChangingPassword}
                       >
-                        Passwort ändern
+                        {isChangingPassword
+                          ? "Wird geändert..."
+                          : "Passwort ändern"}
                       </Button>
                     </div>
                   </div>

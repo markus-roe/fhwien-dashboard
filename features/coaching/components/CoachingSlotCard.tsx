@@ -2,7 +2,7 @@ import { Clock, Users } from "lucide-react";
 import type { CoachingSlot, Course } from "@/shared/lib/api-types";
 import { Button } from "@/shared/components/ui/Button";
 import { Card, CardContent } from "@/shared/components/ui/Card";
-import { currentUser } from "@/shared/data/mockData";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { MemberBadge } from "@/features/dashboard/components/MemberBadge";
 
 type CoachingSlotCardProps = {
@@ -22,7 +22,10 @@ export function CoachingSlotCard({
   onCancelBooking,
   onDelete,
 }: CoachingSlotCardProps) {
-  const isBooked = slot.participants.some((p) => p.name === currentUser.name);
+  const { user: currentUser } = useCurrentUser();
+  const isBooked = currentUser
+    ? slot.participants.some((p) => p.name === currentUser.name)
+    : false;
   const isFull = slot.participants.length >= slot.maxParticipants;
   const canBook = !isBooked && !isFull && !isProfessor;
 

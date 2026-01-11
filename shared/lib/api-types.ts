@@ -7,7 +7,7 @@ import type { NextRequest } from "next/server";
 export type Program = "DTI" | "DI";
 export type SessionType = "lecture" | "workshop" | "coaching";
 export type LocationType = "online" | "on_campus";
-export type UserRole = "student" | "professor";
+export type UserRole = "student" | "professor" | "admin";
 export type Attendance = "mandatory" | "optional";
 export type MaterialType = "pdf" | "presentation" | "other";
 

@@ -16,7 +16,7 @@ import {
 } from "date-fns";
 import { de } from "date-fns/locale";
 import { Card, CardContent } from "@/shared/components/ui/Card";
-import { currentUser } from "@/shared/data/mockData";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { type Session } from "@/shared/lib/api-types";
 import { useSessions } from "@/features/sessions/hooks/useSessions";
 import { useCoachingSlots } from "@/features/coaching/hooks/useCoachingSlots";
@@ -56,12 +56,14 @@ export function CalendarView({
   } | null>(null);
 
   // Fetch data using hooks
+  const { user: currentUser } = useCurrentUser();
   const { sessions: mockSessions } = useSessions();
   const { slots: coachingSlots } = useCoachingSlots();
   const { courses } = useCourses();
 
   // Convert coaching slots to sessions
   const coachingSlotSessions: Session[] = useMemo(() => {
+    if (!currentUser) return [];
     return coachingSlots
       .filter((slot) => slot.participants.some((p) => p.id === currentUser.id))
       .map((slot) => {
