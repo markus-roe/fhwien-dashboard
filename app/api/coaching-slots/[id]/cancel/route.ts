@@ -3,10 +3,12 @@ import { prisma } from "@/shared/lib/prisma";
 import type { CoachingSlotResponse, ApiError } from "@/shared/lib/api-types";
 import { currentUser } from "@/shared/data/mockData";
 
+// daten umwandeln für frontend
 function mapDbSlotToApiSlot(dbSlot: any): any {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
+  // zeit einfach formatieren
   const time = start.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
@@ -29,16 +31,19 @@ function mapDbSlotToApiSlot(dbSlot: any): any {
   };
 }
 
+// post um die buchung abzusagen (cancel)
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse<CoachingSlotResponse | ApiError>> {
   try {
+    // id umwandeln
     const slotId = parseInt(params.id, 10);
     if (isNaN(slotId)) {
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
+    // slot suchen
     const slot = await prisma.coachingSlot.findUnique({
       where: { id: slotId },
       include: { participants: true },
@@ -51,6 +56,7 @@ export async function POST(
       );
     }
 
+    // user holen der eingeloggt ist
     const dbUser = await prisma.user.findUnique({ where: { email: currentUser.email } }) || await prisma.user.findFirst();
 
     if (!dbUser) {
@@ -60,12 +66,12 @@ export async function POST(
       );
     }
 
-    // Remove user from participants
+    // user aus der liste löschen (disconnect)
     const updatedSlot = await prisma.coachingSlot.update({
       where: { id: slotId },
       data: {
         participants: {
-          disconnect: { id: dbUser.id },
+          disconnect: { id: dbUser.id }, // verbindung trennen
         },
       },
       include: {
