@@ -38,6 +38,12 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Update lastLoggedIn timestamp
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoggedIn: new Date() },
+        });
+
         const userData: {
           id: string;
           email: string;

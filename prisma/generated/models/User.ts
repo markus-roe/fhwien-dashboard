@@ -44,6 +44,7 @@ export type UserMinAggregateOutputType = {
   role: $Enums.UserRole | null
   createdAt: Date | null
   updatedAt: Date | null
+  lastLoggedIn: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -56,6 +57,7 @@ export type UserMaxAggregateOutputType = {
   role: $Enums.UserRole | null
   createdAt: Date | null
   updatedAt: Date | null
+  lastLoggedIn: Date | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -68,6 +70,7 @@ export type UserCountAggregateOutputType = {
   role: number
   createdAt: number
   updatedAt: number
+  lastLoggedIn: number
   _all: number
 }
 
@@ -90,6 +93,7 @@ export type UserMinAggregateInputType = {
   role?: true
   createdAt?: true
   updatedAt?: true
+  lastLoggedIn?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -102,6 +106,7 @@ export type UserMaxAggregateInputType = {
   role?: true
   createdAt?: true
   updatedAt?: true
+  lastLoggedIn?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -114,6 +119,7 @@ export type UserCountAggregateInputType = {
   role?: true
   createdAt?: true
   updatedAt?: true
+  lastLoggedIn?: true
   _all?: true
 }
 
@@ -213,6 +219,7 @@ export type UserGroupByOutputType = {
   role: $Enums.UserRole | null
   createdAt: Date
   updatedAt: Date
+  lastLoggedIn: Date | null
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -248,6 +255,7 @@ export type UserWhereInput = {
   role?: Prisma.EnumUserRoleNullableFilter<"User"> | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  lastLoggedIn?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   groups?: Prisma.GroupListRelationFilter
   coachingSlots?: Prisma.CoachingSlotListRelationFilter
   sessionsTaught?: Prisma.SessionListRelationFilter
@@ -263,6 +271,7 @@ export type UserOrderByWithRelationInput = {
   role?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lastLoggedIn?: Prisma.SortOrderInput | Prisma.SortOrder
   groups?: Prisma.GroupOrderByRelationAggregateInput
   coachingSlots?: Prisma.CoachingSlotOrderByRelationAggregateInput
   sessionsTaught?: Prisma.SessionOrderByRelationAggregateInput
@@ -281,6 +290,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.EnumUserRoleNullableFilter<"User"> | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  lastLoggedIn?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   groups?: Prisma.GroupListRelationFilter
   coachingSlots?: Prisma.CoachingSlotListRelationFilter
   sessionsTaught?: Prisma.SessionListRelationFilter
@@ -296,6 +306,7 @@ export type UserOrderByWithAggregationInput = {
   role?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lastLoggedIn?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -316,6 +327,7 @@ export type UserScalarWhereWithAggregatesInput = {
   role?: Prisma.EnumUserRoleNullableWithAggregatesFilter<"User"> | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  lastLoggedIn?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
 }
 
 export type UserCreateInput = {
@@ -327,6 +339,7 @@ export type UserCreateInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupCreateNestedManyWithoutMembersInput
   coachingSlots?: Prisma.CoachingSlotCreateNestedManyWithoutParticipantsInput
   sessionsTaught?: Prisma.SessionCreateNestedManyWithoutLecturerInput
@@ -342,6 +355,7 @@ export type UserUncheckedCreateInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupUncheckedCreateNestedManyWithoutMembersInput
   coachingSlots?: Prisma.CoachingSlotUncheckedCreateNestedManyWithoutParticipantsInput
   sessionsTaught?: Prisma.SessionUncheckedCreateNestedManyWithoutLecturerInput
@@ -356,6 +370,7 @@ export type UserUpdateInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUpdateManyWithoutMembersNestedInput
   coachingSlots?: Prisma.CoachingSlotUpdateManyWithoutParticipantsNestedInput
   sessionsTaught?: Prisma.SessionUpdateManyWithoutLecturerNestedInput
@@ -371,6 +386,7 @@ export type UserUncheckedUpdateInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUncheckedUpdateManyWithoutMembersNestedInput
   coachingSlots?: Prisma.CoachingSlotUncheckedUpdateManyWithoutParticipantsNestedInput
   sessionsTaught?: Prisma.SessionUncheckedUpdateManyWithoutLecturerNestedInput
@@ -386,6 +402,7 @@ export type UserCreateManyInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -397,6 +414,7 @@ export type UserUpdateManyMutationInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -409,6 +427,7 @@ export type UserUncheckedUpdateManyInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -421,6 +440,7 @@ export type UserCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lastLoggedIn?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -437,6 +457,7 @@ export type UserMaxOrderByAggregateInput = {
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lastLoggedIn?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -449,6 +470,7 @@ export type UserMinOrderByAggregateInput = {
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lastLoggedIn?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -488,6 +510,10 @@ export type NullableEnumUserRoleFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type IntFieldUpdateOperationsInput = {
@@ -599,6 +625,7 @@ export type UserCreateWithoutSessionsTaughtInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupCreateNestedManyWithoutMembersInput
   coachingSlots?: Prisma.CoachingSlotCreateNestedManyWithoutParticipantsInput
 }
@@ -613,6 +640,7 @@ export type UserUncheckedCreateWithoutSessionsTaughtInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupUncheckedCreateNestedManyWithoutMembersInput
   coachingSlots?: Prisma.CoachingSlotUncheckedCreateNestedManyWithoutParticipantsInput
 }
@@ -642,6 +670,7 @@ export type UserUpdateWithoutSessionsTaughtInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUpdateManyWithoutMembersNestedInput
   coachingSlots?: Prisma.CoachingSlotUpdateManyWithoutParticipantsNestedInput
 }
@@ -656,6 +685,7 @@ export type UserUncheckedUpdateWithoutSessionsTaughtInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUncheckedUpdateManyWithoutMembersNestedInput
   coachingSlots?: Prisma.CoachingSlotUncheckedUpdateManyWithoutParticipantsNestedInput
 }
@@ -669,6 +699,7 @@ export type UserCreateWithoutGroupsInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
   coachingSlots?: Prisma.CoachingSlotCreateNestedManyWithoutParticipantsInput
   sessionsTaught?: Prisma.SessionCreateNestedManyWithoutLecturerInput
 }
@@ -683,6 +714,7 @@ export type UserUncheckedCreateWithoutGroupsInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
   coachingSlots?: Prisma.CoachingSlotUncheckedCreateNestedManyWithoutParticipantsInput
   sessionsTaught?: Prisma.SessionUncheckedCreateNestedManyWithoutLecturerInput
 }
@@ -721,6 +753,7 @@ export type UserScalarWhereInput = {
   role?: Prisma.EnumUserRoleNullableFilter<"User"> | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  lastLoggedIn?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
 }
 
 export type UserCreateWithoutCoachingSlotsInput = {
@@ -732,6 +765,7 @@ export type UserCreateWithoutCoachingSlotsInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupCreateNestedManyWithoutMembersInput
   sessionsTaught?: Prisma.SessionCreateNestedManyWithoutLecturerInput
 }
@@ -746,6 +780,7 @@ export type UserUncheckedCreateWithoutCoachingSlotsInput = {
   role?: $Enums.UserRole | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupUncheckedCreateNestedManyWithoutMembersInput
   sessionsTaught?: Prisma.SessionUncheckedCreateNestedManyWithoutLecturerInput
 }
@@ -780,6 +815,7 @@ export type UserUpdateWithoutGroupsInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   coachingSlots?: Prisma.CoachingSlotUpdateManyWithoutParticipantsNestedInput
   sessionsTaught?: Prisma.SessionUpdateManyWithoutLecturerNestedInput
 }
@@ -794,6 +830,7 @@ export type UserUncheckedUpdateWithoutGroupsInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   coachingSlots?: Prisma.CoachingSlotUncheckedUpdateManyWithoutParticipantsNestedInput
   sessionsTaught?: Prisma.SessionUncheckedUpdateManyWithoutLecturerNestedInput
 }
@@ -808,6 +845,7 @@ export type UserUncheckedUpdateManyWithoutGroupsInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserUpdateWithoutCoachingSlotsInput = {
@@ -819,6 +857,7 @@ export type UserUpdateWithoutCoachingSlotsInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUpdateManyWithoutMembersNestedInput
   sessionsTaught?: Prisma.SessionUpdateManyWithoutLecturerNestedInput
 }
@@ -833,6 +872,7 @@ export type UserUncheckedUpdateWithoutCoachingSlotsInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUncheckedUpdateManyWithoutMembersNestedInput
   sessionsTaught?: Prisma.SessionUncheckedUpdateManyWithoutLecturerNestedInput
 }
@@ -847,6 +887,7 @@ export type UserUncheckedUpdateManyWithoutCoachingSlotsInput = {
   role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -908,6 +949,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  lastLoggedIn?: boolean
   groups?: boolean | Prisma.User$groupsArgs<ExtArgs>
   coachingSlots?: boolean | Prisma.User$coachingSlotsArgs<ExtArgs>
   sessionsTaught?: boolean | Prisma.User$sessionsTaughtArgs<ExtArgs>
@@ -924,6 +966,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  lastLoggedIn?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -936,6 +979,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  lastLoggedIn?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -948,9 +992,10 @@ export type UserSelectScalar = {
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  lastLoggedIn?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "initials" | "email" | "password" | "program" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "initials" | "email" | "password" | "program" | "role" | "createdAt" | "updatedAt" | "lastLoggedIn", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   groups?: boolean | Prisma.User$groupsArgs<ExtArgs>
   coachingSlots?: boolean | Prisma.User$coachingSlotsArgs<ExtArgs>
@@ -977,6 +1022,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     role: $Enums.UserRole | null
     createdAt: Date
     updatedAt: Date
+    lastLoggedIn: Date | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1412,6 +1458,7 @@ export interface UserFieldRefs {
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly lastLoggedIn: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 
