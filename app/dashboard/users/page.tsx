@@ -16,17 +16,6 @@ export default function UsersPage() {
   const router = useRouter();
   const { user: currentUser, loading: userLoading } = useCurrentUser();
 
-  useEffect(() => {
-    if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
-      router.push("/schedule");
-    }
-  }, [currentUser, userLoading, router]);
-
-  if (userLoading || !currentUser) {
-    return <div className="p-4">Laden...</div>;
-  }
-
-
   const {
     users: allUsers,
     loading: usersLoading,
@@ -55,6 +44,16 @@ export default function UsersPage() {
       updateUser,
       deleteUser,
     });
+
+    useEffect(() => {
+      if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
+        router.push("/schedule");
+      }
+    }, [currentUser, userLoading, router]);
+  
+    if (userLoading || !currentUser) {
+      return <div className="p-4">Laden...</div>;
+    }
 
   const handleCreateOrEditStudentWrapper = async (
     data: CreateStudentFormData

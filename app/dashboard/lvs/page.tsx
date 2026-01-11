@@ -19,17 +19,6 @@ export default function LVsPage() {
   const router = useRouter();
   const { user: currentUser, loading: userLoading } = useCurrentUser();
 
-  useEffect(() => {
-    if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
-      router.push("/schedule");
-    }
-  }, [currentUser, userLoading, router]);
-
-  if (userLoading || !currentUser) {
-    return <div className="p-4">Laden...</div>;
-  }
-
-
   const {
     sessions: allSessions,
     loading: sessionsLoading,
@@ -61,6 +50,16 @@ export default function LVsPage() {
       updateSession,
       deleteSession,
     });
+
+    useEffect(() => {
+      if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
+        router.push("/schedule");
+      }
+    }, [currentUser, userLoading, router]);
+  
+    if (userLoading || !currentUser) {
+      return <div className="p-4">Laden...</div>;
+    }
 
   const handleOpenEditSession = (session: Session) => {
     setEditingSession(session);

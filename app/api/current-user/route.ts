@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/shared/lib/auth";
-import type { UserResponse, ApiError } from "@/shared/lib/api-types";
+import type { UserResponse, ApiError, Program, UserRole } from "@/shared/lib/api-types";
 
 // Helper to map User to API user
 function mapUserToApiUser(user: {
@@ -8,8 +8,8 @@ function mapUserToApiUser(user: {
   name: string;
   initials: string;
   email: string;
-  program?: "DTI" | "DI";
-  role: "student" | "professor";
+  program: Program;
+  role: UserRole;
 }): UserResponse {
   return {
     id: user.id,

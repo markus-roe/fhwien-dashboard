@@ -38,13 +38,20 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const userData = {
+        const userData: {
+          id: string;
+          email: string;
+          name: string;
+          initials?: string;
+          program?: "DTI" | "DI" | null;
+          role?: "student" | "professor" | "admin";
+        } = {
           id: user.id.toString(),
           email: user.email,
           name: user.name,
           initials: user.initials,
-          program: user.program || null,
-          role: user.role || "student",
+          program: (user.program as "DTI" | "DI" | null) || null,
+          role: (user.role as "student" | "professor" | "admin") || "student",
         };
 
         console.log("[AUTH] Login successful for:", userData.email, "User ID:", userData.id);

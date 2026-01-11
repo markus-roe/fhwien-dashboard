@@ -16,6 +16,13 @@ export default function ProfilPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
   useEffect(() => {
     if (currentUser) {
       setName(currentUser.name);
@@ -26,12 +33,6 @@ export default function ProfilPage() {
   if (userLoading || !currentUser) {
     return <div className="p-4">Laden...</div>;
   }
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const handleSaveProfile = () => {
     // Profile save logic would go here

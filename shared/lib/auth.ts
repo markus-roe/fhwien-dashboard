@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "./prisma";
-import type { User } from "./api-types";
+import type { Program, User, UserRole } from "./api-types";
 
 /**
  * Get the current authenticated user from the session
@@ -27,8 +27,8 @@ export async function getCurrentUser(): Promise<User | null> {
     name: dbUser.name,
     initials: dbUser.initials,
     email: dbUser.email,
-    program: dbUser.program as "DTI" | "DI" | undefined,
-    role: (dbUser.role as "student" | "professor") || "student",
+    program: dbUser.program as Program,
+    role: dbUser.role as UserRole,
   };
 }
 

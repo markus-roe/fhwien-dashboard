@@ -18,16 +18,6 @@ export default function GroupsPage() {
   const router = useRouter();
   const { user: currentUser, loading: userLoading } = useCurrentUser();
 
-  useEffect(() => {
-    if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
-      router.push("/schedule");
-    }
-  }, [currentUser, userLoading, router]);
-
-  if (userLoading || !currentUser) {
-    return <div className="p-4">Laden...</div>;
-  }
-
   const {
     groups: allGroups,
     loading: groupsLoading,
@@ -62,6 +52,16 @@ export default function GroupsPage() {
     updateGroup,
     deleteGroup,
   });
+
+  useEffect(() => {
+    if (!userLoading && currentUser && !(currentUser.role === "professor" || currentUser.role === "admin")) {
+      router.push("/schedule");
+    }
+  }, [currentUser, userLoading, router]);
+
+  if (userLoading || !currentUser) {
+    return <div className="p-4">Laden...</div>;
+  }
 
   const handleAssignUserToGroupWrapper = async (
     groupId: number,
