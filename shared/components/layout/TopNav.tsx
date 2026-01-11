@@ -10,6 +10,7 @@ import {
   GraduationCap,
   User,
   LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
@@ -28,8 +29,11 @@ export const TopNav = () => {
     currentUser.role === "professor" || currentUser.name === "Markus";
 
   const isActive = (path: string) => {
+    if (path === "/uebersicht") {
+      return pathname === "/uebersicht" || pathname === "/";
+    }
     if (path === "/schedule") {
-      return pathname === "/schedule" || pathname === "/";
+      return pathname === "/schedule";
     }
     return pathname === path;
   };
@@ -55,7 +59,7 @@ export const TopNav = () => {
       <nav className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-zinc-200/80">
         <div className="w-full px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/schedule" className="flex items-center gap-2">
+            <Link href="/uebersicht" className="flex items-center gap-2">
               <Image
                 src="/fhwien.png"
                 alt="FH Wien Logo"
@@ -71,32 +75,38 @@ export const TopNav = () => {
 
             <div className="hidden md:flex items-center space-x-1">
               <Link
+                href="/uebersicht"
+                className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${isActive("/uebersicht")
+                  ? "text-zinc-900"
+                  : "text-zinc-500 hover:text-zinc-900"
+                  }`}
+              >
+                Übersicht
+              </Link>
+              <Link
                 href="/schedule"
-                className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${
-                  isActive("/schedule")
-                    ? "text-zinc-900"
-                    : "text-zinc-500 hover:text-zinc-900"
-                }`}
+                className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${isActive("/schedule")
+                  ? "text-zinc-900"
+                  : "text-zinc-500 hover:text-zinc-900"
+                  }`}
               >
                 Terminplan
               </Link>
               <Link
                 href="/gruppen"
-                className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${
-                  isActive("/gruppen")
-                    ? "text-zinc-900"
-                    : "text-zinc-500 hover:text-zinc-900"
-                }`}
+                className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${isActive("/gruppen")
+                  ? "text-zinc-900"
+                  : "text-zinc-500 hover:text-zinc-900"
+                  }`}
               >
                 Gruppen
               </Link>
               <Link
                 href="/coaching"
-                className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${
-                  isActive("/coaching")
-                    ? "text-zinc-900"
-                    : "text-zinc-500 hover:text-zinc-900"
-                }`}
+                className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all ${isActive("/coaching")
+                  ? "text-zinc-900"
+                  : "text-zinc-500 hover:text-zinc-900"
+                  }`}
               >
                 Coachings
               </Link>
@@ -169,25 +179,22 @@ export const TopNav = () => {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${
-          mobileMenuOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${mobileMenuOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
+          }`}
       >
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
-            mobileMenuOpen ? "opacity-100" : "opacity-0"
-          }`}
+          className={`fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? "opacity-100" : "opacity-0"
+            }`}
           onClick={() => setMobileMenuOpen(false)}
         />
 
         {/* Menu Panel */}
         <div
-          className={`fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] bg-white shadow-2xl transition-transform duration-300 ease-out ${
-            mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] bg-white shadow-2xl transition-transform duration-300 ease-out ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <div className="flex flex-col h-full">
             {/* Header - matches TopNav exactly */}
@@ -217,50 +224,58 @@ export const TopNav = () => {
             <nav className="flex-1 overflow-y-auto py-4 px-3">
               <div className="space-y-1">
                 <Link
+                  href="/uebersicht"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${isActive("/uebersicht")
+                    ? "text-zinc-900 font-medium"
+                    : "text-zinc-600 hover:text-zinc-900"
+                    }`}
+                >
+                  <LayoutDashboard
+                    className={`w-5 h-5 flex-shrink-0 ${isActive("/uebersicht") ? "text-zinc-900" : "text-zinc-400"
+                      }`}
+                  />
+                  <span className="text-base">Übersicht</span>
+                </Link>
+                <Link
                   href="/schedule"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${
-                    isActive("/schedule")
-                      ? "text-zinc-900 font-medium"
-                      : "text-zinc-600 hover:text-zinc-900"
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${isActive("/schedule")
+                    ? "text-zinc-900 font-medium"
+                    : "text-zinc-600 hover:text-zinc-900"
+                    }`}
                 >
                   <Calendar
-                    className={`w-5 h-5 flex-shrink-0 ${
-                      isActive("/schedule") ? "text-zinc-900" : "text-zinc-400"
-                    }`}
+                    className={`w-5 h-5 flex-shrink-0 ${isActive("/schedule") ? "text-zinc-900" : "text-zinc-400"
+                      }`}
                   />
                   <span className="text-base">Terminplan</span>
                 </Link>
                 <Link
                   href="/gruppen"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${
-                    isActive("/gruppen")
-                      ? "text-zinc-900 font-medium"
-                      : "text-zinc-600 hover:text-zinc-900"
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${isActive("/gruppen")
+                    ? "text-zinc-900 font-medium"
+                    : "text-zinc-600 hover:text-zinc-900"
+                    }`}
                 >
                   <Users
-                    className={`w-5 h-5 flex-shrink-0 ${
-                      isActive("/gruppen") ? "text-zinc-900" : "text-zinc-400"
-                    }`}
+                    className={`w-5 h-5 flex-shrink-0 ${isActive("/gruppen") ? "text-zinc-900" : "text-zinc-400"
+                      }`}
                   />
                   <span className="text-base">Gruppen</span>
                 </Link>
                 <Link
                   href="/coaching"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${
-                    isActive("/coaching")
-                      ? "text-zinc-900 font-medium"
-                      : "text-zinc-600 hover:text-zinc-900"
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${isActive("/coaching")
+                    ? "text-zinc-900 font-medium"
+                    : "text-zinc-600 hover:text-zinc-900"
+                    }`}
                 >
                   <MessageSquare
-                    className={`w-5 h-5 flex-shrink-0 ${
-                      isActive("/coaching") ? "text-zinc-900" : "text-zinc-400"
-                    }`}
+                    className={`w-5 h-5 flex-shrink-0 ${isActive("/coaching") ? "text-zinc-900" : "text-zinc-400"
+                      }`}
                   />
                   <span className="text-base">Coaching</span>
                 </Link>
@@ -268,16 +283,14 @@ export const TopNav = () => {
                   <Link
                     href="/dashboard/lvs"
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${
-                      isDashboardActive()
-                        ? "text-zinc-900 font-medium"
-                        : "text-zinc-600 hover:text-zinc-900"
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98] ${isDashboardActive()
+                      ? "text-zinc-900 font-medium"
+                      : "text-zinc-600 hover:text-zinc-900"
+                      }`}
                   >
                     <GraduationCap
-                      className={`w-5 h-5 flex-shrink-0 ${
-                        isDashboardActive() ? "text-zinc-900" : "text-zinc-400"
-                      }`}
+                      className={`w-5 h-5 flex-shrink-0 ${isDashboardActive() ? "text-zinc-900" : "text-zinc-400"
+                        }`}
                     />
                     <span className="text-base">Dashboard</span>
                   </Link>
