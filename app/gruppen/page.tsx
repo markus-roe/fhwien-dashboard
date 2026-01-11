@@ -10,6 +10,7 @@ import { useGroups } from "@/features/groups/hooks/useGroups";
 import { useCourses } from "@/shared/hooks/useCourses";
 import { useGroupFilters } from "@/features/groups/hooks/useGroupFilters";
 import { useGroupOperations } from "@/features/groups/hooks/useGroupOperations";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { Card, CardContent } from "@/shared/components/ui/Card";
 import { SegmentedTabs } from "@/shared/components/ui/SegmentedTabs";
 import { Input } from "@/shared/components/ui/Input";
@@ -38,6 +39,7 @@ export default function GruppenPage() {
   } = useGroups();
 
   const { courses, loading: coursesLoading } = useCourses();
+  const { user: currentUser } = useCurrentUser();
   const isLoading = groupsLoading || coursesLoading;
 
   // Filtering logic
@@ -65,6 +67,7 @@ export default function GruppenPage() {
     createGroup,
     joinGroup,
     leaveGroup,
+    currentUser,
   });
 
   const handleCreateGroup = async (data: CreateGroupFormData) => {
