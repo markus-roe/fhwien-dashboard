@@ -8,68 +8,87 @@ datasource db {
   provider = "postgresql"
 }
 
-// Enums based on mockData.ts
+//-- Custom datatypes for database schema --//
+//UserRole
 enum UserRole {
   student
   professor
 }
 
+//Program
 enum Program {
   DTI
   DI
 }
 
+//SessionType
 enum SessionType {
   lecture
   workshop
   coaching
 }
 
+//LocationType
 enum LocationType {
   online
   on_campus
 }
 
+//Attendance
 enum Attendance {
   mandatory
   optional
 }
 
+//MaterialType
 enum MaterialType {
   pdf
   presentation
   other
 }
 
-// Models - Normalisiert mit Int IDs
-
+//-- Models - Normalisiert --//
+// Model user with datatypes 
 model User {
+  //auto-incrementing id which is used as primary key
   id       Int       @id @default(autoincrement())
   name     String
   initials String
+  //email must be unique
   email    String    @unique
+  //use of custom datatype (? = optional field)
   program  Program?
+  //use of custom datatype with student as default (? = optional field)
   role     UserRole? @default(student)
 
-  // Relations
+  //Realtions between models
+  //n:n relations
   groups         Group[]        @relation("GroupMembers")
   coachingSlots  CoachingSlot[] @relation("CoachingParticipants")
+  //1:n relation
   sessionsTaught Session[]      @relation("SessionLecturer")
 
+  //additional attributes
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  //indexed columns for faster queries
   @@index([email])
   @@index([role])
 }
 
+//Model Course
 model Course {
+  //auto-incrementing id which is used as primary key
   id       Int       @id @default(autoincrement())
-  code     String    @unique // e.g. "ds", "hti" - human-readable identifier for URLs/API
+  //unique code for course e.g. hti, software ...
+  code     String    @unique
   title    String
-  programs Program[] // Prisma supports arrays for Enums in Postgres
+  //programs to know if for DI or DTI
+  programs Program[]
 
-  // Relations
+  //Relations between models
+  //1:n relations
   sessions      Session[]
   tasks         Task[]
   groups        Group[]
@@ -81,27 +100,36 @@ model Course {
   @@index([code])
 }
 
+//Model Session
 model Session {
+  //auto-incrementing id which is used as primary key
   id       Int         @id @default(autoincrement())
+  //foreign key to course
   courseId Int
+  //relation to course with id from Course mapped to "courseId"
   course   Course      @relation(fields: [courseId], references: [id])
   type     SessionType
   title    String
 
-  // Combined Date and Time
+  //combined date and time
   startDateTime DateTime
   endDateTime   DateTime
 
+  //is on campus or online
   location     String
   locationType LocationType
 
+  //foreign key to lecturer of the session (? = optional)
   lecturerId Int?
+  //relation to lecturer with id from User mapped to "lecturerId" (? = optional)
   lecturer   User? @relation("SessionLecturer", fields: [lecturerId], references: [id])
 
+  //attendance of the session (mandatory or optional)
   attendance Attendance
-  objectives String[] // Simple string array
+  objectives String[]
   isLive     Boolean?   @default(false)
-  groupId    Int? // Optional: if a session is for a specific group
+  //foreign key to group of the session (? = optional)
+  groupId    Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -111,13 +139,16 @@ model Session {
   @@index([lecturerId])
 }
 
+//Model Task
 model Task {
   id       Int    @id @default(autoincrement())
+  //here again foreign key to course with relation mapping below
   courseId Int
   course   Course @relation(fields: [courseId], references: [id])
 
   title     String
   dueDate   DateTime
+  //is the task completed? with default value false
   completed Boolean  @default(false)
 
   createdAt DateTime @default(now())
@@ -127,8 +158,10 @@ model Task {
   @@index([dueDate])
 }
 
+//Model Group
 model Group {
   id       Int    @id @default(autoincrement())
+  //foreign key of course
   courseId Int
   course   Course @relation(fields: [courseId], references: [id])
 
@@ -136,6 +169,7 @@ model Group {
   description String?
   maxMembers  Int?
 
+  //n:n relation
   members User[] @relation("GroupMembers")
 
   createdAt DateTime @default(now())
@@ -144,6 +178,7 @@ model Group {
   @@index([courseId])
 }
 
+//Model CoachingSlot
 model CoachingSlot {
   id       Int    @id @default(autoincrement())
   courseId Int
@@ -155,6 +190,7 @@ model CoachingSlot {
   maxParticipants Int
   description     String?
 
+  //n:n relation
   participants User[] @relation("CoachingParticipants")
 
   createdAt DateTime @default(now())
