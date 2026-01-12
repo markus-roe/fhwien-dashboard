@@ -7,9 +7,9 @@ import type {
   GroupResponse,
   ApiError,
 } from "@/shared/lib/api-types";
-import { currentUser } from "@/shared/data/mockData"; // Keep for fallback if needed, but we should try to use real user
+import { currentUser } from "@/shared/data/mockData";
 
-// Helper
+// hilfsfunktion (db gruppe -> frontend gruppe)
 function mapDbGroupToApiGroup(dbGroup: any): any {
   return {
     id: dbGroup.id.toString(),
@@ -17,11 +17,12 @@ function mapDbGroupToApiGroup(dbGroup: any): any {
     name: dbGroup.name,
     description: dbGroup.description,
     maxMembers: dbGroup.maxMembers,
-    members: dbGroup.members.map((m: any) => m.name), // Map User objects to names array as expected by frontend
+    members: dbGroup.members.map((m: any) => m.name), // nur namen zurückgeben
     createdAt: dbGroup.createdAt,
   };
 }
 
+// get: alle gruppen laden
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<GroupsResponse | ApiError>> {
@@ -31,16 +32,19 @@ export async function GET(
 
     const where: any = {};
     if (courseId) {
+      // kurs suchen
       const course = await prisma.course.findUnique({
         where: { code: courseId },
       });
       if (course) {
         where.courseId = course.id;
       } else {
+        // wenns den kurs nicht gibt, leere liste
         return NextResponse.json([]);
       }
     }
 
+    // gruppen aus der db holen
     const dbGroups = await prisma.group.findMany({
       where,
       include: {
@@ -62,6 +66,7 @@ export async function GET(
   }
 }
 
+// post: neue gruppe erstellen
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<GroupResponse | ApiError>> {
@@ -69,6 +74,7 @@ export async function POST(
     const body = (await request.json()) as CreateGroupRequest;
     const { courseId, name, description, maxMembers } = body;
 
+    // kurze validation
     if (!courseId || !name) {
       return NextResponse.json<ApiError>(
         { error: "Missing required fields" },
@@ -76,6 +82,7 @@ export async function POST(
       );
     }
 
+    // schauen ob kurs existiert
     const course = await prisma.course.findUnique({
       where: { code: courseId },
     });
@@ -87,10 +94,11 @@ export async function POST(
       );
     }
 
-    // Determine current user to add to group
-    // In real app, get from session. For now, find user by email or pick first.
+    // current user finden (der erstellt die gruppe ist also gleich dabei)
+    // in echt über session, hier über mock email
     const user = await prisma.user.findUnique({ where: { email: currentUser.email } }) || await prisma.user.findFirst();
 
+    // gruppe speichern
     const dbGroup = await prisma.group.create({
       data: {
         courseId: course.id,

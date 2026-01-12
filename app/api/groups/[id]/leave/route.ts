@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import type { GroupResponse, ApiError } from "@/shared/lib/api-types";
-import { currentUser } from "@/shared/data/mockData"; // Fallback current user
+import { currentUser } from "@/shared/data/mockData";
 
-// Helper
+// hilfsfunktion (db group -> api group)
 function mapDbGroupToApiGroup(dbGroup: any): any {
   return {
     id: dbGroup.id.toString(),
@@ -16,6 +16,7 @@ function mapDbGroupToApiGroup(dbGroup: any): any {
   };
 }
 
+// post: gruppe verlassen
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -26,6 +27,7 @@ export async function POST(
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
+    // gruppe suchen
     const group = await prisma.group.findUnique({
       where: { id: groupId },
       include: { members: true },
@@ -38,7 +40,7 @@ export async function POST(
       );
     }
 
-    // Get real current user
+    // current user finden
     const dbUser = await prisma.user.findUnique({ where: { email: currentUser.email } }) || await prisma.user.findFirst();
 
     if (!dbUser) {
@@ -48,13 +50,12 @@ export async function POST(
       );
     }
 
-
-    // Remove user from members
+    // user aus der gruppe entfernen
     const updatedGroup = await prisma.group.update({
       where: { id: groupId },
       data: {
         members: {
-          disconnect: { id: dbUser.id },
+          disconnect: { id: dbUser.id }, // verbindung trennen
         },
       },
       include: {

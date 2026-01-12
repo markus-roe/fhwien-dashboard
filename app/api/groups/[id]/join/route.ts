@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import type { GroupResponse, ApiError } from "@/shared/lib/api-types";
-import { currentUser } from "@/shared/data/mockData"; // Fallback current user
+import { currentUser } from "@/shared/data/mockData";
 
-// Helper
+// hilfsfunktion (db group -> api group)
 function mapDbGroupToApiGroup(dbGroup: any): any {
   return {
     id: dbGroup.id.toString(),
@@ -16,6 +16,7 @@ function mapDbGroupToApiGroup(dbGroup: any): any {
   };
 }
 
+// post: gruppe beitreten
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -26,6 +27,7 @@ export async function POST(
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
+    // gruppe laden
     const group = await prisma.group.findUnique({
       where: { id: groupId },
       include: { members: true, course: true },
@@ -38,7 +40,7 @@ export async function POST(
       );
     }
 
-    // Get real current user
+    // current user finden
     const dbUser = await prisma.user.findUnique({ where: { email: currentUser.email } }) || await prisma.user.findFirst();
 
     if (!dbUser) {
@@ -48,7 +50,7 @@ export async function POST(
       );
     }
 
-    // Check if user is already a member
+    // checken ob user schon drin ist
     if (group.members.some((m) => m.id === dbUser.id)) {
       return NextResponse.json<ApiError>(
         { error: "Already a member" },
@@ -56,7 +58,7 @@ export async function POST(
       );
     }
 
-    // Check if group is full
+    // checken ob gruppe schon voll ist
     if (group.maxMembers && group.members.length >= group.maxMembers) {
       return NextResponse.json<ApiError>(
         { error: "Group is full" },
@@ -64,12 +66,12 @@ export async function POST(
       );
     }
 
-    // Add user to members
+    // user hinzufügen
     const updatedGroup = await prisma.group.update({
       where: { id: groupId },
       data: {
         members: {
-          connect: { id: dbUser.id },
+          connect: { id: dbUser.id }, // user verbinden
         },
       },
       include: {

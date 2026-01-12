@@ -8,7 +8,7 @@ import type {
 } from "@/shared/lib/api-types";
 import type { Group } from "@/shared/data/mockData";
 
-// Helper
+// hilfsfunktion (db group -> api group)
 function mapDbGroupToApiGroup(dbGroup: any): any {
   return {
     id: dbGroup.id.toString(),
@@ -21,6 +21,7 @@ function mapDbGroupToApiGroup(dbGroup: any): any {
   };
 }
 
+// get: einzelne gruppe laden
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -31,6 +32,7 @@ export async function GET(
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
+    // gruppe suchen
     const group = await prisma.group.findUnique({
       where: { id: groupId },
       include: {
@@ -56,6 +58,7 @@ export async function GET(
   }
 }
 
+// put: gruppe bearbeiten
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -68,18 +71,8 @@ export async function PUT(
 
     const body = (await request.json()) as UpdateGroupRequest;
 
-    // We don't support updating members directly via PUT in this simplified API, usually done via join/leave?
-    // But usage might imply it. The type has `members?: string[]`.
-    // Mapped mock implementation did update members replacing them? 
-    // `...(members !== undefined && { members }),` in original code.
-    // If members are strings (names), we need to find users by name? That's risky.
-    // For now, let's assume Members update is not primary here, or if it is, we ignore it for safety unless critical.
-    // Actually, looking at original mock code: `if (members !== undefined) updatedGroup.members = members;`
-    // So it allows replacing members list.
-    // Given we have join/leave routes, maybe we can skip full member replacement or assume it's not used frequently.
-    // If strict, we should find users by name.
-
-    const { courseId, name, description, maxMembers } = body; // Ignoring members for now in PUT to avoid complex name matching
+    // wir ignorieren hier mitglieder updates, das geht über join/leave route
+    const { courseId, name, description, maxMembers } = body;
 
     const data: any = {};
     if (name) data.name = name;
@@ -91,6 +84,7 @@ export async function PUT(
       if (course) data.courseId = course.id;
     }
 
+    // update durchführen
     const updatedGroup = await prisma.group.update({
       where: { id: groupId },
       data,
@@ -110,6 +104,7 @@ export async function PUT(
   }
 }
 
+// delete: gruppe löschen
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -120,6 +115,7 @@ export async function DELETE(
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
+    // einfach löschen
     await prisma.group.delete({
       where: { id: groupId },
     });
