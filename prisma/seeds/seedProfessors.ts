@@ -1,6 +1,6 @@
 import { PrismaClient, UserRole } from "../generated/client.js";
 
-// Professor data from mockData.ts
+//create professors const to store data to be seeded
 const professors = [
     {
         name: "Manfred Bornemann",
@@ -54,8 +54,9 @@ const professors = [
     },
 ];
 
+//execute seeding to database with const
 export async function seedProfessors(prisma: PrismaClient) {
-    console.log('👨‍🏫 Seeding professors...');
+    console.log('Seeding professors...');
 
     let count = 0;
 
@@ -78,5 +79,5 @@ export async function seedProfessors(prisma: PrismaClient) {
         count++;
     }
 
-    console.log(`  ✅ Seeded ${count} professors`);
+    console.log(`Seeded ${count} professors`);
 }

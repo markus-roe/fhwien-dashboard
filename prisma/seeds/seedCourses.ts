@@ -39,7 +39,7 @@ const courses = [
     },
 ];
 
-//execute seeding to database with 
+//execute seeding to database with const
 export async function seedCourses(prisma: PrismaClient) {
     console.log('Seeding courses...');
 
