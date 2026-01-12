@@ -9,7 +9,7 @@ import type {
   ApiSuccess,
 } from "@/shared/lib/api-types";
 
-// Helper to map DB user to API user
+// kleine helper funktion (db user -> api user)
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -28,7 +28,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
-// Helper to map DB coaching slot to API format
+// helper um db slot in api format zu wandeln
 function mapDbSlotToApiSlot(dbSlot: {
   id: number;
   startDateTime: Date;
@@ -49,6 +49,7 @@ function mapDbSlotToApiSlot(dbSlot: {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
+  // zeit schön machen (hh:mm)
   const time = start.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
@@ -99,6 +100,7 @@ function mapDbSlotToApiSlot(dbSlot: {
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// get: einzelnen slot laden
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -109,6 +111,7 @@ export async function GET(
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
+    // slot suchen mit allen infos
     const slot = await prisma.coachingSlot.findUnique({
       where: { id: slotId },
       include: {
@@ -173,6 +176,7 @@ export async function GET(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// put: slot bearbeiten
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -185,6 +189,7 @@ export async function PUT(
 
     const body = (await request.json()) as UpdateCoachingSlotRequest;
 
+    // schauen obs den slot gibt
     const existingSlot = await prisma.coachingSlot.findUnique({
       where: { id: slotId },
     });
@@ -222,7 +227,7 @@ export async function PUT(
       data.courseId = courseId;
     }
 
-    // Handle date/time
+    // datum und zeit updaten wenn nötig
     let newStart = new Date(existingSlot.startDateTime);
     let newEnd = new Date(existingSlot.endDateTime);
     let dateChanged = false;
@@ -251,7 +256,7 @@ export async function PUT(
       data.endDateTime = newEnd;
     }
 
-    // Handle participants update if provided (array of user IDs)
+    // teilnehmer updaten (liste von user ids)
     if (participants !== undefined) {
       const matches = participants
         .filter((id) => typeof id === "number" && !isNaN(id))
@@ -259,6 +264,7 @@ export async function PUT(
       data.participants = { set: matches };
     }
 
+    // slot speichern
     const updatedSlot = await prisma.coachingSlot.update({
       where: { id: slotId },
       data,
@@ -305,6 +311,7 @@ export async function PUT(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// delete: slot löschen
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -315,6 +322,7 @@ export async function DELETE(
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
+    // einfach löschen
     await prisma.coachingSlot.delete({
       where: { id: slotId },
     });

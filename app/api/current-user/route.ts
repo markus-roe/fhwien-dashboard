@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/shared/lib/auth";
 import type { UserResponse, ApiError, Program, UserRole } from "@/shared/lib/api-types";
 
-// Helper to map User to API user
+// helper: user zu api user mappen
 function mapUserToApiUser(user: {
   id: number;
   name: string;
@@ -35,6 +35,7 @@ function mapUserToApiUser(user: {
  *             schema:
  *               $ref: '#/components/schemas/UserResponse'
  */
+// get: aktuellen user laden (fake login)
 export async function GET(): Promise<NextResponse<UserResponse | ApiError>> {
   try {
     const user = await getCurrentUser();

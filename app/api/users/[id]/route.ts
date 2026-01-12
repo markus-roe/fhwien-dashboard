@@ -10,7 +10,7 @@ import type {
   UserRole,
 } from "@/shared/lib/api-types";
 
-// Helper function to map DB user to API user format
+// kleine funktion (db user -> api user)
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -56,6 +56,7 @@ function mapDbUserToApiUser(dbUser: {
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// get: user laden per id
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -131,6 +132,7 @@ export async function GET(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// put: user bearbeiten
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -198,7 +200,7 @@ export async function PUT(
  *           type: string
  *         description: User ID
  *     responses:
- *       200:
+ *       201:
  *         description: User deleted successfully
  *         content:
  *           application/json:
@@ -211,6 +213,7 @@ export async function PUT(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// delete: user löschen
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

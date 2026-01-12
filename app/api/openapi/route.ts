@@ -1,6 +1,7 @@
 import { createSwaggerSpec } from "next-swagger-doc";
 import { commonSchemas } from "@/app/api-docs/schemas";
 
+// get: swagger json holen
 export async function GET() {
   const spec = createSwaggerSpec({
     definition: {

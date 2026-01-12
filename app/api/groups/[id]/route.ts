@@ -9,7 +9,7 @@ import type {
   ApiSuccess,
 } from "@/shared/lib/api-types";
 
-// Helper to map DB user to API user
+// helper: db user -> api user
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -28,7 +28,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
-// Helper to map DB group to API format
+// helper: db group -> api group
 function mapDbGroupToApiGroup(dbGroup: {
   id: number;
   name: string;
@@ -83,6 +83,7 @@ function mapDbGroupToApiGroup(dbGroup: {
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// get: gruppe anzeigen
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -157,6 +158,7 @@ export async function GET(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// put: gruppe bearbeiten
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -186,7 +188,7 @@ export async function PUT(
       data.courseId = courseId;
     }
 
-    // Handle members update if provided (array of user IDs)
+    // mitglieder updaten wenn gewollt
     if (members !== undefined) {
       const matches = members
         .filter((id) => typeof id === "number" && !isNaN(id))
@@ -240,6 +242,7 @@ export async function PUT(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// delete: gruppe löschen
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

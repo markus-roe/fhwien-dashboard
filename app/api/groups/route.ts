@@ -10,6 +10,7 @@ import type {
 } from "@/shared/lib/api-types";
 
 // Helper to map DB user to API user
+// helper: db user zu api user
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -28,7 +29,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
-// Helper to map DB group to API format
+// helper: db group zu api group
 function mapDbGroupToApiGroup(dbGroup: {
   id: number;
   name: string;
@@ -78,6 +79,7 @@ function mapDbGroupToApiGroup(dbGroup: {
  *               items:
  *                 $ref: '#/components/schemas/GroupResponse'
  */
+// get: alle gruppen holen
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<GroupsResponse | ApiError>> {
@@ -137,6 +139,7 @@ export async function GET(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// post: neue gruppe erstellen
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<GroupResponse | ApiError>> {

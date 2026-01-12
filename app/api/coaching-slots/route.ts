@@ -8,7 +8,7 @@ import type {
   ApiError,
 } from "@/shared/lib/api-types";
 
-// Helper to map DB user to API user
+// kleine funktion um db user in api user umzuwandeln
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -27,7 +27,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
-// Helper to map DB coaching slot to API format
+// funktion um db slot in das api format zu bringen
 function mapDbSlotToApiSlot(dbSlot: {
   id: number;
   startDateTime: Date;
@@ -48,6 +48,7 @@ function mapDbSlotToApiSlot(dbSlot: {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
+  // uhrzeit formatieren (hh:mm)
   const time = start.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
@@ -93,6 +94,7 @@ function mapDbSlotToApiSlot(dbSlot: {
  *               items:
  *                 $ref: '#/components/schemas/CoachingSlotResponse'
  */
+// get: alle coaching slots laden
 export async function GET(
 ): Promise<NextResponse<CoachingSlot[] | ApiError>> {
   try {
@@ -142,6 +144,7 @@ export async function GET(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// post: neuen slot erstellen
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<CoachingSlot | ApiError>> {
@@ -157,6 +160,7 @@ export async function POST(
       description,
     } = body;
 
+    // validation: schauen ob alles da ist
     if (!courseId || !date || !time || !endTime || maxParticipants === undefined) {
       return NextResponse.json<ApiError>(
         { error: "Missing required fields" },
@@ -164,6 +168,7 @@ export async function POST(
       );
     }
 
+    // kurs suchen
     const course = await prisma.course.findUnique({
       where: { id: courseId },
     });
@@ -175,7 +180,7 @@ export async function POST(
       );
     }
 
-    // Construct DateTimes
+    // datum und zeit zusammenbauen für db
     const dateObj = new Date(date);
     const [startHour, startMinute] = time.split(":").map(Number);
     const [endHour, endMinute] = endTime.split(":").map(Number);
@@ -186,11 +191,12 @@ export async function POST(
     const endDateTime = new Date(dateObj);
     endDateTime.setHours(endHour, endMinute, 0, 0);
 
-    // Build connect array for participants (expecting user IDs as numbers)
+    // teilnehmer verknüpfen (wir erwarten user ids)
     const connectParticipants = participants
       .filter((id) => typeof id === "number" && !isNaN(id))
       .map((id) => ({ id }));
 
+    // slot in db speichern
     const dbSlot = await prisma.coachingSlot.create({
       data: {
         courseId: course.id,

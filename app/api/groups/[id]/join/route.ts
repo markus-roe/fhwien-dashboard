@@ -7,7 +7,7 @@ import type {
   ApiError,
 } from "@/shared/lib/api-types";
 
-// Helper to map DB user to API user
+// helper: db user -> api user
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -26,7 +26,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
-// Helper to map DB group to API format
+// helper: db group -> api group format
 function mapDbGroupToApiGroup(dbGroup: {
   id: number;
   name: string;
@@ -96,7 +96,14 @@ function mapDbGroupToApiGroup(dbGroup: {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
+ *       404:
+ *         description: Group not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  */
+// post: gruppe beitreten
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -129,7 +136,7 @@ export async function POST(
       );
     }
 
-    // Check if user is already a member
+    // schauen ob user schon dabei ist
     if (group.members.some((m) => m.id === userId)) {
       return NextResponse.json<ApiError>(
         { error: "Already a member" },
@@ -137,7 +144,7 @@ export async function POST(
       );
     }
 
-    // Check if group is full
+    // prüfen ob gruppe voll ist
     if (group.maxMembers && group.members.length >= group.maxMembers) {
       return NextResponse.json<ApiError>(
         { error: "Group is full" },
@@ -145,7 +152,7 @@ export async function POST(
       );
     }
 
-    // Add user to members
+    // user hinzufügen
     const updatedGroup = await prisma.group.update({
       where: { id: groupId },
       data: {

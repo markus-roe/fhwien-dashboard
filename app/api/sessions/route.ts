@@ -46,9 +46,9 @@ function mapDbSessionToApiSession(dbSession: {
 
   const lecturer: UserRef | undefined = dbSession.lecturer
     ? {
-        name: dbSession.lecturer.name,
-        initials: dbSession.lecturer.initials,
-      }
+      name: dbSession.lecturer.name,
+      initials: dbSession.lecturer.initials,
+    }
     : undefined;
 
   return {
