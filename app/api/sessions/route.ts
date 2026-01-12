@@ -10,20 +10,12 @@ import type {
 } from "@/shared/lib/api-types";
 import type { Session } from "@/shared/data/mockData";
 
-// Helper to map DB session to API session
+// hilfsfunktion (datenbank session -> api session)
 function mapDbSessionToApiSession(dbSession: any): Session {
-  // Format date as "YYYY-MM-DD" or ISO string as expected by client?
-  // Mock data used Date objects that were often serialized.
-  // We'll keep date as Date object, but times are strings "HH:mm"
-
-  // We need to extract time from startDateTime if needed, but the model has separate fields?
-  // Checking schema: startDateTime and endDateTime are DateTime.
-  // But our API expects separate date, time, endTime strings and a Duration string.
-
   const start = new Date(dbSession.startDateTime);
   const end = new Date(dbSession.endDateTime);
 
-  // Format time as HH:mm
+  // uhrzeit formatieren (hh:mm)
   const time = start.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
@@ -34,8 +26,8 @@ function mapDbSessionToApiSession(dbSession: any): Session {
   });
 
   return {
-    id: dbSession.id.toString(), // API expects string ID
-    courseId: dbSession.course.code, // API expects course code (e.g. "ds")
+    id: dbSession.id.toString(), // id muss string sein für api
+    courseId: dbSession.course.code, // kurs code (z.b. "ds")
     type: dbSession.type,
     title: dbSession.title,
     date: start,
@@ -46,7 +38,7 @@ function mapDbSessionToApiSession(dbSession: any): Session {
     locationType: dbSession.locationType,
     attendance: dbSession.attendance,
     objectives: dbSession.objectives,
-    materials: [], // Materials not yet fully implemented in DB model or related table? Schema doesn't show materials relation yet.
+    materials: [], // materialien haben wir noch nicht in der db
     groupId: dbSession.groupId?.toString(),
     lecturer: dbSession.lecturer
       ? {
@@ -58,6 +50,7 @@ function mapDbSessionToApiSession(dbSession: any): Session {
   };
 }
 
+// get: alle sessions holen
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<SessionsResponse | ApiError>> {
@@ -67,7 +60,7 @@ export async function GET(
 
     const where: any = {};
     if (courseId) {
-      // Find course by code to get ID
+      // kurs suchen um id zu bekommen
       const course = await prisma.course.findUnique({
         where: { code: courseId },
       });
@@ -75,17 +68,18 @@ export async function GET(
       if (course) {
         where.courseId = course.id;
       } else {
-        return NextResponse.json([]); // Return empty if course code not found
+        return NextResponse.json([]); // wenn kurs nicht gefunden, leere liste
       }
     }
 
+    // sessions aus der db laden
     const dbSessions = await prisma.session.findMany({
       where,
       include: {
         course: true,
         lecturer: true,
       },
-      orderBy: { startDateTime: "asc" },
+      orderBy: { startDateTime: "asc" }, // sortieren
     });
 
     const sessions = dbSessions.map(mapDbSessionToApiSession);
@@ -100,6 +94,7 @@ export async function GET(
   }
 }
 
+// post: neue session erstellen
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<SessionResponse | ApiError>> {
@@ -116,10 +111,11 @@ export async function POST(
       locationType,
       attendance = "mandatory",
       objectives = [],
-      materials = [], // ignored for now
+      materials = [], // wird noch ignoriert
       groupId,
     } = body;
 
+    // validation (schauen ob alles da ist)
     if (!courseId || !title || !date || !time || !endTime || !location) {
       return NextResponse.json<ApiError>(
         { error: "Missing required fields" },
@@ -127,7 +123,7 @@ export async function POST(
       );
     }
 
-    // Resolve course code to ID
+    // kurs finden
     const course = await prisma.course.findUnique({
       where: { code: courseId },
     });
@@ -139,7 +135,7 @@ export async function POST(
       );
     }
 
-    // Construct DataTime objects
+    // datum und zeit zusammenbauen
     const dateObj = new Date(date);
     const [startHour, startMinute] = time.split(":").map(Number);
     const [endHour, endMinute] = endTime.split(":").map(Number);
@@ -150,7 +146,7 @@ export async function POST(
     const endDateTime = new Date(dateObj);
     endDateTime.setHours(endHour, endMinute, 0, 0);
 
-    // Create session
+    // session speichern
     const dbSession = await prisma.session.create({
       data: {
         courseId: course.id,
@@ -163,7 +159,6 @@ export async function POST(
         attendance: attendance as any,
         objectives,
         groupId: groupId ? parseInt(groupId) : undefined,
-        // lecturerId: ... we skip assuming current user or specific logic later
       },
       include: {
         course: true,

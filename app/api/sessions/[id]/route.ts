@@ -9,8 +9,8 @@ import type {
 } from "@/shared/lib/api-types";
 import type { Session } from "@/shared/data/mockData";
 
-// Reuse map function via copy or shared util if possible, but for now copying inline to avoid file jumps for user.
-// (Better practice: extract to shared util, but user asked for these routes specifically)
+// mapping funktion (datenbank session -> api session)
+// sollte eigentlich in einer datei sein, aber ich habe sie kopiert damit es einfacher ist
 function mapDbSessionToApiSession(dbSession: any): Session {
   const start = new Date(dbSession.startDateTime);
   const end = new Date(dbSession.endDateTime);
@@ -49,6 +49,7 @@ function mapDbSessionToApiSession(dbSession: any): Session {
   };
 }
 
+// get: session details laden
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -84,6 +85,7 @@ export async function GET(
   }
 }
 
+// put: session bearbeiten
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -96,7 +98,7 @@ export async function PUT(
 
     const body = (await request.json()) as UpdateSessionRequest;
 
-    // We need current session to update times correctly if only one is provided
+    // alte session holen für die zeit berechnung
     const existingSession = await prisma.session.findUnique({
       where: { id: sessionId },
     });
@@ -137,10 +139,7 @@ export async function PUT(
       if (course) data.courseId = course.id;
     }
 
-    // Handle date/time update
-    // Logic: if date changes, update both start/end. If time changes, update start/end time components.
-    // This is complex because we split them.
-
+    // zeiten updaten (ziemlich kompliziert weil wir datum und zeit trennen)
     let newStart = new Date(existingSession.startDateTime);
     let newEnd = new Date(existingSession.endDateTime);
     let dateChanged = false;
@@ -169,6 +168,7 @@ export async function PUT(
       data.endDateTime = newEnd;
     }
 
+    // session in db updaten
     const updatedSession = await prisma.session.update({
       where: { id: sessionId },
       data,
@@ -185,6 +185,7 @@ export async function PUT(
   }
 }
 
+// delete: session löschen
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
