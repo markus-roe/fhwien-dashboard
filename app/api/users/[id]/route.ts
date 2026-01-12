@@ -8,7 +8,7 @@ import type {
 } from "@/shared/lib/api-types";
 import type { User } from "@/shared/data/mockData";
 
-// Helper function to map DB user to API user format
+// kleine funktion um db user in api user umzuwandeln (kopiert)
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -27,7 +27,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
-// Get a user by id
+// get: einen user mit id laden
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -35,6 +35,7 @@ export async function GET(
   try {
     const userId = parseInt(params.id, 10);
 
+    // checken ob id zahl ist
     if (isNaN(userId)) {
       return NextResponse.json<ApiError>(
         { error: "Invalid user ID" },
@@ -42,6 +43,7 @@ export async function GET(
       );
     }
 
+    // user suchen
     const dbUser = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -64,6 +66,7 @@ export async function GET(
   }
 }
 
+// put: user bearbeiten
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -81,6 +84,7 @@ export async function PUT(
     const body = (await request.json()) as UpdateUserRequest;
     const { name, email, program, initials, role } = body;
 
+    // nur das updaten was auch geschickt wurde
     const updateData: any = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
@@ -88,6 +92,7 @@ export async function PUT(
     if (initials) updateData.initials = initials;
     if (role) updateData.role = role.toLowerCase();
 
+    // update in datenbank machen
     const dbUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
@@ -110,6 +115,7 @@ export async function PUT(
   }
 }
 
+// delete: user löschen
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -124,6 +130,7 @@ export async function DELETE(
       );
     }
 
+    // einfach löschen
     await prisma.user.delete({
       where: { id: userId },
     });

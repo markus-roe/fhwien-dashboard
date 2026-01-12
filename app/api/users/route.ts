@@ -9,7 +9,7 @@ import type {
 } from "@/shared/lib/api-types";
 import type { User } from "@/shared/data/mockData";
 
-// Helper function to map DB user to API user format
+// kleine funktion um db user in api user umzuwandeln
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -28,6 +28,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
+// get: alle user holen (kann auch suchen)
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<UsersResponse | ApiError>> {
@@ -44,25 +45,29 @@ export async function GET(
       query.search = search;
     }
 
-    // Build Prisma query
+    // hier bauen wir die suchanfrage für prisma zusammen
     const where: any = {};
 
+    // filter nach studiengang (außer wenn "all" ausgewählt ist)
     if (query.program && query.program !== "all") {
       where.program = query.program.toUpperCase();
     }
 
+    // filter nach textsuche (name oder email)
     if (query.search) {
       where.OR = [
-        { name: { contains: query.search, mode: "insensitive" } },
+        { name: { contains: query.search, mode: "insensitive" } }, // insensitive heißt groß/klein egal
         { email: { contains: query.search, mode: "insensitive" } },
       ];
     }
 
+    // datenbank abfragen
     const dbUsers = await prisma.user.findMany({
       where,
-      orderBy: { name: "asc" },
+      orderBy: { name: "asc" }, // alphabetisch sortieren
     });
 
+    // alle user umwandeln
     const filteredUsers = dbUsers.map(mapDbUserToApiUser);
 
     return NextResponse.json<UsersResponse>(filteredUsers);
@@ -75,7 +80,7 @@ export async function GET(
   }
 }
 
-// create new user
+// post: neuen user erstellen
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<UserResponse | ApiError>> {
@@ -83,6 +88,7 @@ export async function POST(
     const body = (await request.json()) as CreateUserRequest;
     const { name, email, program, initials, role = "student" } = body;
 
+    // prüfen ob alles da ist
     if (!name || !email || !program) {
       return NextResponse.json<ApiError>(
         { error: "Missing required fields" },
@@ -90,7 +96,7 @@ export async function POST(
       );
     }
 
-    // Check if user with email already exists
+    // schauen ob es die email schon gibt
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -102,11 +108,13 @@ export async function POST(
       );
     }
 
+    // user in datenbank schreiben
     const dbUser = await prisma.user.create({
       data: {
         name,
         email,
         program: program.toUpperCase() as "DTI" | "DI",
+        // initialen automatisch generieren wenn keine da sind
         initials: initials || name.substring(0, 2).toUpperCase(),
         role: role.toLowerCase() as "student" | "professor",
       },
