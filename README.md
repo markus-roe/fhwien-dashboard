@@ -4,21 +4,12 @@
 
 Dieses Projekt wurde im Rahmen des Software Engineering Kurses an der FH Wien entwickelt.
 
-### Projektstruktur
+### Team
 
-**Pair Programming** Teams:
-
-- **Pair 1 (Frontend)**: Entwicklung der Frontend-Anwendung mit Next.js und TypeScript
-
-  - Benutzeroberfläche für alle Bereiche (Dashboard, Schedule, Gruppen, Coaching)
-  - UI-Komponenten und Design-System
-  - Client-seitige Logik und State-Management
-  - Responsive Design und Mobile-Optimierung
-
-- **Pair 2 (Backend)**: Entwicklung des Backend-Systems
-  - API-Endpoints für alle Datenoperationen
-  - Datenbank-Integration
-  - Business-Logik und Datenvalidierung
+- Johannes Liebacher
+- Markus Rösner
+- Melanie Trautenberger
+- ÖZDEMIR Öznur
 
 ### Projektbeschreibung
 
@@ -26,19 +17,43 @@ Ein modernes Dashboard-System für die FH Wien, entwickelt für das DTI/DI-Progr
 
 **Architektur:**
 
-1. **Frontend (Pair 1)**: Vollständige React/Next.js-Anwendung mit allen Benutzeroberflächen
+- React/Next.js-Anwendung mit TypeScript
+- RESTful API-Endpoints für CRUD-Operationen
+- Datenbank-Schema und Migrations (Prisma)
+- Authentifizierung und Rollenverwaltung (NextAuth)
+- Responsive Design für alle Geräte
+- Dashboard für Professoren/Admins
+- Schedule/Kalender für Studierende
+- Gruppen-Verwaltung
+- Coaching-Terminbuchung
 
-   - Dashboard für Professoren/Admins
-   - Schedule/Kalender für Studierende
-   - Gruppen-Verwaltung
-   - Coaching-Terminbuchung
-   - Responsive Design für alle Geräte
+## Tech Stack
 
-2. **Backend (Pair 2)**: RESTful API und Datenbank-System
-   - API-Endpoints für CRUD-Operationen
-   - Datenbank-Schema und Migrations
-   - Authentifizierung und Rollenverwaltung
-   - Datenvalidierung und Business-Logik
+### Frontend
+- **Next.js 14** - React Framework mit App Router
+- **TypeScript** - Typsichere Entwicklung
+- **React 18** - UI-Bibliothek
+- **Tailwind CSS** - Utility-first CSS Framework
+- **TanStack Query** - Daten-Fetching und State Management
+- **Lucide React** - Icon-Bibliothek
+- **date-fns** - Datums- und Zeitmanipulation
+
+### Backend
+- **Next.js API Routes** - Serverless API-Endpoints
+- **Prisma** - ORM für Datenbankzugriffe
+- **PostgreSQL** - Relationale Datenbank
+- **NextAuth.js** - Authentifizierung und Session-Management
+- **bcryptjs** - Passwort-Hashing
+
+### Tools & Libraries
+- **Swagger/OpenAPI** - API-Dokumentation
+- **ESLint** - Code-Linting
+
+## API Dokumentation
+
+Die vollständige API-Dokumentation ist unter `/api-docs` verfügbar. Sie bietet eine interaktive Übersicht aller verfügbaren Endpoints, Request/Response-Schemas und Beispielanfragen.
+
+Die OpenAPI-Spezifikation kann unter `/api/openapi` im JSON-Format abgerufen werden.
 
 ## Features
 
@@ -79,3 +94,80 @@ Ein modernes Dashboard-System für die FH Wien, entwickelt für das DTI/DI-Progr
 
 - Name und E-Mail bearbeiten
 - Passwort ändern
+
+## Voraussetzungen
+
+Für die lokale Einrichtung des Projekts werden benötigt:
+
+- **Node.js** (Version 18 oder höher)
+- **pnpm** oder **npm** als Package Manager
+- **PostgreSQL** Datenbank (lokal oder remote)
+- **Git** für Versionskontrolle
+
+## Umgebungsvariablen
+
+Eine `.env` Datei wird im Root-Verzeichnis des Projekts mit folgenden Variablen erstellt:
+
+```env
+# Datenbank
+DATABASE_URL="postgresql://user:password@localhost:5432/database_name"
+
+# NextAuth
+NEXTAUTH_SECRET="your-secret-key-here"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+**Wichtig:**
+- `DATABASE_URL`: PostgreSQL-Verbindungsstring für die Datenbank
+- `NEXTAUTH_SECRET`: Ein zufälliger, sicherer String für die Session-Verschlüsselung (kann mit `openssl rand -base64 32` generiert werden)
+- `NEXTAUTH_URL`: Die Basis-URL der Anwendung (für lokale Entwicklung: `http://localhost:3000`)
+
+## Installation & Setup
+
+1. **Repository klonen**
+   ```bash
+   git clone <repository-url>
+   cd fhwien-dashboard
+   ```
+
+2. **Dependencies installieren**
+   ```bash
+   pnpm install
+   # oder
+   npm install
+   ```
+
+3. **Umgebungsvariablen konfigurieren**
+   - Eine `.env` Datei wird erstellt (siehe Abschnitt "Umgebungsvariablen")
+   - Alle erforderlichen Variablen werden ausgefüllt
+
+4. **Datenbank einrichten**
+   ```bash
+   # Prisma Client generieren
+   npx prisma generate
+   
+   # Datenbank-Migrationen ausführen
+   npx prisma migrate deploy
+   # oder für Development
+   npx prisma migrate dev
+   
+   # Optional: Datenbank mit Seed-Daten füllen
+   npx prisma db seed
+   ```
+
+5. **Entwicklungsserver starten**
+   ```bash
+   pnpm dev
+   # oder
+   npm run dev
+   ```
+
+6. **Anwendung öffnen**
+   - Die Anwendung wird unter [http://localhost:3000](http://localhost:3000) im Browser geöffnet
+
+### Verfügbare Scripts
+
+- `pnpm dev` - Startet den Entwicklungsserver
+- `pnpm build` - Erstellt eine Production-Build
+- `pnpm start` - Startet den Production-Server
+- `pnpm lint` - Führt ESLint aus

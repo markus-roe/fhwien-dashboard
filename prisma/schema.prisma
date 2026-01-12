@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  student
+  professor
+  admin
+}
+
+//Program
+enum Program {
+  DTI
+  DI
+}
+
+//SessionType
+enum SessionType {
+  lecture
+  workshop
+  coaching
+}
+
+//LocationType
+enum LocationType {
+  online
+  on_campus
+}
+
+//Attendance
+enum Attendance {
+  mandatory
+  optional
+}
+
+//MaterialType
+enum MaterialType {
+  pdf
+  presentation
+  other
+}
+
+//-- Models - Normalisiert --//
+// Model user with datatypes 
+model User {
+  //auto-incrementing id which is used as primary key
+  id       Int       @id @default(autoincrement())
+  name     String
+  initials String
+  //email must be unique
+  email    String    @unique
+  password String?   // Hashed password for authentication
+  program  Program?
+  //use of custom datatype with student as default (? = optional field)
+  role     UserRole? @default(student)
+
+  //Realtions between models
+  //n:n relations
+  groups         Group[]        @relation("GroupMembers")
+  coachingSlots  CoachingSlot[] @relation("CoachingParticipants")
+  //1:n relation
+  sessionsTaught Session[]      @relation("SessionLecturer")
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoggedIn DateTime?
+
+  //indexed columns for faster queries
+  @@index([email])
+  @@index([role])
+}
+
+//Model Course
+model Course {
+  //auto-incrementing id which is used as primary key
+  id       Int       @id @default(autoincrement())
+  //unique code for course e.g. hti, software ...
+  code     String    @unique
+  title    String
+  //programs to know if for DI or DTI
+  programs Program[]
+
+  //Relations between models
+  //1:n relations
+  sessions      Session[]
+  tasks         Task[]
+  groups        Group[]
+  coachingSlots CoachingSlot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+}
+
+//Model Session
+model Session {
+  //auto-incrementing id which is used as primary key
+  id       Int         @id @default(autoincrement())
+  //foreign key to course
+  courseId Int
+  //relation to course with id from Course mapped to "courseId"
+  course   Course      @relation(fields: [courseId], references: [id])
+  type     SessionType
+  title    String
+
+  //combined date and time
+  startDateTime DateTime
+  endDateTime   DateTime
+
+  //is on campus or online
+  location     String
+  locationType LocationType
+
+  //foreign key to lecturer of the session (? = optional)
+  lecturerId Int?
+  //relation to lecturer with id from User mapped to "lecturerId" (? = optional)
+  lecturer   User? @relation("SessionLecturer", fields: [lecturerId], references: [id])
+
+  //attendance of the session (mandatory or optional)
+  attendance Attendance
+  objectives String[]
+  isLive     Boolean?   @default(false)
+  //foreign key to group of the session (? = optional)
+  groupId    Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([startDateTime])
+  @@index([lecturerId])
+}
+
+//Model Task
+model Task {
+  id       Int    @id @default(autoincrement())
+  //here again foreign key to course with relation mapping below
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+
+  title     String
+  dueDate   DateTime
+  //is the task completed? with default value false
+  completed Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([dueDate])
+}
+
+//Model Group
+model Group {
+  id       Int    @id @default(autoincrement())
+  //foreign key of course
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+
+  name        String
+  description String?
+  maxMembers  Int?
+
+  //n:n relation
+  members User[] @relation("GroupMembers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+//Model CoachingSlot
+model CoachingSlot {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+
+  startDateTime DateTime
+  endDateTime   DateTime
+
+  maxParticipants Int
+  description     String?
+
+  //n:n relation
+  participants User[] @relation("CoachingParticipants")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([startDateTime])
+}

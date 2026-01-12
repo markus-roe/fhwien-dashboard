@@ -1,48 +1,138 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockUsers, type User, type Program } from "@/data/mockData";
+import { prisma } from "@/shared/lib/prisma";
 import type {
   CreateUserRequest,
   GetUsersQuery,
   UsersResponse,
   UserResponse,
+  User,
   ApiError,
-} from "@/lib/api-types";
+  Program,
+} from "@/shared/lib/api-types";
 
-let users: User[] = [...mockUsers];
+// Helper function to map DB user to API user format
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
+  return {
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
+}
 
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     parameters:
+ *       - in: query
+ *         name: program
+ *         schema:
+ *           type: string
+ *         description: Filter by program (e.g., "DTI", "all")
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search users by name or email
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/UserResponse'
+ */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<UsersResponse | ApiError>> {
-  const searchParams = request.nextUrl.searchParams;
-  const program = searchParams.get("program");
-  const search = searchParams.get("search");
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const program = searchParams.get("program");
+    const search = searchParams.get("search");
 
-  const query: GetUsersQuery = {};
-  if (program) {
-    query.program = program as GetUsersQuery["program"];
-  }
-  if (search) {
-    query.search = search;
-  }
+    const query: GetUsersQuery = {};
+    if (program) {
+      query.program = program as GetUsersQuery["program"];
+    }
+    if (search) {
+      query.search = search;
+    }
 
-  let filteredUsers = users;
+    // Build Prisma query
+    interface WhereClause {
+      program?: Program;
+      OR?: Array<{ name?: { contains: string; mode: "insensitive" }; email?: { contains: string; mode: "insensitive" } }>;
+    }
+    const where: WhereClause = {};
 
-  if (query.program && query.program !== "all") {
-    filteredUsers = filteredUsers.filter((u) => u.program === query.program);
-  }
+    if (query.program && query.program !== "all") {
+      where.program = query.program;
+    }
 
-  if (query.search) {
-    const searchLower = query.search.toLowerCase();
-    filteredUsers = filteredUsers.filter(
-      (u) =>
-        u.name.toLowerCase().includes(searchLower) ||
-        u.email.toLowerCase().includes(searchLower)
+    if (query.search) {
+      where.OR = [
+        { name: { contains: query.search, mode: "insensitive" } },
+        { email: { contains: query.search, mode: "insensitive" } },
+      ];
+    }
+
+    const dbUsers = await prisma.user.findMany({
+      where,
+      orderBy: { name: "asc" },
+    });
+
+    const filteredUsers = dbUsers.map(mapDbUserToApiUser);
+
+    return NextResponse.json<UsersResponse>(filteredUsers);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return NextResponse.json<ApiError>(
+      { error: "Failed to fetch users" },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json<UsersResponse>(filteredUsers);
 }
 
+/**
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Create a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateUserRequest'
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserResponse'
+ *       400:
+ *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<UserResponse | ApiError>> {
@@ -57,22 +147,36 @@ export async function POST(
       );
     }
 
-    const newUser: User = {
-      id: `u-${Date.now()}`,
-      name,
-      email,
-      program: program as Program,
-      initials: initials || name.substring(0, 2).toUpperCase(),
-      role: role as User["role"],
-    };
+    // Check if user with email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    users.push(newUser);
+    if (existingUser) {
+      return NextResponse.json<ApiError>(
+        { error: "User with this email already exists" },
+        { status: 409 }
+      );
+    }
+
+    const dbUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        program: program.toUpperCase() as "DTI" | "DI",
+        initials: initials || name.substring(0, 2).toUpperCase(),
+        role: role.toLowerCase() as "student" | "professor",
+      },
+    });
+
+    const newUser = mapDbUserToApiUser(dbUser);
 
     return NextResponse.json<UserResponse>(newUser, { status: 201 });
   } catch (error) {
+    console.error("Error creating user:", error);
     return NextResponse.json<ApiError>(
-      { error: "Invalid request body" },
-      { status: 400 }
+      { error: "Failed to create user" },
+      { status: 500 }
     );
   }
 }

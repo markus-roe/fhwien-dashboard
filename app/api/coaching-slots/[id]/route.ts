@@ -1,51 +1,201 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  mockCoachingSlots,
-  mockUsers,
-  type CoachingSlot,
-} from "@/data/mockData";
-import { calculateDuration } from "@/lib/dashboardUtils";
+import { prisma } from "@/shared/lib/prisma";
+import { calculateDuration } from "@/shared/lib/dashboardUtils";
 import type {
   UpdateCoachingSlotRequest,
-  CoachingSlotResponse,
+  CoachingSlot,
+  User,
   ApiError,
   ApiSuccess,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
-let coachingSlots: CoachingSlot[] = [...mockCoachingSlots];
+// Helper to map DB user to API user
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
+  return {
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
+}
 
+// Helper to map DB coaching slot to API format
+function mapDbSlotToApiSlot(dbSlot: {
+  id: number;
+  startDateTime: Date;
+  endDateTime: Date;
+  maxParticipants: number;
+  description: string | null;
+  createdAt: Date;
+  course: { id: number };
+  participants: Array<{
+    id: number;
+    name: string;
+    initials: string;
+    email: string;
+    program: string | null;
+    role: string | null;
+  }>;
+}): CoachingSlot {
+  const start = new Date(dbSlot.startDateTime);
+  const end = new Date(dbSlot.endDateTime);
+
+  const time = start.toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const endTime = end.toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return {
+    id: dbSlot.id,
+    courseId: dbSlot.course.id,
+    date: start,
+    time: time,
+    endTime: endTime,
+    duration: calculateDuration(time, endTime),
+    maxParticipants: dbSlot.maxParticipants,
+    participants: dbSlot.participants.map(mapDbUserToApiUser),
+    description: dbSlot.description ?? undefined,
+    createdAt: dbSlot.createdAt,
+  };
+}
+
+/**
+ * @swagger
+ * /api/coaching-slots/{id}:
+ *   get:
+ *     summary: Get a coaching slot by ID
+ *     tags: [Coaching Slots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Coaching slot ID
+ *     responses:
+ *       200:
+ *         description: Coaching slot details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CoachingSlotResponse'
+ *       404:
+ *         description: Coaching slot not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
-): Promise<NextResponse<CoachingSlotResponse | ApiError>> {
-  const slot = coachingSlots.find((s) => s.id === params.id);
-
-  if (!slot) {
-    return NextResponse.json<ApiError>(
-      { error: "Coaching slot not found" },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json<CoachingSlotResponse>(slot);
-}
-
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse<CoachingSlotResponse | ApiError>> {
+): Promise<NextResponse<CoachingSlot | ApiError>> {
   try {
-    const body = (await request.json()) as UpdateCoachingSlotRequest;
-    const slotIndex = coachingSlots.findIndex((s) => s.id === params.id);
+    const slotId = parseInt(params.id, 10);
+    if (isNaN(slotId)) {
+      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
+    }
 
-    if (slotIndex === -1) {
+    const slot = await prisma.coachingSlot.findUnique({
+      where: { id: slotId },
+      include: {
+        course: true,
+        participants: true,
+      },
+    });
+
+    if (!slot) {
       return NextResponse.json<ApiError>(
         { error: "Coaching slot not found" },
         { status: 404 }
       );
     }
 
-    const existingSlot = coachingSlots[slotIndex];
+    return NextResponse.json<CoachingSlot>(mapDbSlotToApiSlot(slot));
+  } catch (error) {
+    console.error("Error fetching coaching slot:", error);
+    return NextResponse.json<ApiError>(
+      { error: "Failed to fetch coaching slot" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/coaching-slots/{id}:
+ *   put:
+ *     summary: Update a coaching slot
+ *     tags: [Coaching Slots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Coaching slot ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateCoachingSlotRequest'
+ *     responses:
+ *       200:
+ *         description: Coaching slot updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CoachingSlotResponse'
+ *       400:
+ *         description: Bad request - invalid request body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       404:
+ *         description: Coaching slot not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse<CoachingSlot | ApiError>> {
+  try {
+    const slotId = parseInt(params.id, 10);
+    if (isNaN(slotId)) {
+      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    const body = (await request.json()) as UpdateCoachingSlotRequest;
+
+    const existingSlot = await prisma.coachingSlot.findUnique({
+      where: { id: slotId },
+    });
+
+    if (!existingSlot) {
+      return NextResponse.json<ApiError>(
+        { error: "Coaching slot not found" },
+        { status: 404 }
+      );
+    }
+
     const {
       courseId,
       date,
@@ -56,61 +206,131 @@ export async function PUT(
       description,
     } = body;
 
-    // Convert participant IDs to names if provided
-    let participantNames = existingSlot.participants;
+    interface UpdateData {
+      maxParticipants?: number;
+      description?: string;
+      courseId?: number;
+      startDateTime?: Date;
+      endDateTime?: Date;
+      participants?: { set: Array<{ id: number }> };
+    }
+    const data: UpdateData = {};
+    if (maxParticipants !== undefined) data.maxParticipants = maxParticipants;
+    if (description !== undefined) data.description = description;
+
+    if (courseId) {
+      data.courseId = courseId;
+    }
+
+    // Handle date/time
+    let newStart = new Date(existingSlot.startDateTime);
+    let newEnd = new Date(existingSlot.endDateTime);
+    let dateChanged = false;
+
+    if (date) {
+      const d = new Date(date);
+      newStart.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
+      newEnd.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
+      dateChanged = true;
+    }
+
+    if (time) {
+      const [h, m] = time.split(":").map(Number);
+      newStart.setHours(h, m, 0, 0);
+      dateChanged = true;
+    }
+
+    if (endTime) {
+      const [h, m] = endTime.split(":").map(Number);
+      newEnd.setHours(h, m, 0, 0);
+      dateChanged = true;
+    }
+
+    if (dateChanged) {
+      data.startDateTime = newStart;
+      data.endDateTime = newEnd;
+    }
+
+    // Handle participants update if provided (array of user IDs)
     if (participants !== undefined) {
-      participantNames = participants
-        .map((id: string) => {
-          const user = mockUsers.find((u) => u.id === id);
-          return user?.name;
-        })
-        .filter((name): name is string => !!name);
+      const matches = participants
+        .filter((id) => typeof id === "number" && !isNaN(id))
+        .map((id) => ({ id }));
+      data.participants = { set: matches };
     }
 
-    const updatedSlot: CoachingSlot = {
-      ...existingSlot,
-      ...(courseId && { courseId }),
-      ...(date && { date: new Date(date) }),
-      ...(time && { time }),
-      ...(endTime && { endTime }),
-      ...(maxParticipants !== undefined && { maxParticipants }),
-      ...(participants !== undefined && { participants: participantNames }),
-      ...(description !== undefined && { description }),
-    };
+    const updatedSlot = await prisma.coachingSlot.update({
+      where: { id: slotId },
+      data,
+      include: {
+        course: true,
+        participants: true,
+      },
+    });
 
-    // Recalculate duration if time changed
-    if (time || endTime) {
-      updatedSlot.duration = calculateDuration(
-        updatedSlot.time,
-        updatedSlot.endTime
-      );
-    }
-
-    coachingSlots[slotIndex] = updatedSlot;
-
-    return NextResponse.json<CoachingSlotResponse>(updatedSlot);
+    return NextResponse.json<CoachingSlot>(mapDbSlotToApiSlot(updatedSlot));
   } catch (error) {
+    console.error("Error updating coaching slot:", error);
     return NextResponse.json<ApiError>(
-      { error: "Invalid request body" },
-      { status: 400 }
+      { error: "Failed to update coaching slot" },
+      { status: 500 }
     );
   }
 }
 
+/**
+ * @swagger
+ * /api/coaching-slots/{id}:
+ *   delete:
+ *     summary: Delete a coaching slot
+ *     tags: [Coaching Slots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Coaching slot ID
+ *     responses:
+ *       200:
+ *         description: Coaching slot deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiSuccess'
+ *       404:
+ *         description: Coaching slot not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse<ApiSuccess | ApiError>> {
-  const slotIndex = coachingSlots.findIndex((s) => s.id === params.id);
+  try {
+    const slotId = parseInt(params.id, 10);
+    if (isNaN(slotId)) {
+      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
+    }
 
-  if (slotIndex === -1) {
+    await prisma.coachingSlot.delete({
+      where: { id: slotId },
+    });
+
+    return NextResponse.json<ApiSuccess>({ success: true });
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
+      return NextResponse.json<ApiError>(
+        { error: "Coaching slot not found" },
+        { status: 404 }
+      );
+    }
+    console.error("Error deleting coaching slot:", error);
     return NextResponse.json<ApiError>(
-      { error: "Coaching slot not found" },
-      { status: 404 }
+      { error: "Failed to delete coaching slot" },
+      { status: 500 }
     );
   }
-
-  coachingSlots = coachingSlots.filter((s) => s.id !== params.id);
-
-  return NextResponse.json<ApiSuccess>({ success: true });
 }

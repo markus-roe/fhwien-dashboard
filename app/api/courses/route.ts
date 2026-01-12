@@ -1,29 +1,66 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockCourses } from "@/data/mockData";
+import { prisma } from "@/shared/lib/prisma";
 import type {
-  GetCoursesQuery,
   CoursesResponse,
-} from "@/lib/api-types";
+  Course,
+  Program,
+  ApiError,
+} from "@/shared/lib/api-types";
 
+/**
+ * @swagger
+ * /api/courses:
+ *   get:
+ *     summary: Get all courses
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: program
+ *         schema:
+ *           type: string
+ *         description: Filter courses by program
+ *     responses:
+ *       200:
+ *         description: List of courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CourseResponse'
+ */
 export async function GET(
   request: NextRequest
-): Promise<NextResponse<CoursesResponse>> {
-  const searchParams = request.nextUrl.searchParams;
-  const program = searchParams.get("program");
+): Promise<NextResponse<CoursesResponse | ApiError>> {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const program = searchParams.get("program");
 
-  const query: GetCoursesQuery = {};
-  if (program) {
-    query.program = program as GetCoursesQuery["program"];
-  }
+    const where: { programs?: { has: Program } } = {};
 
-  let filteredCourses = mockCourses;
+    if (program) {
+      where.programs = {
+        has: program as Program,
+      };
+    }
 
-  if (query.program) {
-    filteredCourses = mockCourses.filter((c) =>
-      c.program.includes(query.program!)
+    const dbCourses = await prisma.course.findMany({
+      where,
+      orderBy: { title: "asc" },
+    });
+
+    const courses: Course[] = dbCourses.map((c) => ({
+      id: c.id,
+      title: c.title,
+      program: c.programs,
+    }));
+
+    return NextResponse.json<CoursesResponse>(courses);
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    return NextResponse.json<ApiError>(
+      { error: "Failed to fetch courses" },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json<CoursesResponse>(filteredCourses);
 }
-

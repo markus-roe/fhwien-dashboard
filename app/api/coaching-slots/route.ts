@@ -1,43 +1,150 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  mockCoachingSlots,
-  mockUsers,
-  type CoachingSlot,
-} from "@/data/mockData";
-import { calculateDuration } from "@/lib/dashboardUtils";
+import { prisma } from "@/shared/lib/prisma";
+import { calculateDuration } from "@/shared/lib/dashboardUtils";
 import type {
   CreateCoachingSlotRequest,
-  GetCoachingSlotsQuery,
-  CoachingSlotsResponse,
-  CoachingSlotResponse,
+  CoachingSlot,
+  User,
   ApiError,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
-let coachingSlots: CoachingSlot[] = [...mockCoachingSlots];
-
-export async function GET(
-  request: NextRequest
-): Promise<NextResponse<CoachingSlotsResponse | ApiError>> {
-  const searchParams = request.nextUrl.searchParams;
-  const courseId = searchParams.get("courseId");
-
-  const query: GetCoachingSlotsQuery = {};
-  if (courseId) {
-    query.courseId = courseId;
-  }
-
-  let filteredSlots = coachingSlots;
-
-  if (query.courseId) {
-    filteredSlots = coachingSlots.filter((s) => s.courseId === query.courseId);
-  }
-
-  return NextResponse.json(filteredSlots);
+// Helper to map DB user to API user
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
+  return {
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
 }
 
+// Helper to map DB coaching slot to API format
+function mapDbSlotToApiSlot(dbSlot: {
+  id: number;
+  startDateTime: Date;
+  endDateTime: Date;
+  maxParticipants: number;
+  description: string | null;
+  createdAt: Date;
+  course: { id: number };
+  participants: Array<{
+    id: number;
+    name: string;
+    initials: string;
+    email: string;
+    program: string | null;
+    role: string | null;
+  }>;
+}): CoachingSlot {
+  const start = new Date(dbSlot.startDateTime);
+  const end = new Date(dbSlot.endDateTime);
+
+  const time = start.toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const endTime = end.toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return {
+    id: dbSlot.id,
+    courseId: dbSlot.course.id,
+    date: start,
+    time: time,
+    endTime: endTime,
+    duration: calculateDuration(time, endTime),
+    maxParticipants: dbSlot.maxParticipants,
+    participants: dbSlot.participants.map(mapDbUserToApiUser),
+    description: dbSlot.description ?? undefined,
+    createdAt: dbSlot.createdAt,
+  };
+}
+
+/**
+ * @swagger
+ * /api/coaching-slots:
+ *   get:
+ *     summary: Get all coaching slots
+ *     tags: [Coaching Slots]
+ *     parameters:
+ *       - in: query
+ *         name: courseId
+ *         schema:
+ *           type: string
+ *         description: Filter coaching slots by course ID
+ *     responses:
+ *       200:
+ *         description: List of coaching slots
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CoachingSlotResponse'
+ */
+export async function GET(
+): Promise<NextResponse<CoachingSlot[] | ApiError>> {
+  try {
+    const dbSlots = await prisma.coachingSlot.findMany({
+      include: {
+        course: true,
+        participants: true,
+      },
+      orderBy: { startDateTime: "asc" },
+    });
+
+    const slots = dbSlots.map(mapDbSlotToApiSlot);
+
+    return NextResponse.json<CoachingSlot[]>(slots);
+  } catch (error) {
+    console.error("Error fetching coaching slots:", error);
+    return NextResponse.json<ApiError>(
+      { error: "Failed to fetch coaching slots" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/coaching-slots:
+ *   post:
+ *     summary: Create a new coaching slot
+ *     tags: [Coaching Slots]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateCoachingSlotRequest'
+ *     responses:
+ *       201:
+ *         description: Coaching slot created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CoachingSlotResponse'
+ *       400:
+ *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest
-): Promise<NextResponse<CoachingSlotResponse | ApiError>> {
+): Promise<NextResponse<CoachingSlot | ApiError>> {
   try {
     const body = (await request.json()) as CreateCoachingSlotRequest;
     const {
@@ -50,42 +157,66 @@ export async function POST(
       description,
     } = body;
 
-    if (!courseId || !date || !time || !endTime || !maxParticipants) {
+    if (!courseId || !date || !time || !endTime || maxParticipants === undefined) {
       return NextResponse.json<ApiError>(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Convert participant IDs to names
-    const participantNames = participants
-      .map((id: string) => {
-        const user = mockUsers.find((u) => u.id === id);
-        return user?.name;
-      })
-      .filter((name): name is string => !!name);
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
 
-    const newSlot: CoachingSlot = {
-      id: `cs-${Date.now()}`,
-      courseId,
-      date: new Date(date),
-      time,
-      endTime,
-      duration: calculateDuration(time, endTime),
-      maxParticipants,
-      participants: participantNames,
-      description,
-      createdAt: new Date(),
-    };
+    if (!course) {
+      return NextResponse.json<ApiError>(
+        { error: "Course not found" },
+        { status: 404 }
+      );
+    }
 
-    coachingSlots.push(newSlot);
+    // Construct DateTimes
+    const dateObj = new Date(date);
+    const [startHour, startMinute] = time.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
 
-    return NextResponse.json<CoachingSlotResponse>(newSlot, { status: 201 });
+    const startDateTime = new Date(dateObj);
+    startDateTime.setHours(startHour, startMinute, 0, 0);
+
+    const endDateTime = new Date(dateObj);
+    endDateTime.setHours(endHour, endMinute, 0, 0);
+
+    // Build connect array for participants (expecting user IDs as numbers)
+    const connectParticipants = participants
+      .filter((id) => typeof id === "number" && !isNaN(id))
+      .map((id) => ({ id }));
+
+    const dbSlot = await prisma.coachingSlot.create({
+      data: {
+        courseId: course.id,
+        startDateTime,
+        endDateTime,
+        maxParticipants,
+        description,
+        participants:
+          connectParticipants.length > 0
+            ? { connect: connectParticipants }
+            : undefined,
+      },
+      include: {
+        course: true,
+        participants: true,
+      },
+    });
+
+    const newSlot = mapDbSlotToApiSlot(dbSlot);
+
+    return NextResponse.json<CoachingSlot>(newSlot, { status: 201 });
   } catch (error) {
+    console.error("Error creating coaching slot:", error);
     return NextResponse.json<ApiError>(
-      { error: "Invalid request body" },
-      { status: 400 }
+      { error: "Failed to create coaching slot" },
+      { status: 500 }
     );
   }
 }
-

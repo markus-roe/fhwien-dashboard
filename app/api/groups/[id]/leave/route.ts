@@ -1,32 +1,148 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockGroups, currentUser, type Group } from "@/data/mockData";
+import { prisma } from "@/shared/lib/prisma";
 import type {
   GroupResponse,
+  Group,
+  User,
   ApiError,
-} from "@/lib/api-types";
+} from "@/shared/lib/api-types";
 
-let groups: Group[] = [...mockGroups];
+// Helper to map DB user to API user
+function mapDbUserToApiUser(dbUser: {
+  id: number;
+  name: string;
+  initials: string;
+  email: string;
+  program: string | null;
+  role: string | null;
+}): User {
+  return {
+    id: dbUser.id,
+    name: dbUser.name,
+    initials: dbUser.initials,
+    email: dbUser.email,
+    program: (dbUser.program as "DTI" | "DI") || "DTI",
+    role: (dbUser.role as "student" | "professor") || "student",
+  };
+}
 
+// Helper to map DB group to API format
+function mapDbGroupToApiGroup(dbGroup: {
+  id: number;
+  name: string;
+  description: string | null;
+  maxMembers: number | null;
+  createdAt: Date;
+  course: { id: number };
+  members: Array<{
+    id: number;
+    name: string;
+    initials: string;
+    email: string;
+    program: string | null;
+    role: string | null;
+  }>;
+}): Group {
+  return {
+    id: dbGroup.id,
+    courseId: dbGroup.course.id,
+    name: dbGroup.name,
+    description: dbGroup.description ?? undefined,
+    maxMembers: dbGroup.maxMembers ?? undefined,
+    members: dbGroup.members.map(mapDbUserToApiUser),
+    createdAt: dbGroup.createdAt,
+  };
+}
+
+/**
+ * @swagger
+ * /api/groups/{id}/leave:
+ *   post:
+ *     summary: Leave a group
+ *     tags: [Groups]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Group ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: number
+ *                 description: User ID to leave the group
+ *     responses:
+ *       200:
+ *         description: Successfully left the group
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GroupResponse'
+ *       404:
+ *         description: Group not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse<GroupResponse | ApiError>> {
-  const groupIndex = groups.findIndex((g) => g.id === params.id);
+  try {
+    const groupId = parseInt(params.id, 10);
+    if (isNaN(groupId)) {
+      return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
+    }
 
-  if (groupIndex === -1) {
+    const body = await request.json();
+    const userId = body.userId as number;
+
+    if (!userId || isNaN(userId)) {
+      return NextResponse.json<ApiError>(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
+      include: { members: true },
+    });
+
+    if (!group) {
+      return NextResponse.json<ApiError>(
+        { error: "Group not found" },
+        { status: 404 }
+      );
+    }
+
+    // Remove user from members
+    const updatedGroup = await prisma.group.update({
+      where: { id: groupId },
+      data: {
+        members: {
+          disconnect: { id: userId },
+        },
+      },
+      include: {
+        course: true,
+        members: true,
+      },
+    });
+
+    return NextResponse.json<GroupResponse>(mapDbGroupToApiGroup(updatedGroup));
+  } catch (error) {
+    console.error("Error leaving group:", error);
     return NextResponse.json<ApiError>(
-      { error: "Group not found" },
-      { status: 404 }
+      { error: "Failed to leave group" },
+      { status: 500 }
     );
   }
-
-  const group = groups[groupIndex];
-
-  // Remove user from members
-  groups[groupIndex] = {
-    ...group,
-    members: group.members.filter((m) => m !== currentUser.name),
-  };
-
-  return NextResponse.json<GroupResponse>(groups[groupIndex]);
 }
