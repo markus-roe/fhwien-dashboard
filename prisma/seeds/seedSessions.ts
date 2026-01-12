@@ -6,7 +6,7 @@ import {
 } from "../generated/client.js";
 import { getCourseIdByCode } from "./seedCourses.js";
 
-// Session data - uses course codes, will be resolved to IDs at runtime
+//session data object structure
 interface SessionData {
     courseCode: string;
     type: SessionType;
@@ -19,7 +19,7 @@ interface SessionData {
     objectives: string[];
 }
 
-// All sessions from mockData.ts
+//create sessions const to store data to be seeded
 const sessions: SessionData[] = [
     {
         courseCode: "networks",
@@ -332,21 +332,22 @@ const sessions: SessionData[] = [
     },
 ];
 
+//execute seeding to database with const
 export async function seedSessions(prisma: PrismaClient) {
-    console.log('📅 Seeding sessions...');
+    console.log('Seeding sessions...');
 
     let count = 0;
 
     for (const session of sessions) {
-        // Get course ID by code
+        //get course ID by code
         const courseId = await getCourseIdByCode(prisma, session.courseCode);
 
         if (!courseId) {
-            console.warn(`  ⚠️ Skipping session "${session.title}": Course "${session.courseCode}" not found`);
+            console.warn(`Skipping session "${session.title}": Course "${session.courseCode}" not found`);
             continue;
         }
 
-        // Check if session already exists (by unique combination of courseId, title, startDateTime)
+        //check if session already exist by courseid, title and startdatetime
         const existingSession = await prisma.session.findFirst({
             where: {
                 courseId,
@@ -356,7 +357,7 @@ export async function seedSessions(prisma: PrismaClient) {
         });
 
         if (existingSession) {
-            // Update existing session
+            //update existing session
             await prisma.session.update({
                 where: { id: existingSession.id },
                 data: {
@@ -369,7 +370,7 @@ export async function seedSessions(prisma: PrismaClient) {
                 },
             });
         } else {
-            // Create new session
+            //create new session
             await prisma.session.create({
                 data: {
                     courseId,
@@ -387,5 +388,5 @@ export async function seedSessions(prisma: PrismaClient) {
         count++;
     }
 
-    console.log(`  ✅ Seeded ${count} sessions`);
+    console.log(`Seeded ${count} sessions`);
 }
