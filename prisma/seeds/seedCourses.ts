@@ -1,6 +1,6 @@
 import { PrismaClient, Program } from "../generated/client.js";
 
-// Course data with new structure (code instead of id)
+//create courses const to store data to be seeded
 const courses = [
     {
         code: "ds",
@@ -39,8 +39,9 @@ const courses = [
     },
 ];
 
+//execute seeding to database with 
 export async function seedCourses(prisma: PrismaClient) {
-    console.log('📖 Seeding courses...');
+    console.log('Seeding courses...');
 
     let count = 0;
 
@@ -60,7 +61,7 @@ export async function seedCourses(prisma: PrismaClient) {
         count++;
     }
 
-    console.log(`  ✅ Seeded ${count} courses`);
+    console.log(`Seeded ${count} courses`);
 }
 
 // Helper function to get course ID by code

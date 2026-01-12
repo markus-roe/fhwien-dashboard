@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/client.js";
 
-// Import all seed functions
+//Import all seed functions decomment already created ones if second run necessary
 //import { seedStudents } from "./seeds/seedStudents.js";
 //import { seedProfessors } from "./seeds/seedProfessors.js";
 //import { seedCourses } from "./seeds/seedCourses.js";
@@ -13,6 +13,7 @@ config();
 
 const connectionString = process.env.DATABASE_URL!;
 
+//Errorhandler if no connection string is found
 if (!connectionString) {
     throw new Error("DATABASE_URL environment variable is not set");
 }
