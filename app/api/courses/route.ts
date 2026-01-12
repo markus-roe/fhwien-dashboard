@@ -6,6 +6,7 @@ import type {
   ApiError,
 } from "@/shared/lib/api-types";
 
+// get: alle kurse laden
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<CoursesResponse | ApiError>> {
@@ -15,20 +16,23 @@ export async function GET(
 
     const where: any = {};
 
+    // wenn ein studiengang ausgewählt ist, nur diese kurse zeigen
     if (program) {
-      // Prisma supports checking if array contains value
+      // prisma "has" benutzen weil programs ein array ist
       where.programs = {
         has: program.toUpperCase(),
       };
     }
 
+    // sortiert nach titel ausgeben
     const dbCourses = await prisma.course.findMany({
       where,
       orderBy: { title: "asc" },
     });
 
+    // kurse für das frontend vorbereiten
     const courses = dbCourses.map((c) => ({
-      id: c.code, // We use 'code' field as the ID for API compatibility (e.g. "ds", "hti")
+      id: c.code, // wir nehmen den code als id (z.b. "ds" oder "hti")
       title: c.title,
       program: c.programs as any[],
     }));
