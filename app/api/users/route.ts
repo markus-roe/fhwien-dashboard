@@ -10,7 +10,7 @@ import type {
   Program,
 } from "@/shared/lib/api-types";
 
-// Helper function to map DB user to API user format
+// funktion für db user -> api user
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -56,6 +56,7 @@ function mapDbUserToApiUser(dbUser: {
  *               items:
  *                 $ref: '#/components/schemas/UserResponse'
  */
+// get: alle user holen
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<UsersResponse | ApiError>> {
@@ -72,7 +73,7 @@ export async function GET(
       query.search = search;
     }
 
-    // Build Prisma query
+    // prisma query bauen
     interface WhereClause {
       program?: Program;
       OR?: Array<{ name?: { contains: string; mode: "insensitive" }; email?: { contains: string; mode: "insensitive" } }>;
@@ -133,6 +134,7 @@ export async function GET(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// post: neuen user anlegen
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<UserResponse | ApiError>> {
@@ -140,6 +142,7 @@ export async function POST(
     const body = (await request.json()) as CreateUserRequest;
     const { name, email, program, initials, role = "student" } = body;
 
+    // felder prüfen
     if (!name || !email || !program) {
       return NextResponse.json<ApiError>(
         { error: "Missing required fields" },
@@ -147,7 +150,7 @@ export async function POST(
       );
     }
 
-    // Check if user with email already exists
+    // schauen obs den user schon gibt (email check)
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -159,6 +162,7 @@ export async function POST(
       );
     }
 
+    // user erstellen
     const dbUser = await prisma.user.create({
       data: {
         name,

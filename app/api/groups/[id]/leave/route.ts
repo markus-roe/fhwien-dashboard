@@ -7,7 +7,7 @@ import type {
   ApiError,
 } from "@/shared/lib/api-types";
 
-// Helper to map DB user to API user
+// helper: db user zu api user
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -26,7 +26,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
-// Helper to map DB group to API format
+// helper: db group zu api group
 function mapDbGroupToApiGroup(dbGroup: {
   id: number;
   name: string;
@@ -84,6 +84,12 @@ function mapDbGroupToApiGroup(dbGroup: {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/GroupResponse'
+ *       400:
+ *         description: Bad request - user ID missing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  *       404:
  *         description: Group not found
  *         content:
@@ -91,6 +97,7 @@ function mapDbGroupToApiGroup(dbGroup: {
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// post: gruppe verlassen
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -123,7 +130,7 @@ export async function POST(
       );
     }
 
-    // Remove user from members
+    // user entfernen
     const updatedGroup = await prisma.group.update({
       where: { id: groupId },
       data: {

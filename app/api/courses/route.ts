@@ -29,6 +29,7 @@ import type {
  *               items:
  *                 $ref: '#/components/schemas/CourseResponse'
  */
+// get: alle kurse holen (optional nach studiengang filtern)
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<CoursesResponse | ApiError>> {
@@ -49,6 +50,8 @@ export async function GET(
       orderBy: { title: "asc" },
     });
 
+    // mappen (wir nehmen die id als id, aber im frontend vielleicht code?)
+    // hier nehmen wir id
     const courses: Course[] = dbCourses.map((c) => ({
       id: c.id,
       title: c.title,

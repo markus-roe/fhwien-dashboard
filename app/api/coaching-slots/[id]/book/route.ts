@@ -47,6 +47,7 @@ function mapDbSlotToApiSlot(dbSlot: {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
+  // zeit (hh:mm)
   const time = start.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
@@ -113,6 +114,7 @@ function mapDbSlotToApiSlot(dbSlot: {
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// post: slot buchen (jemanden einschreiben)
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -133,6 +135,7 @@ export async function POST(
       );
     }
 
+    // slot suchen
     const slot = await prisma.coachingSlot.findUnique({
       where: { id: slotId },
       include: {
@@ -148,7 +151,7 @@ export async function POST(
       );
     }
 
-    // Check if slot is full (0 means unlimited)
+    // prüfen ob voll ist (0 heißt unbegrenzt)
     if (slot.maxParticipants > 0 && slot.participants.length >= slot.maxParticipants) {
       return NextResponse.json<ApiError>(
         { error: "Slot is full" },
@@ -156,7 +159,7 @@ export async function POST(
       );
     }
 
-    // Check if user is already booked
+    // schauen ob user schon dabei ist
     if (slot.participants.some((p) => p.id === userId)) {
       return NextResponse.json<ApiError>(
         { error: "Already booked" },
@@ -164,7 +167,7 @@ export async function POST(
       );
     }
 
-    // Add user to participants
+    // user hinzufuegen
     const updatedSlot = await prisma.coachingSlot.update({
       where: { id: slotId },
       data: {

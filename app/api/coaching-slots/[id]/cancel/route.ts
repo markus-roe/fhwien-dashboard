@@ -47,6 +47,7 @@ function mapDbSlotToApiSlot(dbSlot: {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
+  // zeit (hh:mm)
   const time = start.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
@@ -107,6 +108,7 @@ function mapDbSlotToApiSlot(dbSlot: {
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// post: buchung stornieren
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -127,6 +129,7 @@ export async function POST(
       );
     }
 
+    // slot suchen
     const slot = await prisma.coachingSlot.findUnique({
       where: { id: slotId },
       include: {
@@ -142,7 +145,7 @@ export async function POST(
       );
     }
 
-    // Remove user from participants
+    // user rausnehmen aus der liste
     const updatedSlot = await prisma.coachingSlot.update({
       where: { id: slotId },
       data: {

@@ -13,7 +13,7 @@ import type {
   ApiSuccess,
 } from "@/shared/lib/api-types";
 
-// Helper to map DB session to API session
+// helper: db session -> api session
 function mapDbSessionToApiSession(dbSession: {
   id: number;
   type: SessionType;
@@ -35,6 +35,7 @@ function mapDbSessionToApiSession(dbSession: {
   const start = new Date(dbSession.startDateTime);
   const end = new Date(dbSession.endDateTime);
 
+  // uhrzeit formatieren (hh:mm)
   const time = start.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
@@ -46,9 +47,9 @@ function mapDbSessionToApiSession(dbSession: {
 
   const lecturer: UserRef | undefined = dbSession.lecturer
     ? {
-        name: dbSession.lecturer.name,
-        initials: dbSession.lecturer.initials,
-      }
+      name: dbSession.lecturer.name,
+      initials: dbSession.lecturer.initials,
+    }
     : undefined;
 
   return {
@@ -97,7 +98,14 @@ function mapDbSessionToApiSession(dbSession: {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
+ *       400:
+ *         description: Invalid ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  */
+// get: session holen
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -172,6 +180,7 @@ export async function GET(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
+// put: session updaten
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -234,7 +243,7 @@ export async function PUT(
       data.courseId = courseId;
     }
 
-    // Handle date/time update
+    // zeit update (kompliziert)
     let newStart = new Date(existingSession.startDateTime);
     let newEnd = new Date(existingSession.endDateTime);
     let dateChanged = false;
@@ -305,7 +314,14 @@ export async function PUT(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
+ *       400:
+ *         description: Invalid ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  */
+// delete: weg damit
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
