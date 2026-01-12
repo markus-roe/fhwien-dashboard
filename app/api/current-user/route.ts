@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import type { UserResponse, ApiError } from "@/shared/lib/api-types";
 
-// Helper to map DB user to API user
+// hilfsfunktion (db user -> frontend)
 function mapDbUserToApiUser(dbUser: any): any {
   return {
     id: dbUser.id,
@@ -16,8 +16,8 @@ function mapDbUserToApiUser(dbUser: any): any {
 
 export async function GET(): Promise<NextResponse<UserResponse | ApiError>> {
   try {
-    // For now, we just get the first user to simulate a logged-in user
-    // In a real app, this would get the user from the session
+    // wir nehmen einfach den ersten user zum testen als eingeloggten user
+    // später kommt das aus der session
     const dbUser = await prisma.user.findFirst();
 
     if (!dbUser) {
