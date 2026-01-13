@@ -68,7 +68,7 @@ export default function UebersichtPage() {
 
     // Hilfsfunktion: Kurs anhand der ID finden
     const getCourseById = (courseId: string) => {
-        return courses.find((course) => course.id === courseId);
+        return courses.find((course) => course.id === Number(courseId));
     };
 
     // Countdown-Timer bis zum Studienabschluss (19. Juni 2027)
@@ -224,7 +224,7 @@ export default function UebersichtPage() {
                                         ) : (
                                             // Wenn Gruppen vorhanden: Jede Gruppe als Karte anzeigen
                                             userGroups.map((group) => {
-                                                const course = getCourseById(group.courseId);
+                                                const course = getCourseById(group.courseId.toString());
                                                 return (
                                                     <Link
                                                         key={group.id}
@@ -284,7 +284,7 @@ export default function UebersichtPage() {
                                         ) : (
                                             // Wenn Coachings vorhanden: Jedes Coaching als Karte anzeigen
                                             upcomingCoachings.map((coaching) => {
-                                                const course = getCourseById(coaching.courseId);
+                                                const course = getCourseById(coaching.courseId.toString());
                                                 return (
                                                     <Link
                                                         key={coaching.id}
