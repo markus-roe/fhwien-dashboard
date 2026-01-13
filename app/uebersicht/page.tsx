@@ -11,12 +11,13 @@
 "use client";
 
 // Icons und UI-Komponenten importieren
-import { Users, MessageSquare, Clock } from "lucide-react";
+import { Users, MessageSquare, Clock, GraduationCap } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/shared/components/ui/Card";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
 import { SessionPanel } from "@/features/schedule/components/SessionPanel";
 import { useSessionPanel } from "@/features/schedule/components/hooks/useSessionPanel";
+import { useState, useEffect } from "react";
 
 // Hooks zum Laden der Daten von der API
 import { useGroups } from "@/features/groups/hooks/useGroups";
@@ -69,6 +70,48 @@ export default function UebersichtPage() {
     const getCourseById = (courseId: string) => {
         return courses.find((course) => course.id === courseId);
     };
+
+    // Countdown-Timer bis zum Studienabschluss (19. Juni 2027)
+    const graduationDate = new Date("2027-06-19T00:00:00");
+
+    // State für den Countdown (wird jede Minute aktualisiert)
+    const [timeLeft, setTimeLeft] = useState({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+    });
+
+    // Funktion: Berechnet die verbleibende Zeit bis zum Abschluss
+    const calculateTimeLeft = () => {
+        const now = new Date();
+        const difference = graduationDate.getTime() - now.getTime();
+
+        // Wenn das Datum in der Vergangenheit liegt, zeige 0
+        if (difference <= 0) {
+            return { days: 0, hours: 0, minutes: 0 };
+        }
+
+        // Berechne Tage, Stunden und Minuten
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+
+        return { days, hours, minutes };
+    };
+
+    // useEffect: Aktualisiert den Countdown jede Minute
+    useEffect(() => {
+        // Sofort beim Laden berechnen
+        setTimeLeft(calculateTimeLeft());
+
+        // Dann jede Minute neu berechnen
+        const timer = setInterval(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 60000); // 60000ms = 1 Minute
+
+        // Cleanup: Timer stoppen, wenn Komponente unmountet wird
+        return () => clearInterval(timer);
+    }, []);
 
     // Lade-Animation anzeigen, solange Daten noch geladen werden
     if (isLoading) {
@@ -277,6 +320,54 @@ export default function UebersichtPage() {
                         </CardContent>
                     </Card>
                 </div>
+            </div>
+
+            {/* Countdown-Timer bis zum Studienabschluss (unten rechts fixiert) */}
+            <div className="fixed bottom-6 right-6 z-30">
+                <Card className="shadow-lg border-[#012f64]/20">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            {/* Icon */}
+                            <div className="p-2 bg-[#012f64] rounded-lg">
+                                <GraduationCap className="w-5 h-5 text-white" />
+                            </div>
+
+                            {/* Countdown-Informationen */}
+                            <div>
+                                <p className="text-xs text-zinc-600 font-medium mb-1">
+                                    Bis zum Abschluss
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    {/* Tage */}
+                                    <div className="text-center">
+                                        <p className="text-lg font-bold text-[#012f64]">
+                                            {timeLeft.days}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-500">Tage</p>
+                                    </div>
+                                    <span className="text-zinc-400">:</span>
+
+                                    {/* Stunden */}
+                                    <div className="text-center">
+                                        <p className="text-lg font-bold text-[#012f64]">
+                                            {timeLeft.hours}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-500">Std</p>
+                                    </div>
+                                    <span className="text-zinc-400">:</span>
+
+                                    {/* Minuten */}
+                                    <div className="text-center">
+                                        <p className="text-lg font-bold text-[#012f64]">
+                                            {timeLeft.minutes}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-500">Min</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Session-Detail-Panel (öffnet sich beim Klick auf einen Termin in der Sidebar) */}
