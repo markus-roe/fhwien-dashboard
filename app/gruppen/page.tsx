@@ -56,7 +56,7 @@ export default function GruppenPage() {
     courses,
     selectedCourseId,
     searchQuery,
-    currentUser, // Echten User übergeben
+    currentUser: currentUser!, // Echten User übergeben
   });
 
   // Group operations
