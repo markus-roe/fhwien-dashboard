@@ -29,6 +29,9 @@ export default function GruppenPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
 
+  // Aktuellen User von der API laden
+  const { user: currentUser, loading: userLoading } = useCurrentUser();
+
   // Always fetch all groups, filter client-side
   const {
     groups: allGroups,
@@ -39,10 +42,9 @@ export default function GruppenPage() {
   } = useGroups();
 
   const { courses, loading: coursesLoading } = useCourses();
-  const { user: currentUser } = useCurrentUser();
   const isLoading = groupsLoading || coursesLoading;
 
-  // Filtering logic
+  // Filtering logic - jetzt mit echtem currentUser
   const {
     totalGroupCount,
     courseGroupCounts,
@@ -54,6 +56,7 @@ export default function GruppenPage() {
     courses,
     selectedCourseId,
     searchQuery,
+    currentUser, // Echten User übergeben
   });
 
   // Group operations

@@ -6,7 +6,7 @@ type UseGroupFiltersProps = {
   courses: Course[];
   selectedCourseId: number | null;
   searchQuery: string;
-  currentUser?: User;
+  currentUser: User;
 };
 
 export function useGroupFilters({
@@ -55,6 +55,7 @@ export function useGroupFilters({
     return filtered;
   }, [selectedCourseId, allGroups, searchQuery, courses]);
 
+  // Nur Gruppen filtern, wenn currentUser vorhanden ist
   const myGroups = useMemo(() => {
     if (!currentUser) return [];
     return filteredGroups.filter((g) =>
