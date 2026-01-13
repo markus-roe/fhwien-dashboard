@@ -8,6 +8,7 @@ import { CreateGroupDialog } from "@/features/groups/components/CreateGroupDialo
 import type { CreateGroupFormData } from "@/features/groups/types";
 import { useGroups } from "@/features/groups/hooks/useGroups";
 import { useCourses } from "@/shared/hooks/useCourses";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { useGroupFilters } from "@/features/groups/hooks/useGroupFilters";
 import { useGroupOperations } from "@/features/groups/hooks/useGroupOperations";
 import { Card, CardContent } from "@/shared/components/ui/Card";
@@ -28,6 +29,9 @@ export default function GruppenPage() {
   const { selectedSession, isPanelOpen, openSessionPanel, closeSessionPanel } =
     useSessionPanel();
 
+  // Aktuellen User von der API laden
+  const { user: currentUser, loading: userLoading } = useCurrentUser();
+
   // Always fetch all groups, filter client-side
   const {
     groups: allGroups,
@@ -38,9 +42,9 @@ export default function GruppenPage() {
   } = useGroups();
 
   const { courses: mockCourses, loading: coursesLoading } = useCourses();
-  const isLoading = groupsLoading || coursesLoading;
+  const isLoading = groupsLoading || coursesLoading || userLoading;
 
-  // Filtering logic
+  // Filtering logic - jetzt mit echtem currentUser
   const {
     totalGroupCount,
     courseGroupCounts,
@@ -52,6 +56,7 @@ export default function GruppenPage() {
     courses: mockCourses,
     selectedCourseId,
     searchQuery,
+    currentUser, // Echten User übergeben
   });
 
   // Group operations
