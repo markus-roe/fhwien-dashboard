@@ -7,7 +7,7 @@ import type {
   ApiError,
 } from "@/shared/lib/api-types";
 
-// Helper to map DB user to API user
+// kleine helper funktion (db user -> api user)
 function mapDbUserToApiUser(dbUser: {
   id: number;
   name: string;
@@ -26,7 +26,7 @@ function mapDbUserToApiUser(dbUser: {
   };
 }
 
-// Helper to map DB coaching slot to API format
+// helper um db slot in api format zu wandeln
 function mapDbSlotToApiSlot(dbSlot: {
   id: number;
   startDateTime: Date;
@@ -47,7 +47,7 @@ function mapDbSlotToApiSlot(dbSlot: {
   const start = new Date(dbSlot.startDateTime);
   const end = new Date(dbSlot.endDateTime);
 
-  // zeit (hh:mm)
+  // zeit schön machen (hh:mm)
   const time = start.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
