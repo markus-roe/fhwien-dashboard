@@ -116,7 +116,7 @@ export function DateTimePickerSection({
           />
         </div>
         <label className="hidden md:block text-sm font-medium text-zinc-700 mb-1">
-          Datum
+          Datum *
         </label>
         {/* Desktop: Text input */}
         <Input
@@ -131,7 +131,7 @@ export function DateTimePickerSection({
       <div className="space-y-2.5">
         <div>
           <label className="hidden md:block text-sm font-medium text-zinc-700 mb-1">
-            Startzeit
+            Startzeit *
           </label>
           {/* Desktop: Custom time input */}
           <TimeInput
@@ -143,7 +143,7 @@ export function DateTimePickerSection({
         </div>
         <div>
           <label className="hidden md:block text-sm font-medium text-zinc-700 mb-1">
-            Endzeit
+            Endzeit *
           </label>
           {/* Desktop: Custom time input */}
           <TimeInput
