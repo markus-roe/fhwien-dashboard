@@ -55,6 +55,57 @@ Die vollständige API-Dokumentation ist unter `/api-docs` verfügbar. Sie bietet
 
 Die OpenAPI-Spezifikation kann unter `/api/openapi` im JSON-Format abgerufen werden.
 
+### API-Dokumentation
+
+- **Interaktive Dokumentation**: [http://localhost:3000/api-docs](http://localhost:3000/api-docs) (im Development-Modus)
+- **OpenAPI JSON**: [http://localhost:3000/api/openapi](http://localhost:3000/api/openapi)
+
+### Verfügbare API-Endpoints
+
+#### Benutzer (Users)
+- `GET /api/users` - Alle Benutzer abrufen (mit optionalen Filtern: `program`, `search`)
+- `GET /api/users/{id}` - Benutzer nach ID abrufen
+- `POST /api/users` - Neuen Benutzer erstellen
+- `PUT /api/users/{id}` - Benutzer aktualisieren
+- `DELETE /api/users/{id}` - Benutzer löschen
+
+#### Kurse (Courses)
+- `GET /api/courses` - Alle Kurse abrufen (mit optionalem Filter: `program`)
+
+#### Sessions
+- `GET /api/sessions` - Alle Sessions abrufen (mit optionalem Filter: `courseId`)
+- `GET /api/sessions/{id}` - Session nach ID abrufen
+- `POST /api/sessions` - Neue Session erstellen
+- `PUT /api/sessions/{id}` - Session aktualisieren
+- `DELETE /api/sessions/{id}` - Session löschen
+
+#### Gruppen (Groups)
+- `GET /api/groups` - Alle Gruppen abrufen (mit optionalem Filter: `courseId`)
+- `GET /api/groups/{id}` - Gruppe nach ID abrufen
+- `POST /api/groups` - Neue Gruppe erstellen
+- `PUT /api/groups/{id}` - Gruppe aktualisieren
+- `DELETE /api/groups/{id}` - Gruppe löschen
+- `POST /api/groups/{id}/join` - Gruppe beitreten
+- `POST /api/groups/{id}/leave` - Gruppe verlassen
+
+#### Coaching-Slots
+- `GET /api/coaching-slots` - Alle Coaching-Slots abrufen (mit optionalem Filter: `courseId`)
+- `GET /api/coaching-slots/{id}` - Coaching-Slot nach ID abrufen
+- `POST /api/coaching-slots` - Neuen Coaching-Slot erstellen
+- `PUT /api/coaching-slots/{id}` - Coaching-Slot aktualisieren
+- `DELETE /api/coaching-slots/{id}` - Coaching-Slot löschen
+- `POST /api/coaching-slots/{id}/book` - Coaching-Slot buchen
+- `POST /api/coaching-slots/{id}/cancel` - Buchung stornieren
+
+#### Authentifizierung & Profil
+- `POST /api/change-password` - Passwort des aktuellen Benutzers ändern
+
+### Authentifizierung
+
+Die Endpoints erfordern eine Authentifizierung über NextAuth.js. Die Session wird automatisch über Cookies verwaltet.
+
+Für die API-Dokumentation wird Bearer Token Authentication unterstützt (siehe `/api-docs` für Details).
+
 ## Features
 
 ### Schedule (Kalender)

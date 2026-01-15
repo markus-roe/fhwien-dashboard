@@ -81,7 +81,7 @@ function mapDbSessionToApiSession(dbSession: {
  *       - in: query
  *         name: courseId
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Filter sessions by course ID
  *     responses:
  *       200:
@@ -92,6 +92,12 @@ function mapDbSessionToApiSession(dbSession: {
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/SessionResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  */
 export async function GET(
   request: NextRequest
@@ -139,6 +145,18 @@ export async function GET(
  *               $ref: '#/components/schemas/SessionResponse'
  *       400:
  *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       404:
+ *         description: Course not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:

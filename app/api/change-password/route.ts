@@ -10,6 +10,8 @@ import type { ApiError, ApiSuccess } from "@/shared/lib/api-types";
  *   post:
  *     summary: Change the current user's password
  *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -22,8 +24,13 @@ import type { ApiError, ApiSuccess } from "@/shared/lib/api-types";
  *             properties:
  *               currentPassword:
  *                 type: string
+ *                 format: password
+ *                 description: Current password
  *               newPassword:
  *                 type: string
+ *                 format: password
+ *                 minLength: 6
+ *                 description: New password (minimum 6 characters)
  *     responses:
  *       200:
  *         description: Password changed successfully
@@ -32,19 +39,31 @@ import type { ApiError, ApiSuccess } from "@/shared/lib/api-types";
  *             schema:
  *               $ref: '#/components/schemas/ApiSuccess'
  *       400:
- *         description: Bad request - invalid request body
+ *         description: Bad request - invalid request body or password too short
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized - user not authenticated
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  *       403:
  *         description: Current password is incorrect
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       404:
+ *         description: User not found or has no password set
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:

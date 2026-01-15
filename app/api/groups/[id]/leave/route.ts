@@ -65,7 +65,7 @@ function mapDbGroupToApiGroup(dbGroup: {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Group ID
  *     requestBody:
  *       required: true
@@ -73,9 +73,11 @@ function mapDbGroupToApiGroup(dbGroup: {
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - userId
  *             properties:
  *               userId:
- *                 type: number
+ *                 type: integer
  *                 description: User ID to leave the group
  *     responses:
  *       200:
@@ -85,13 +87,19 @@ function mapDbGroupToApiGroup(dbGroup: {
  *             schema:
  *               $ref: '#/components/schemas/GroupResponse'
  *       400:
- *         description: Bad request - user ID missing
+ *         description: Bad request - invalid user ID or group ID
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  *       404:
  *         description: Group not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:

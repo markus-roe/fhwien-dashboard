@@ -82,7 +82,7 @@ function mapDbSlotToApiSlot(dbSlot: {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Coaching slot ID
  *     requestBody:
  *       required: true
@@ -90,9 +90,11 @@ function mapDbSlotToApiSlot(dbSlot: {
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - userId
  *             properties:
  *               userId:
- *                 type: number
+ *                 type: integer
  *                 description: User ID to cancel the booking for
  *     responses:
  *       200:
@@ -101,8 +103,20 @@ function mapDbSlotToApiSlot(dbSlot: {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CoachingSlotResponse'
+ *       400:
+ *         description: Bad request - invalid user ID or slot ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  *       404:
  *         description: Coaching slot not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:

@@ -82,7 +82,7 @@ function mapDbSlotToApiSlot(dbSlot: {
  *       - in: query
  *         name: courseId
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Filter coaching slots by course ID
  *     responses:
  *       200:
@@ -93,6 +93,12 @@ function mapDbSlotToApiSlot(dbSlot: {
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/CoachingSlotResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  */
 // get: alle coaching slots laden
 export async function GET(
@@ -139,6 +145,18 @@ export async function GET(
  *               $ref: '#/components/schemas/CoachingSlotResponse'
  *       400:
  *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       404:
+ *         description: Course not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:

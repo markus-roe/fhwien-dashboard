@@ -40,7 +40,7 @@ function mapDbUserToApiUser(dbUser: {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: User ID
  *     responses:
  *       200:
@@ -49,8 +49,20 @@ function mapDbUserToApiUser(dbUser: {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/UserResponse'
+ *       400:
+ *         description: Bad request - invalid user ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -104,7 +116,7 @@ export async function GET(
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: User ID
  *     requestBody:
  *       required: true
@@ -120,13 +132,19 @@ export async function GET(
  *             schema:
  *               $ref: '#/components/schemas/UserResponse'
  *       400:
- *         description: Bad request - invalid request body
+ *         description: Bad request - invalid user ID or request body
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -197,7 +215,7 @@ export async function PUT(
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: User ID
  *     responses:
  *       201:
@@ -206,8 +224,20 @@ export async function PUT(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiSuccess'
+ *       400:
+ *         description: Bad request - invalid user ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
