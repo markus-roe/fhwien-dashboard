@@ -17,15 +17,33 @@ Ein modernes Dashboard-System für die FH Wien, entwickelt für das DTI/DI-Progr
 
 **Architektur:**
 
-- React/Next.js-Anwendung mit TypeScript
-- RESTful API-Endpoints für CRUD-Operationen
-- Datenbank-Schema und Migrations (Prisma)
-- Authentifizierung und Rollenverwaltung (NextAuth)
-- Responsive Design für alle Geräte
+![FH Wien Dashboard - Projektarchitektur](./public/image.png)
+
+Die Anwendung folgt einer mehrschichtigen Architektur:
+
+**User Interface Layer:**
+- Next.js 15 mit App Router
+- Seiten: Übersicht, Terminplan, Gruppen, Coachings
+
+**Components Layer:**
+- Shared Components (TopNav, Sidebar, Card, Button, Badge)
+- Feature Components (SessionPanel, GroupsList, CoachingSlots)
+
+**Data Layer:**
+- React Query für State Management
+- Custom Hooks (useCurrentUser, useSessions, useGroups, useCoachingSlots, useCourses)
+
+**Backend Layer:**
+- API Routes (/api)
+- Prisma ORM
+- PostgreSQL Database
+
+**Features:**
 - Dashboard für Professoren/Admins
 - Schedule/Kalender für Studierende
 - Gruppen-Verwaltung
 - Coaching-Terminbuchung
+- Responsive Design für alle Geräte
 
 ## Tech Stack
 
