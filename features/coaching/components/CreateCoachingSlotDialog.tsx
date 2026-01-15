@@ -134,16 +134,16 @@ export function CreateCoachingSlotDialog({
 
   // Filter users by search query
   const filteredAvailableUsers = availableUsers
-  .filter((user) => user.role === "student" || user.role === "admin")
-  .filter((user) => {
-    if (!participantSearch.trim()) return true;
-    const searchLower = participantSearch.toLowerCase();
-    return (
-      user.name.toLowerCase().includes(searchLower) ||
-      user.program?.toLowerCase().includes(searchLower) ||
-      user.email?.toLowerCase().includes(searchLower)
-    );
-  });
+    .filter((user) => user.role === "student" || user.role === "admin")
+    .filter((user) => {
+      if (!participantSearch.trim()) return true;
+      const searchLower = participantSearch.toLowerCase();
+      return (
+        user.name.toLowerCase().includes(searchLower) ||
+        user.program?.toLowerCase().includes(searchLower) ||
+        user.email?.toLowerCase().includes(searchLower)
+      );
+    });
 
   // Focus input when popover opens
   useEffect(() => {
@@ -201,7 +201,7 @@ export function CreateCoachingSlotDialog({
             <div className="space-y-4 md:pl-6 md:border-l md:border-zinc-200">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">
-                  Fach
+                  Fach *
                 </label>
                 <Select
                   options={[
@@ -221,7 +221,7 @@ export function CreateCoachingSlotDialog({
 
               {/* Mobile: Native date input */}
               <label className="md:hidden block text-sm font-medium text-zinc-700 mb-1">
-                Datum
+                Datum *
               </label>
               <div className="md:hidden w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
                 <input
@@ -240,7 +240,7 @@ export function CreateCoachingSlotDialog({
               <div className="md:hidden grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">
-                    Startzeit
+                    Startzeit *
                   </label>
                   <div className="w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
                     <input
@@ -258,7 +258,7 @@ export function CreateCoachingSlotDialog({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">
-                    Endzeit
+                    Endzeit *
                   </label>
                   <div className="w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
                     <input
@@ -278,7 +278,7 @@ export function CreateCoachingSlotDialog({
 
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">
-                  Ort
+                  Ort *
                 </label>
                 <Input
                   type="text"
@@ -296,7 +296,7 @@ export function CreateCoachingSlotDialog({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">
-                    Art des Ortes
+                    Art des Ortes *
                   </label>
                   <Select
                     options={[
@@ -314,7 +314,7 @@ export function CreateCoachingSlotDialog({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">
-                    Maximale Teilnehmer
+                    Maximale Teilnehmer *
                   </label>
                   <div className="flex items-center gap-2">
                     <button
@@ -381,8 +381,8 @@ export function CreateCoachingSlotDialog({
                         Teilnehmer hinzufügen
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent 
-                      className="w-[calc(100vw-2rem)] sm:w-80 max-w-sm p-0" 
+                    <PopoverContent
+                      className="w-[calc(100vw-2rem)] sm:w-80 max-w-sm p-0"
                       align="start"
                     >
                       <div className="p-2 sm:p-2 border-b border-zinc-200">
