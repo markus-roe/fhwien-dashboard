@@ -27,5 +27,5 @@ export async function GET(request: NextRequest) {
   }
 
   // If admin, delegate to the ApiReference handler
-  return apiReferenceHandler(request);
+  return apiReferenceHandler();
 }
