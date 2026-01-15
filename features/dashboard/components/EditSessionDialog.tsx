@@ -65,7 +65,7 @@ export function EditSessionDialog({
             <div className="space-y-4 md:pl-6 md:border-l md:border-zinc-200">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">
-                  Lehrveranstaltung
+                  Lehrveranstaltung *
                 </label>
                 <Select
                   options={courses.map((course) => ({
@@ -88,7 +88,7 @@ export function EditSessionDialog({
 
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">
-                  Titel
+                  Titel *
                 </label>
                 <Input
                   value={formState.title}
@@ -100,7 +100,7 @@ export function EditSessionDialog({
 
               {/* Mobile: Native date input */}
               <label className="md:hidden block text-sm font-medium text-zinc-700 mb-1">
-                Datum
+                Datum *
               </label>
               <div className="md:hidden w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
                 <input
@@ -122,7 +122,7 @@ export function EditSessionDialog({
               <div className="md:hidden grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">
-                    Startzeit
+                    Startzeit *
                   </label>
                   <div className="w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
                     <input
@@ -140,7 +140,7 @@ export function EditSessionDialog({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">
-                    Endzeit
+                    Endzeit *
                   </label>
                   <div className="w-full py-1.5 border border-zinc-200 rounded-lg bg-white text-zinc-900 transition-all">
                     <input
@@ -160,7 +160,7 @@ export function EditSessionDialog({
 
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">
-                  Ort
+                  Ort *
                 </label>
                 <Input
                   value={formState.location}
@@ -195,7 +195,7 @@ export function EditSessionDialog({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">
-                    Anwesenheit
+                    Anwesenheit *
                   </label>
                   <Select
                     options={[
