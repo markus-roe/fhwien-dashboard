@@ -91,7 +91,7 @@ export function CreateGroupDialog({
         <div className="p-4 sm:p-6 space-y-4 overflow-x-hidden min-w-0">
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-              Fach
+              Fach *
             </label>
             <Select
               options={[
@@ -108,7 +108,7 @@ export function CreateGroupDialog({
           </div>
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-              Gruppenname
+              Gruppenname *
             </label>
             <Input
               type="text"

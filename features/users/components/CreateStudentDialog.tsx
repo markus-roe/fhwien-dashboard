@@ -111,7 +111,7 @@ export function CreateStudentDialog({
         <div className="p-4 sm:p-6 space-y-4 overflow-x-hidden min-w-0">
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-              Name
+              Name *
             </label>
             <Input
               type="text"
@@ -122,7 +122,7 @@ export function CreateStudentDialog({
           </div>
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-              E-Mail
+              E-Mail *
             </label>
             <Input
               type="email"
@@ -135,7 +135,7 @@ export function CreateStudentDialog({
           </div>
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-              Programm
+              Programm *
             </label>
             <Select
               options={[
