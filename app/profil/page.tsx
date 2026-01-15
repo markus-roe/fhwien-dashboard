@@ -8,7 +8,7 @@ import { Button } from "@/shared/components/ui/Button";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import type { Session } from "@/shared/lib/api-types";
-import { currentUserApi } from "@/shared/lib/api";
+import { changePassword } from "@/shared/lib/api";
 import { User, Mail, GraduationCap, Lock } from "lucide-react";
 
 export default function ProfilPage() {
@@ -62,7 +62,7 @@ export default function ProfilPage() {
     setIsChangingPassword(true);
 
     try {
-      await currentUserApi.changePassword({
+      await changePassword({
         currentPassword,
         newPassword,
       });
