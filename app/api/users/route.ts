@@ -40,7 +40,8 @@ function mapDbUserToApiUser(dbUser: {
  *         name: program
  *         schema:
  *           type: string
- *         description: Filter by program (e.g., "DTI", "all")
+ *           enum: [DTI, DI, all]
+ *         description: Filter by program (e.g., "DTI", "DI", "all")
  *       - in: query
  *         name: search
  *         schema:
@@ -55,6 +56,12 @@ function mapDbUserToApiUser(dbUser: {
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/UserResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  */
 // get: alle user holen
 export async function GET(
@@ -129,6 +136,18 @@ export async function GET(
  *               $ref: '#/components/schemas/UserResponse'
  *       400:
  *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       409:
+ *         description: Conflict - user with this email already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:

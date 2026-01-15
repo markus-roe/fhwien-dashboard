@@ -67,7 +67,7 @@ function mapDbGroupToApiGroup(dbGroup: {
  *       - in: query
  *         name: courseId
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Filter groups by course ID
  *     responses:
  *       200:
@@ -78,6 +78,12 @@ function mapDbGroupToApiGroup(dbGroup: {
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/GroupResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  */
 // get: alle gruppen holen
 export async function GET(
@@ -134,6 +140,12 @@ export async function GET(
  *               $ref: '#/components/schemas/GroupResponse'
  *       400:
  *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:

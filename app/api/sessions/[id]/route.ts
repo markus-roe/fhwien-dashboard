@@ -83,7 +83,7 @@ function mapDbSessionToApiSession(dbSession: {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Session ID
  *     responses:
  *       200:
@@ -100,6 +100,12 @@ function mapDbSessionToApiSession(dbSession: {
  *               $ref: '#/components/schemas/ApiError'
  *       400:
  *         description: Invalid ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -152,7 +158,7 @@ export async function GET(
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Session ID
  *     requestBody:
  *       required: true
@@ -299,7 +305,7 @@ export async function PUT(
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Session ID
  *     responses:
  *       200:
@@ -316,6 +322,12 @@ export async function PUT(
  *               $ref: '#/components/schemas/ApiError'
  *       400:
  *         description: Invalid ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:

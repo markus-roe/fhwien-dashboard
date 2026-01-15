@@ -18,7 +18,8 @@ import type {
  *         name: program
  *         schema:
  *           type: string
- *         description: Filter courses by program
+ *           enum: [DTI, DI]
+ *         description: Filter courses by program (DTI or DI)
  *     responses:
  *       200:
  *         description: List of courses
@@ -28,6 +29,12 @@ import type {
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/CourseResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
  */
 // get: alle kurse holen (optional nach studiengang filtern)
 export async function GET(
