@@ -197,6 +197,23 @@ export async function GET(request: NextRequest) {
 
     const coachingSlots = dbCoachingSlots.map(mapDbSlotToApiSlot);
 
+    // Create a map of session IDs to their original Date objects for timezone-correct conversion
+    const sessionDateMap = new Map<number, { start: Date; end: Date }>();
+    dbSessions.forEach((s) => {
+      sessionDateMap.set(s.id, {
+        start: new Date(s.startDateTime),
+        end: new Date(s.endDateTime),
+      });
+    });
+
+    const coachingSlotDateMap = new Map<number, { start: Date; end: Date }>();
+    dbCoachingSlots.forEach((s) => {
+      coachingSlotDateMap.set(s.id, {
+        start: new Date(s.startDateTime),
+        end: new Date(s.endDateTime),
+      });
+    });
+
     // Map courses to API format
     const apiCourses: Course[] = courses.map((c) => ({
       id: c.id,
@@ -213,8 +230,16 @@ export async function GET(request: NextRequest) {
       ? new Date(Math.max(...allUpdatedAts))
       : new Date();
 
-    // Generate iCal file
-    const icalContent = generateIcalFile(sessions, coachingSlots, apiCourses, dbSessions, dbCoachingSlots);
+    // Generate iCal file with original Date objects for correct timezone handling
+    const icalContent = generateIcalFile(
+      sessions,
+      coachingSlots,
+      apiCourses,
+      dbSessions,
+      dbCoachingSlots,
+      sessionDateMap,
+      coachingSlotDateMap
+    );
 
     // Format last modified date for HTTP header
     const lastModifiedStr = lastModified.toUTCString();

@@ -13,15 +13,30 @@ function escapeIcalText(text: string): string {
 
 /**
  * Formats a date to iCal format (YYYYMMDDTHHMMSS)
- * For use with TZID parameter (local time without offset)
+ * For use with TZID parameter (local time in Europe/Vienna timezone)
+ * Converts the date to Europe/Vienna timezone before formatting
  */
 function formatIcalDateLocal(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
+  // Use Intl.DateTimeFormat to get the time components in Europe/Vienna timezone
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Vienna",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(date);
+  const year = parts.find((p) => p.type === "year")?.value || "";
+  const month = parts.find((p) => p.type === "month")?.value || "";
+  const day = parts.find((p) => p.type === "day")?.value || "";
+  const hours = parts.find((p) => p.type === "hour")?.value || "";
+  const minutes = parts.find((p) => p.type === "minute")?.value || "";
+  const seconds = parts.find((p) => p.type === "second")?.value || "";
+
   return `${year}${month}${day}T${hours}${minutes}${seconds}`;
 }
 
@@ -41,12 +56,22 @@ function formatIcalDateUTC(date: Date): string {
 
 /**
  * Parses a date string and time string to a Date object
+ * Treats the time as local time in Europe/Vienna timezone
  */
 function parseDateTime(dateStr: string | Date, timeStr: string): Date {
   const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
   const [hours, minutes] = timeStr.split(":").map(Number);
-  const result = new Date(date);
-  result.setHours(hours, minutes || 0, 0, 0);
+  
+  // Create date with year, month, day from date, and time from timeStr
+  // We need to treat this as local time in Europe/Vienna
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  
+  // Create a date in local timezone (which should be Europe/Vienna)
+  // This ensures the time is interpreted correctly
+  const result = new Date(year, month, day, hours, minutes || 0, 0, 0);
+  
   return result;
 }
 
@@ -59,14 +84,19 @@ function generateUid(id: number, type: "session" | "coaching"): string {
 
 /**
  * Converts a Session to an iCal event
+ * @param startDateTime - Original Date object from database (for correct timezone handling)
+ * @param endDateTime - Original Date object from database (for correct timezone handling)
  */
 export function sessionToIcalEvent(
   session: Session,
   course?: Course,
-  updatedAt?: Date
+  updatedAt?: Date,
+  startDateTime?: Date,
+  endDateTime?: Date
 ): string {
-  const startDate = parseDateTime(session.date, session.time);
-  const endDate = parseDateTime(session.date, session.endTime);
+  // Use original Date objects if provided, otherwise parse from session
+  const startDate = startDateTime || parseDateTime(session.date, session.time);
+  const endDate = endDateTime || parseDateTime(session.date, session.endTime);
   const uid = generateUid(session.id, "session");
   const now = new Date();
 
@@ -115,14 +145,19 @@ export function sessionToIcalEvent(
 
 /**
  * Converts a CoachingSlot to an iCal event
+ * @param startDateTime - Original Date object from database (for correct timezone handling)
+ * @param endDateTime - Original Date object from database (for correct timezone handling)
  */
 export function coachingSlotToIcalEvent(
   slot: CoachingSlot,
   course?: Course,
-  updatedAt?: Date
+  updatedAt?: Date,
+  startDateTime?: Date,
+  endDateTime?: Date
 ): string {
-  const startDate = parseDateTime(slot.date, slot.time);
-  const endDate = parseDateTime(slot.date, slot.endTime);
+  // Use original Date objects if provided, otherwise parse from slot
+  const startDate = startDateTime || parseDateTime(slot.date, slot.time);
+  const endDate = endDateTime || parseDateTime(slot.date, slot.endTime);
   const uid = generateUid(slot.id, "coaching");
   const now = new Date();
 
@@ -161,7 +196,9 @@ export function generateIcalFile(
   coachingSlots: CoachingSlot[],
   courses: Course[],
   dbSessions?: Array<{ id: number; updatedAt: Date }>,
-  dbCoachingSlots?: Array<{ id: number; updatedAt: Date }>
+  dbCoachingSlots?: Array<{ id: number; updatedAt: Date }>,
+  sessionDates?: Map<number, { start: Date; end: Date }>,
+  coachingSlotDates?: Map<number, { start: Date; end: Date }>
 ): string {
   const now = new Date();
   const events: string[] = [];
@@ -170,14 +207,32 @@ export function generateIcalFile(
   for (const session of sessions) {
     const course = courses.find((c) => c.id === session.courseId);
     const dbSession = dbSessions?.find((s) => s.id === session.id);
-    events.push(sessionToIcalEvent(session, course, dbSession?.updatedAt));
+    const dates = sessionDates?.get(session.id);
+    events.push(
+      sessionToIcalEvent(
+        session,
+        course,
+        dbSession?.updatedAt,
+        dates?.start,
+        dates?.end
+      )
+    );
   }
 
   // Add coaching slots
   for (const slot of coachingSlots) {
     const course = courses.find((c) => c.id === slot.courseId);
     const dbSlot = dbCoachingSlots?.find((s) => s.id === slot.id);
-    events.push(coachingSlotToIcalEvent(slot, course, dbSlot?.updatedAt));
+    const dates = coachingSlotDates?.get(slot.id);
+    events.push(
+      coachingSlotToIcalEvent(
+        slot,
+        course,
+        dbSlot?.updatedAt,
+        dates?.start,
+        dates?.end
+      )
+    );
   }
 
   return [
