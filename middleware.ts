@@ -9,6 +9,16 @@ export default withAuth(
       return NextResponse.next();
     }
 
+    // Allow calendar feed with query parameter token (for Google Calendar, etc.)
+    if (req.nextUrl.pathname === "/api/calendar/feed.ics") {
+      const token = req.nextUrl.searchParams.get("token");
+      if (token) {
+        // Token will be validated in the route handler
+        return NextResponse.next();
+      }
+      // If no token, continue to check session (for direct browser access)
+    }
+
     // For API routes, check for Bearer token authentication (mobile app)
     if (req.nextUrl.pathname.startsWith("/api/") && !req.nextUrl.pathname.startsWith("/api/auth")) {
       const authHeader = req.headers.get("authorization");
@@ -57,6 +67,16 @@ export default withAuth(
         const publicRoutes = ["/login", "/api/auth"];
         if (publicRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
           return true;
+        }
+        
+        // Allow calendar feed with query parameter token (for Google Calendar, etc.)
+        if (req.nextUrl.pathname === "/api/calendar/feed.ics") {
+          const queryToken = req.nextUrl.searchParams.get("token");
+          if (queryToken) {
+            return true; // Token will be validated in the route handler
+          }
+          // If no token, allow if session exists (for direct browser access)
+          return !!token;
         }
         
         // For API routes, allow if Bearer token is present (checked in middleware function)
