@@ -6,6 +6,7 @@ import { Avatar } from "@/shared/components/ui/Avatar";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
+import { CalendarSubscriptionCard } from "@/features/calendar/components/CalendarSubscriptionCard";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import type { Session } from "@/shared/lib/api-types";
 import { changePassword } from "@/shared/lib/api";
@@ -262,6 +263,9 @@ export default function ProfilPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Kalender-Abonnement */}
+          <CalendarSubscriptionCard />
         </div>
       </div>
     </div>

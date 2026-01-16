@@ -4,6 +4,7 @@ import { decode } from "next-auth/jwt";
 import { prisma } from "./prisma";
 import type { Program, User, UserRole } from "./api-types";
 import { NextRequest } from "next/server";
+import crypto from "crypto";
 
 /**
  * Get the current authenticated user from Bearer token (for mobile app)
@@ -119,4 +120,74 @@ export async function requireAuthFromRequest(request: NextRequest): Promise<User
     throw new Error("Unauthorized");
   }
   return user;
+}
+
+/**
+ * Generate a personal calendar token for a user
+ * This token is deterministic (same user = same token) and can be used in URLs
+ */
+export function generateCalendarToken(userId: number): string {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    throw new Error("NEXTAUTH_SECRET is not set");
+  }
+  
+  // Create a deterministic hash from user ID + secret
+  const hash = crypto
+    .createHash("sha256")
+    .update(`${userId}-${secret}-calendar`)
+    .digest("hex");
+  
+  // Return first 32 characters as token (enough for security, short enough for URLs)
+  return hash.substring(0, 32);
+}
+
+/**
+ * Get user from calendar token
+ * Returns null if token is invalid
+ * 
+ * Note: This function needs to check all users to find a matching token.
+ * For better performance with many users, consider storing tokens in the database.
+ */
+export async function getUserFromCalendarToken(token: string): Promise<User | null> {
+  if (!token || token.length !== 32) {
+    return null;
+  }
+
+  try {
+    // Get all users (we need to check each one since token is derived from user ID + secret)
+    // For better performance, you could store tokens in DB with an index
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        initials: true,
+        email: true,
+        program: true,
+        role: true,
+      },
+      // Limit to reasonable number - if you have thousands of users, consider caching
+      take: 10000,
+    });
+
+    // Check each user's token (this is O(n) but necessary without DB storage)
+    for (const user of users) {
+      const userToken = generateCalendarToken(user.id);
+      if (userToken === token) {
+        return {
+          id: user.id,
+          name: user.name,
+          initials: user.initials,
+          email: user.email,
+          program: (user.program as Program) || "DTI",
+          role: (user.role as UserRole) || "student",
+        };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error validating calendar token:", error);
+    return null;
+  }
 }
