@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { getCurrentUserFromRequest } from "@/shared/lib/auth";
 import type {
   GroupResponse,
   Group,
@@ -116,15 +117,15 @@ export async function POST(
       return NextResponse.json<ApiError>({ error: "Invalid ID" }, { status: 400 });
     }
 
-    const body = await request.json();
-    const userId = body.userId as number;
-
-    if (!userId || isNaN(userId)) {
+    const currentUser = await getCurrentUserFromRequest(request);
+    if (!currentUser) {
       return NextResponse.json<ApiError>(
-        { error: "User ID is required" },
-        { status: 400 }
+        { error: "Unauthorized" },
+        { status: 401 }
       );
     }
+
+    const userId = currentUser.id;
 
     const group = await prisma.group.findUnique({
       where: { id: groupId },
