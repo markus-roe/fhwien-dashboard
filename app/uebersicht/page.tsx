@@ -17,6 +17,7 @@ import { Card, CardContent } from "@/shared/components/ui/Card";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
 import { SessionPanel } from "@/features/schedule/components/SessionPanel";
 import { useSessionPanel } from "@/features/schedule/components/hooks/useSessionPanel";
+import { CalendarSubscriptionCard } from "@/features/calendar/components/CalendarSubscriptionCard";
 import { useState, useEffect } from "react";
 
 // Hooks zum Laden der Daten von der API
@@ -165,6 +166,11 @@ export default function UebersichtPage() {
                                 <p className="text-sm text-zinc-600">
                                     Willkommen zurück{currentUser ? `, ${currentUser.name}` : ""}!
                                 </p>
+                            </div>
+
+                            {/* New Feature: Kalender-Abo */}
+                            <div className="mb-6">
+                                <CalendarSubscriptionCard />
                             </div>
 
                             {/* Statistik-Karten: Zeigen Anzahl der Gruppen und Coachings */}
