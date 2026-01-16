@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/shared/lib/authOptions";
 import { decode } from "next-auth/jwt";
 import { prisma } from "./prisma";
 import type { Program, User, UserRole } from "./api-types";

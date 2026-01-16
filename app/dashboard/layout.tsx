@@ -7,7 +7,7 @@ import { SegmentedTabs } from "@/shared/components/ui/SegmentedTabs";
 import { useRouter } from "next/navigation";
 import { useDashboardTabs } from "@/features/dashboard/hooks/useDashboardTabs";
 
-const VALID_TABS = ["lvs", "coachings", "groups", "users"] as const;
+const VALID_TABS = ["lvs", "coachings", "groups", "users", "reports"] as const;
 type TabValue = (typeof VALID_TABS)[number];
 
 export default function DashboardLayout({

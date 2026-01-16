@@ -56,7 +56,8 @@ export const ModelName = {
   Session: 'Session',
   Task: 'Task',
   Group: 'Group',
-  CoachingSlot: 'CoachingSlot'
+  CoachingSlot: 'CoachingSlot',
+  Report: 'Report'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -162,6 +163,20 @@ export const CoachingSlotScalarFieldEnum = {
 } as const
 
 export type CoachingSlotScalarFieldEnum = (typeof CoachingSlotScalarFieldEnum)[keyof typeof CoachingSlotScalarFieldEnum]
+
+
+export const ReportScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  title: 'title',
+  description: 'description',
+  status: 'status',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
 
 
 export const SortOrder = {

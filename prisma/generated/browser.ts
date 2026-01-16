@@ -47,3 +47,8 @@ export type Group = Prisma.GroupModel
  * 
  */
 export type CoachingSlot = Prisma.CoachingSlotModel
+/**
+ * Model Report
+ * 
+ */
+export type Report = Prisma.ReportModel
