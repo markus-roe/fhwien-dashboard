@@ -65,7 +65,7 @@ export async function POST(
         id: user.id.toString(),
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: user.role as "student" | "professor" | "admin",
         initials: user.initials,
         program: user.program,
       },
