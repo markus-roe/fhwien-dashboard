@@ -184,12 +184,20 @@ DATABASE_URL="postgresql://user:password@localhost:5432/database_name"
 # NextAuth
 NEXTAUTH_SECRET="your-secret-key-here"
 NEXTAUTH_URL="http://localhost:3000"
+
+# Email Notifications (Resend)
+RESEND_API_KEY="re_xxxxxxxxxxxxx"
+RESEND_FROM_EMAIL="noreply@yourdomain.com"
+NOTIFICATION_EMAIL="admin@yourdomain.com"
 ```
 
 **Wichtig:**
 - `DATABASE_URL`: PostgreSQL-Verbindungsstring für die Datenbank
 - `NEXTAUTH_SECRET`: Ein zufälliger, sicherer String für die Session-Verschlüsselung (kann mit `openssl rand -base64 32` generiert werden)
 - `NEXTAUTH_URL`: Die Basis-URL der Anwendung (für lokale Entwicklung: `http://localhost:3000`)
+- `RESEND_API_KEY`: API-Schlüssel von Resend für E-Mail-Versand (erforderlich für Bug-Report-Benachrichtigungen)
+- `RESEND_FROM_EMAIL`: Absender-E-Mail-Adresse für Benachrichtigungen (optional, Standard: "onboarding@resend.dev")
+- `NOTIFICATION_EMAIL`: E-Mail-Adresse, an die Bug-Report-Benachrichtigungen gesendet werden (optional, falls nicht gesetzt werden Admin-Benutzer aus der Datenbank verwendet)
 
 ## Installation & Setup
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { getCurrentUser } from "@/shared/lib/auth";
+import { Resend } from "resend";
 import type {
   CreateReportRequest,
   GetReportsQuery,
@@ -245,6 +246,329 @@ export async function POST(
       createdAt: dbReport.createdAt,
       updatedAt: dbReport.updatedAt,
     };
+
+    try {
+      const resendApiKey = process.env.RESEND_API_KEY;
+      if (resendApiKey) {
+        const resend = new Resend(resendApiKey);
+        
+        const reportTypeLabel = type === "bug_report" ? "Bug Report" : "Feature Request";
+        const reportTypeLabelDE = type === "bug_report" ? "Bug Report" : "Feature Request";
+        const formattedDate = new Date(dbReport.createdAt).toLocaleString("de-DE", {
+          dateStyle: "long",
+          timeStyle: "short",
+        });
+
+        // Get admin emails or use configured notification email
+        const notificationEmail = process.env.NOTIFICATION_EMAIL;
+        let adminEmails: string[] = [];
+        
+        if (notificationEmail) {
+          adminEmails = [notificationEmail];
+        } else {
+          // Fallback: fetch admin emails from database
+          const adminUsers = await prisma.user.findMany({
+            where: { role: "admin" },
+            select: { email: true },
+          });
+          adminEmails = adminUsers.map((admin) => admin.email);
+        }
+
+        // Send notification email to admins
+        if (adminEmails.length > 0) {
+          const adminEmailHtml = `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+                  body { 
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+                    line-height: 1.6; 
+                    color: #171717; 
+                    background-color: #fafafa;
+                    margin: 0;
+                    padding: 0;
+                  }
+                  .email-container { 
+                    max-width: 600px; 
+                    margin: 0 auto; 
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                  }
+                  .header { 
+                    background-color: #012f64; 
+                    padding: 32px 24px; 
+                    color: #ffffff;
+                  }
+                  .header h1 {
+                    margin: 0;
+                    font-size: 24px;
+                    font-weight: 600;
+                    color: #ffffff;
+                  }
+                  .content { 
+                    padding: 24px; 
+                  }
+                  .info-row {
+                    margin-bottom: 20px;
+                  }
+                  .label { 
+                    font-weight: 600; 
+                    color: #52525b; 
+                    font-size: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 6px;
+                  }
+                  .value { 
+                    color: #171717;
+                    font-size: 15px;
+                    padding: 12px;
+                    background-color: #fafafa;
+                    border-radius: 6px;
+                    border: 1px solid #e4e4e7;
+                    word-wrap: break-word;
+                  }
+                  .description-value {
+                    white-space: pre-wrap;
+                    line-height: 1.7;
+                  }
+                  .footer { 
+                    margin-top: 32px; 
+                    padding-top: 24px; 
+                    border-top: 1px solid #e4e4e7; 
+                    font-size: 12px; 
+                    color: #71717a;
+                    text-align: center;
+                  }
+                  .badge {
+                    display: inline-block;
+                    padding: 4px 12px;
+                    border-radius: 12px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    background-color: ${type === "bug_report" ? "#fef2f2" : "#eff6ff"};
+                    color: ${type === "bug_report" ? "#dc2626" : "#2563eb"};
+                  }
+                </style>
+              </head>
+              <body>
+                <div style="padding: 20px;">
+                  <div class="email-container">
+                    <div class="header">
+                      <h1>Neuer ${reportTypeLabelDE}</h1>
+                    </div>
+                    <div class="content">
+                      <div style="margin-bottom: 20px;">
+                        <span class="badge">${reportTypeLabelDE}</span>
+                      </div>
+                      
+                      <div class="info-row">
+                        <div class="label">Von</div>
+                        <div class="value">${dbReport.user.name} (${dbReport.user.email})</div>
+                      </div>
+                      
+                      <div class="info-row">
+                        <div class="label">Titel</div>
+                        <div class="value">${title}</div>
+                      </div>
+                      
+                      <div class="info-row">
+                        <div class="label">Beschreibung</div>
+                        <div class="value description-value">${description.replace(/\n/g, "\n")}</div>
+                      </div>
+                      
+                      <div class="info-row">
+                        <div class="label">Erstellt am</div>
+                        <div class="value">${formattedDate}</div>
+                      </div>
+                      
+                      <div class="info-row">
+                        <div class="label">Report ID</div>
+                        <div class="value">#${dbReport.id}</div>
+                      </div>
+                    </div>
+                    <div class="footer">
+                      <p>FH Wien Dashboard - Automatische Benachrichtigung</p>
+                    </div>
+                  </div>
+                </div>
+              </body>
+            </html>
+          `;
+
+          await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+            to: adminEmails,
+            subject: `Neuer ${reportTypeLabelDE}: ${title}`,
+            html: adminEmailHtml,
+          });
+        }
+
+        // Send confirmation email to the user who submitted the report
+        const confirmationEmailHtml = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+                body { 
+                  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+                  line-height: 1.6; 
+                  color: #171717; 
+                  background-color: #fafafa;
+                  margin: 0;
+                  padding: 0;
+                }
+                .email-container { 
+                  max-width: 600px; 
+                  margin: 0 auto; 
+                  background-color: #ffffff;
+                  border-radius: 8px;
+                  overflow: hidden;
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
+                .header { 
+                  background-color: #012f64; 
+                  padding: 32px 24px; 
+                  color: #ffffff;
+                  text-align: center;
+                }
+                .header h1 {
+                  margin: 0;
+                  font-size: 24px;
+                  font-weight: 600;
+                  color: #ffffff;
+                }
+                .content { 
+                  padding: 24px; 
+                }
+                .greeting {
+                  font-size: 16px;
+                  color: #171717;
+                  margin-bottom: 16px;
+                }
+                .message {
+                  font-size: 15px;
+                  color: #52525b;
+                  line-height: 1.7;
+                  margin-bottom: 24px;
+                }
+                .report-summary {
+                  background-color: #fafafa;
+                  border: 1px solid #e4e4e7;
+                  border-radius: 6px;
+                  padding: 20px;
+                  margin: 24px 0;
+                }
+                .summary-title {
+                  font-weight: 600;
+                  color: #171717;
+                  font-size: 14px;
+                  margin-bottom: 12px;
+                }
+                .summary-item {
+                  margin-bottom: 12px;
+                  font-size: 14px;
+                }
+                .summary-label {
+                  color: #71717a;
+                  font-size: 13px;
+                  margin-bottom: 4px;
+                }
+                .summary-value {
+                  color: #171717;
+                  font-weight: 500;
+                }
+                .footer { 
+                  margin-top: 32px; 
+                  padding-top: 24px; 
+                  border-top: 1px solid #e4e4e7; 
+                  font-size: 12px; 
+                  color: #71717a;
+                  text-align: center;
+                }
+                .badge {
+                  display: inline-block;
+                  padding: 4px 12px;
+                  border-radius: 12px;
+                  font-size: 12px;
+                  font-weight: 500;
+                  background-color: ${type === "bug_report" ? "#fef2f2" : "#eff6ff"};
+                  color: ${type === "bug_report" ? "#dc2626" : "#2563eb"};
+                }
+              </style>
+            </head>
+            <body>
+              <div style="padding: 20px;">
+                <div class="email-container">
+                  <div class="header">
+                    <h1>Report erfolgreich eingereicht</h1>
+                  </div>
+                  <div class="content">
+                    <div class="greeting">Hallo ${dbReport.user.name},</div>
+                    <div class="message">
+                      vielen Dank für dein Feedback! Dein ${reportTypeLabelDE.toLowerCase()} wurde erfolgreich eingereicht und wird von unserem Team bearbeitet.
+                    </div>
+                    
+                    <div class="report-summary">
+                      <div class="summary-title">Dein Report im Überblick:</div>
+                      <div class="summary-item">
+                        <div class="summary-label">Typ</div>
+                        <div class="summary-value">
+                          <span class="badge">${reportTypeLabelDE}</span>
+                        </div>
+                      </div>
+                      <div class="summary-item">
+                        <div class="summary-label">Titel</div>
+                        <div class="summary-value">${title}</div>
+                      </div>
+                      <div class="summary-item">
+                        <div class="summary-label">Beschreibung</div>
+                        <div class="summary-value" style="white-space: pre-wrap; line-height: 1.6;">${description}</div>
+                      </div>
+                      <div class="summary-item">
+                        <div class="summary-label">Report ID</div>
+                        <div class="summary-value">#${dbReport.id}</div>
+                      </div>
+                      <div class="summary-item" style="margin-bottom: 0;">
+                        <div class="summary-label">Eingereicht am</div>
+                        <div class="summary-value">${formattedDate}</div>
+                      </div>
+                    </div>
+                    
+                    <div class="message">
+                      Wir werden uns so schnell wie möglich um deinen ${reportTypeLabelDE.toLowerCase()} kümmern. Du wirst über Updates informiert.
+                    </div>
+                  </div>
+                  <div class="footer">
+                    <p>FH Wien Dashboard - DTI/DI</p>
+                    <p style="margin-top: 8px;">Dies ist eine automatische Bestätigungs-E-Mail.</p>
+                  </div>
+                </div>
+              </div>
+            </body>
+          </html>
+        `;
+
+        await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+          to: dbReport.user.email,
+          subject: `Bestätigung: Dein ${reportTypeLabelDE} wurde eingereicht`,
+          html: confirmationEmailHtml,
+        });
+      }
+    } catch (emailError) {
+      // Log email error but don't fail the request
+      console.error("Error sending email notifications:", emailError);
+    }
 
     return NextResponse.json<ReportResponse>(report, { status: 201 });
   } catch (error) {
