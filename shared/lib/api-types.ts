@@ -10,6 +10,8 @@ export type LocationType = "online" | "on_campus";
 export type UserRole = "student" | "professor" | "admin";
 export type Attendance = "mandatory" | "optional";
 export type MaterialType = "pdf" | "presentation" | "other";
+export type ReportType = "feature_request" | "bug_report";
+export type ReportStatus = "open" | "in_progress" | "resolved" | "closed";
 
 // ============================================================================
 // Common Types
@@ -263,6 +265,42 @@ export interface GetCoursesQuery {
 
 export type CourseResponse = Course;
 export type CoursesResponse = Course[];
+
+// ============================================================================
+// Report Types
+// ============================================================================
+
+/** Report as returned by the API */
+export interface Report {
+  id: number;
+  type: ReportType;
+  title: string;
+  description: string;
+  status: ReportStatus;
+  userId: number;
+  user: User;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface CreateReportRequest {
+  type: ReportType;
+  title: string;
+  description: string;
+}
+
+export interface UpdateReportRequest {
+  status?: ReportStatus;
+}
+
+export interface GetReportsQuery {
+  status?: ReportStatus;
+  type?: ReportType;
+  userId?: number;
+}
+
+export type ReportResponse = Report;
+export type ReportsResponse = Report[];
 
 // ============================================================================
 // Route Handler Context Types (Next.js 14)

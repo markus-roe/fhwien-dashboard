@@ -259,6 +259,7 @@ export type UserWhereInput = {
   groups?: Prisma.GroupListRelationFilter
   coachingSlots?: Prisma.CoachingSlotListRelationFilter
   sessionsTaught?: Prisma.SessionListRelationFilter
+  reports?: Prisma.ReportListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -275,6 +276,7 @@ export type UserOrderByWithRelationInput = {
   groups?: Prisma.GroupOrderByRelationAggregateInput
   coachingSlots?: Prisma.CoachingSlotOrderByRelationAggregateInput
   sessionsTaught?: Prisma.SessionOrderByRelationAggregateInput
+  reports?: Prisma.ReportOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -294,6 +296,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   groups?: Prisma.GroupListRelationFilter
   coachingSlots?: Prisma.CoachingSlotListRelationFilter
   sessionsTaught?: Prisma.SessionListRelationFilter
+  reports?: Prisma.ReportListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -343,6 +346,7 @@ export type UserCreateInput = {
   groups?: Prisma.GroupCreateNestedManyWithoutMembersInput
   coachingSlots?: Prisma.CoachingSlotCreateNestedManyWithoutParticipantsInput
   sessionsTaught?: Prisma.SessionCreateNestedManyWithoutLecturerInput
+  reports?: Prisma.ReportCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -359,6 +363,7 @@ export type UserUncheckedCreateInput = {
   groups?: Prisma.GroupUncheckedCreateNestedManyWithoutMembersInput
   coachingSlots?: Prisma.CoachingSlotUncheckedCreateNestedManyWithoutParticipantsInput
   sessionsTaught?: Prisma.SessionUncheckedCreateNestedManyWithoutLecturerInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -374,6 +379,7 @@ export type UserUpdateInput = {
   groups?: Prisma.GroupUpdateManyWithoutMembersNestedInput
   coachingSlots?: Prisma.CoachingSlotUpdateManyWithoutParticipantsNestedInput
   sessionsTaught?: Prisma.SessionUpdateManyWithoutLecturerNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -390,6 +396,7 @@ export type UserUncheckedUpdateInput = {
   groups?: Prisma.GroupUncheckedUpdateManyWithoutMembersNestedInput
   coachingSlots?: Prisma.CoachingSlotUncheckedUpdateManyWithoutParticipantsNestedInput
   sessionsTaught?: Prisma.SessionUncheckedUpdateManyWithoutLecturerNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -490,6 +497,11 @@ export type UserListRelationFilter = {
 
 export type UserOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -616,6 +628,20 @@ export type UserUncheckedUpdateManyWithoutCoachingSlotsNestedInput = {
   deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
 }
 
+export type UserCreateNestedOneWithoutReportsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportsInput, Prisma.UserUncheckedCreateWithoutReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutReportsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportsInput, Prisma.UserUncheckedCreateWithoutReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportsInput
+  upsert?: Prisma.UserUpsertWithoutReportsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReportsInput, Prisma.UserUpdateWithoutReportsInput>, Prisma.UserUncheckedUpdateWithoutReportsInput>
+}
+
 export type UserCreateWithoutSessionsTaughtInput = {
   name: string
   initials: string
@@ -628,6 +654,7 @@ export type UserCreateWithoutSessionsTaughtInput = {
   lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupCreateNestedManyWithoutMembersInput
   coachingSlots?: Prisma.CoachingSlotCreateNestedManyWithoutParticipantsInput
+  reports?: Prisma.ReportCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsTaughtInput = {
@@ -643,6 +670,7 @@ export type UserUncheckedCreateWithoutSessionsTaughtInput = {
   lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupUncheckedCreateNestedManyWithoutMembersInput
   coachingSlots?: Prisma.CoachingSlotUncheckedCreateNestedManyWithoutParticipantsInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsTaughtInput = {
@@ -673,6 +701,7 @@ export type UserUpdateWithoutSessionsTaughtInput = {
   lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUpdateManyWithoutMembersNestedInput
   coachingSlots?: Prisma.CoachingSlotUpdateManyWithoutParticipantsNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsTaughtInput = {
@@ -688,6 +717,7 @@ export type UserUncheckedUpdateWithoutSessionsTaughtInput = {
   lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUncheckedUpdateManyWithoutMembersNestedInput
   coachingSlots?: Prisma.CoachingSlotUncheckedUpdateManyWithoutParticipantsNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGroupsInput = {
@@ -702,6 +732,7 @@ export type UserCreateWithoutGroupsInput = {
   lastLoggedIn?: Date | string | null
   coachingSlots?: Prisma.CoachingSlotCreateNestedManyWithoutParticipantsInput
   sessionsTaught?: Prisma.SessionCreateNestedManyWithoutLecturerInput
+  reports?: Prisma.ReportCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGroupsInput = {
@@ -717,6 +748,7 @@ export type UserUncheckedCreateWithoutGroupsInput = {
   lastLoggedIn?: Date | string | null
   coachingSlots?: Prisma.CoachingSlotUncheckedCreateNestedManyWithoutParticipantsInput
   sessionsTaught?: Prisma.SessionUncheckedCreateNestedManyWithoutLecturerInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGroupsInput = {
@@ -768,6 +800,7 @@ export type UserCreateWithoutCoachingSlotsInput = {
   lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupCreateNestedManyWithoutMembersInput
   sessionsTaught?: Prisma.SessionCreateNestedManyWithoutLecturerInput
+  reports?: Prisma.ReportCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCoachingSlotsInput = {
@@ -783,6 +816,7 @@ export type UserUncheckedCreateWithoutCoachingSlotsInput = {
   lastLoggedIn?: Date | string | null
   groups?: Prisma.GroupUncheckedCreateNestedManyWithoutMembersInput
   sessionsTaught?: Prisma.SessionUncheckedCreateNestedManyWithoutLecturerInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCoachingSlotsInput = {
@@ -806,6 +840,84 @@ export type UserUpdateManyWithWhereWithoutCoachingSlotsInput = {
   data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutCoachingSlotsInput>
 }
 
+export type UserCreateWithoutReportsInput = {
+  name: string
+  initials: string
+  email: string
+  password?: string | null
+  program?: $Enums.Program | null
+  role?: $Enums.UserRole | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
+  groups?: Prisma.GroupCreateNestedManyWithoutMembersInput
+  coachingSlots?: Prisma.CoachingSlotCreateNestedManyWithoutParticipantsInput
+  sessionsTaught?: Prisma.SessionCreateNestedManyWithoutLecturerInput
+}
+
+export type UserUncheckedCreateWithoutReportsInput = {
+  id?: number
+  name: string
+  initials: string
+  email: string
+  password?: string | null
+  program?: $Enums.Program | null
+  role?: $Enums.UserRole | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoggedIn?: Date | string | null
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutMembersInput
+  coachingSlots?: Prisma.CoachingSlotUncheckedCreateNestedManyWithoutParticipantsInput
+  sessionsTaught?: Prisma.SessionUncheckedCreateNestedManyWithoutLecturerInput
+}
+
+export type UserCreateOrConnectWithoutReportsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportsInput, Prisma.UserUncheckedCreateWithoutReportsInput>
+}
+
+export type UserUpsertWithoutReportsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReportsInput, Prisma.UserUncheckedUpdateWithoutReportsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportsInput, Prisma.UserUncheckedCreateWithoutReportsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReportsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReportsInput, Prisma.UserUncheckedUpdateWithoutReportsInput>
+}
+
+export type UserUpdateWithoutReportsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  initials?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  program?: Prisma.NullableEnumProgramFieldUpdateOperationsInput | $Enums.Program | null
+  role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  groups?: Prisma.GroupUpdateManyWithoutMembersNestedInput
+  coachingSlots?: Prisma.CoachingSlotUpdateManyWithoutParticipantsNestedInput
+  sessionsTaught?: Prisma.SessionUpdateManyWithoutLecturerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReportsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  initials?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  program?: Prisma.NullableEnumProgramFieldUpdateOperationsInput | $Enums.Program | null
+  role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutMembersNestedInput
+  coachingSlots?: Prisma.CoachingSlotUncheckedUpdateManyWithoutParticipantsNestedInput
+  sessionsTaught?: Prisma.SessionUncheckedUpdateManyWithoutLecturerNestedInput
+}
+
 export type UserUpdateWithoutGroupsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   initials?: Prisma.StringFieldUpdateOperationsInput | string
@@ -818,6 +930,7 @@ export type UserUpdateWithoutGroupsInput = {
   lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   coachingSlots?: Prisma.CoachingSlotUpdateManyWithoutParticipantsNestedInput
   sessionsTaught?: Prisma.SessionUpdateManyWithoutLecturerNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGroupsInput = {
@@ -833,6 +946,7 @@ export type UserUncheckedUpdateWithoutGroupsInput = {
   lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   coachingSlots?: Prisma.CoachingSlotUncheckedUpdateManyWithoutParticipantsNestedInput
   sessionsTaught?: Prisma.SessionUncheckedUpdateManyWithoutLecturerNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutGroupsInput = {
@@ -860,6 +974,7 @@ export type UserUpdateWithoutCoachingSlotsInput = {
   lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUpdateManyWithoutMembersNestedInput
   sessionsTaught?: Prisma.SessionUpdateManyWithoutLecturerNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCoachingSlotsInput = {
@@ -875,6 +990,7 @@ export type UserUncheckedUpdateWithoutCoachingSlotsInput = {
   lastLoggedIn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   groups?: Prisma.GroupUncheckedUpdateManyWithoutMembersNestedInput
   sessionsTaught?: Prisma.SessionUncheckedUpdateManyWithoutLecturerNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCoachingSlotsInput = {
@@ -899,12 +1015,14 @@ export type UserCountOutputType = {
   groups: number
   coachingSlots: number
   sessionsTaught: number
+  reports: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   groups?: boolean | UserCountOutputTypeCountGroupsArgs
   coachingSlots?: boolean | UserCountOutputTypeCountCoachingSlotsArgs
   sessionsTaught?: boolean | UserCountOutputTypeCountSessionsTaughtArgs
+  reports?: boolean | UserCountOutputTypeCountReportsArgs
 }
 
 /**
@@ -938,6 +1056,13 @@ export type UserCountOutputTypeCountSessionsTaughtArgs<ExtArgs extends runtime.T
   where?: Prisma.SessionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReportWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -953,6 +1078,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   groups?: boolean | Prisma.User$groupsArgs<ExtArgs>
   coachingSlots?: boolean | Prisma.User$coachingSlotsArgs<ExtArgs>
   sessionsTaught?: boolean | Prisma.User$sessionsTaughtArgs<ExtArgs>
+  reports?: boolean | Prisma.User$reportsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1000,6 +1126,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   groups?: boolean | Prisma.User$groupsArgs<ExtArgs>
   coachingSlots?: boolean | Prisma.User$coachingSlotsArgs<ExtArgs>
   sessionsTaught?: boolean | Prisma.User$sessionsTaughtArgs<ExtArgs>
+  reports?: boolean | Prisma.User$reportsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1011,6 +1138,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     groups: Prisma.$GroupPayload<ExtArgs>[]
     coachingSlots: Prisma.$CoachingSlotPayload<ExtArgs>[]
     sessionsTaught: Prisma.$SessionPayload<ExtArgs>[]
+    reports: Prisma.$ReportPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1420,6 +1548,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   groups<T extends Prisma.User$groupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$groupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   coachingSlots<T extends Prisma.User$coachingSlotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$coachingSlotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CoachingSlotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessionsTaught<T extends Prisma.User$sessionsTaughtArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsTaughtArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reports<T extends Prisma.User$reportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1916,6 +2045,30 @@ export type User$sessionsTaughtArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.reports
+ */
+export type User$reportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Report
+   */
+  select?: Prisma.ReportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Report
+   */
+  omit?: Prisma.ReportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportInclude<ExtArgs> | null
+  where?: Prisma.ReportWhereInput
+  orderBy?: Prisma.ReportOrderByWithRelationInput | Prisma.ReportOrderByWithRelationInput[]
+  cursor?: Prisma.ReportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReportScalarFieldEnum | Prisma.ReportScalarFieldEnum[]
 }
 
 /**

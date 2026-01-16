@@ -11,6 +11,7 @@ import {
   User,
   LogOut,
   LayoutDashboard,
+  Bug,
 } from "lucide-react";
 import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
@@ -21,14 +22,49 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { signOut } from "next-auth/react";
+import { SubmitReportDialog } from "@/features/reports/components/SubmitReportDialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { CreateReportRequest } from "@/shared/lib/api-types";
 
 export const TopNav = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const { user: currentUser, loading: userLoading } = useCurrentUser();
+  const queryClient = useQueryClient();
 
   const canSeeDashboard = currentUser?.role === "professor" || currentUser?.role === "admin";
+
+  const submitReportMutation = useMutation({
+    mutationFn: async (data: CreateReportRequest) => {
+      const response = await fetch("/api/reports", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to submit report");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+    },
+  });
+
+  const handleSubmitReport = async (data: {
+    type: "feature_request" | "bug_report";
+    title: string;
+    description: string;
+  }) => {
+    await submitReportMutation.mutateAsync(data);
+  };
 
   const handleLogout = async () => {
     // Speichere E-Mail im localStorage vor dem Logout
@@ -169,6 +205,15 @@ export const TopNav = () => {
                         <User className="w-4 h-4 text-zinc-500" />
                         <span>Profil</span>
                       </Link>
+                      <button
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors w-full text-left"
+                        onClick={() => {
+                          setReportDialogOpen(true);
+                        }}
+                      >
+                        <Bug className="w-4 h-4 text-zinc-500" />
+                        <span>Feedback / Bug Report</span>
+                      </button>
                       <button
                         className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors w-full text-left"
                         onClick={handleLogout}
@@ -328,6 +373,16 @@ export const TopNav = () => {
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
+                      setReportDialogOpen(true);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white transition-colors w-full text-left"
+                  >
+                    <Bug className="w-5 h-5 text-zinc-400" />
+                    <span className="text-base text-zinc-700">Feedback / Bug Report</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
                       handleLogout();
                     }}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white transition-colors w-full text-left"
@@ -352,6 +407,12 @@ export const TopNav = () => {
           </div>
         </div>
       </div>
+
+      <SubmitReportDialog
+        isOpen={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        onSubmit={handleSubmitReport}
+      />
     </>
   );
 };

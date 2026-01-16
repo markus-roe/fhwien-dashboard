@@ -45,6 +45,20 @@ enum MaterialType {
   other
 }
 
+//ReportType
+enum ReportType {
+  feature_request
+  bug_report
+}
+
+//ReportStatus
+enum ReportStatus {
+  open
+  in_progress
+  resolved
+  closed
+}
+
 //-- Models - Normalisiert --//
 // Model user with datatypes 
 model User {
@@ -65,6 +79,7 @@ model User {
   coachingSlots  CoachingSlot[] @relation("CoachingParticipants")
   //1:n relation
   sessionsTaught Session[]      @relation("SessionLecturer")
+  reports        Report[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -196,4 +211,24 @@ model CoachingSlot {
 
   @@index([courseId])
   @@index([startDateTime])
+}
+
+//Model Report
+model Report {
+  id          Int          @id @default(autoincrement())
+  type        ReportType
+  title       String
+  description String
+  status      ReportStatus @default(open)
+  
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
 }

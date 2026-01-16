@@ -58,3 +58,21 @@ export const MaterialType = {
 } as const
 
 export type MaterialType = (typeof MaterialType)[keyof typeof MaterialType]
+
+
+export const ReportType = {
+  feature_request: 'feature_request',
+  bug_report: 'bug_report'
+} as const
+
+export type ReportType = (typeof ReportType)[keyof typeof ReportType]
+
+
+export const ReportStatus = {
+  open: 'open',
+  in_progress: 'in_progress',
+  resolved: 'resolved',
+  closed: 'closed'
+} as const
+
+export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus]
